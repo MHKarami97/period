@@ -1,24 +1,9 @@
 <script setup lang="ts">
-/**
- * UpdatePrompt - surfaces the vite-plugin-pwa update lifecycle to the user
- * instead of updating silently. `registerType: "prompt"` in vite.config.ts
- * makes the new service worker wait in the "installed" state until
- * `updateServiceWorker(true)` is called here, so the user is always the
- * one who decides when to reload onto the new version.
- *
- * `useRegisterSW` returns two independent reactive flags:
- *  - `offlineReady`: the app was cached for the first time and can now be
- *    used offline (shown once, informational only).
- *  - `needRefresh`: a NEW service worker has finished installing and is
- *    waiting to take over; reloading is required to activate it.
- *
- * See: https://vite-pwa-org.netlify.app/frameworks/vue.html
- */
 import { useRegisterSW } from "virtual:pwa-register/vue";
 
-const CHECK_FOR_UPDATE_INTERVAL_MS = 60 * 60 * 1000; // re-check every hour while the tab stays open
+const CHECK_FOR_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
-const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
+const { needRefresh, updateServiceWorker } = useRegisterSW({
   immediate: true,
   onRegisteredSW(_swUrl, registration) {
     if (!registration) {
@@ -36,14 +21,13 @@ async function reloadWithNewVersion(): Promise<void> {
 
 function dismiss(): void {
   needRefresh.value = false;
-  offlineReady.value = false;
 }
 </script>
 
 <template>
   <Transition name="update-prompt-fade">
     <div
-      v-if="needRefresh || offlineReady"
+      v-if="needRefresh"
       class="fixed inset-x-4 bottom-20 z-30 mx-auto flex max-w-sm flex-col gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:bottom-4 lg:left-4 lg:right-auto lg:mx-0"
       role="status"
     >
