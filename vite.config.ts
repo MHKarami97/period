@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/*.png", "fonts/**/*"],
       manifest: {
-        name: "Period Tracker - Local First",
-        short_name: "Period",
-        description: "Local-first, privacy-first menstrual cycle tracker",
+        name: "ردیاب عادت‌ماهیانه",
+        short_name: "ردیاب عادت‌ماهیانه",
+        description: "ردیاب عادت‌ماهیانه",
         theme_color: "#0f172a",
         background_color: "#0f172a",
         display: "standalone",
