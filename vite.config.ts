@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/*.png", "fonts/**/*"],
       manifest: {
-        name: "ردیاب عادت‌ماهیانه",
-        short_name: "ردیاب عادت‌ماهیانه",
-        description: "ردیاب عادت‌ماهیانه",
+        name: "ماهک | ردیاب عادت‌ماهیانه",
+        short_name: "ماهک | ردیاب عادت‌ماهیانه",
+        description: "با ماهک به راحتی عادت ماهیانه خود را ردیابی کنید",
         theme_color: "#0f172a",
         background_color: "#0f172a",
         display: "standalone",

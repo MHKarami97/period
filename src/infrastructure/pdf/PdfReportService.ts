@@ -24,7 +24,7 @@ export class PdfReportService {
       .sort((a, b) => a.startDate.diffInDays(b.startDate));
 
     doc.setFontSize(16);
-    doc.text("Period Tracker - 6-Month Summary Report", 14, 18);
+    doc.text("Mahak - 6-Month Summary Report", 14, 18);
     doc.setFontSize(10);
     doc.text(`Generated on: ${DateOnly.today().toIsoString()}`, 14, 25);
 
