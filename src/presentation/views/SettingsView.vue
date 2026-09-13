@@ -2,6 +2,7 @@
 import DataManagementPanel from "@presentation/components/settings/DataManagementPanel.vue";
 import ThemeSwitcher from "@presentation/components/settings/ThemeSwitcher.vue";
 import DisplayNameForm from "@presentation/components/settings/DisplayNameForm.vue";
+import AboutSection from "@presentation/components/settings/AboutSection.vue";
 </script>
 
 <template>
@@ -10,8 +11,9 @@ import DisplayNameForm from "@presentation/components/settings/DisplayNameForm.v
       <DisplayNameForm />
       <ThemeSwitcher />
     </div>
-    <div class="lg:col-span-6">
+    <div class="flex flex-col gap-4 lg:col-span-6">
       <DataManagementPanel />
+      <AboutSection />
     </div>
   </div>
 </template>

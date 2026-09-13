@@ -6,6 +6,7 @@ import { useUserProfileStore } from "@application/stores/userProfileStore";
 import { useCycleDashboard } from "@presentation/composables/useCycleDashboard";
 import CircularCycleChart from "@presentation/components/dashboard/CircularCycleChart.vue";
 import QuickActions from "@presentation/components/dashboard/QuickActions.vue";
+import PhaseGuidanceCard from "@presentation/components/dashboard/PhaseGuidanceCard.vue";
 
 const cycleStore = useCycleStore();
 const appModeStore = useAppModeStore();
@@ -53,6 +54,10 @@ onMounted(() => {
 
       <section v-else class="flex items-center rounded-2xl bg-white p-6 text-sm text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-800 lg:col-span-5">
         نمای شریک فقط‌خواندنی است؛ ثبت پریود و علائم فقط در حالت «ردیابی برای خود» در دسترس است.
+      </section>
+
+      <section class="lg:col-span-12">
+        <PhaseGuidanceCard />
       </section>
     </div>
   </div>
