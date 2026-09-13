@@ -24,7 +24,7 @@ function save(): void {
   <div class="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">نام نمایشی</h2>
     <p class="text-xs text-slate-500 dark:text-slate-400">
-      این نام هم در نمای «ردیابی برای خود» (مثلاً «سلام {{ nameInput || "..." }}») و هم برای شریک شما در نمای فقط‌خواندنی («وضعیت {{ nameInput || "..." }}») نمایش داده می‌شود.
+      از این اسم فقط برای بهبود پیام‌های داخلی اپلیکیشن استفاده می‌شود و به جایی ارسال نمی‌شود
     </p>
     <div class="flex items-center gap-2">
       <input
