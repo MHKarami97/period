@@ -13,8 +13,8 @@ export default defineConfig({
         name: "ردیاب عادت‌ماهیانه",
         short_name: "ردیاب عادت‌ماهیانه",
         description: "با ماهک به راحتی عادت ماهیانه خود را ردیابی کنید",
-        theme_color: "#f8fafc",
-        background_color: "#f8fafc",
+        theme_color: "#fa7e78",
+        background_color: "#fa7e78",
         display: "standalone",
         start_url: "/",
         icons: [
