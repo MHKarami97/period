@@ -69,7 +69,7 @@ async function applyDateCorrection(): Promise<void> {
       class="text-sm text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
       @click="isAdjustingDate = !isAdjustingDate"
     >
-      ویرایش تاریخ (زودتر/دیرتر شروع/پایان شده)
+      ویرایش تاریخ
     </button>
 
     <div v-if="isAdjustingDate" class="flex items-center gap-2">
