@@ -8,9 +8,12 @@ const WMA_WEIGHTS = [3, 2, 1] as const;
 /** Clinically standard luteal-phase length used to back-calculate ovulation day. */
 const LUTEAL_PHASE_DAYS = 14;
 
-/** Fallback used only when there is no historical data at all. */
+/** Fallbacks used only when there is no historical data at all. */
 const DEFAULT_CYCLE_LENGTH_DAYS = 28;
-const DEFAULT_PERIOD_LENGTH_DAYS = 5;
+// A normal period commonly lasts up to 7 days (ACOG / Mayo Clinic reference
+// range: 21-35 day cycles, periods lasting up to ~7 days), so 7 is used as
+// the conservative starting estimate before any real history exists.
+const DEFAULT_PERIOD_LENGTH_DAYS = 7;
 
 /** Fertile window is modeled as 5 days before to 1 day after ovulation (sperm survival window). */
 const FERTILE_WINDOW_DAYS_BEFORE_OVULATION = 5;

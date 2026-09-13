@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: { name: "dashboard" }, label: "داشبورد", icon: "◐" },
   { to: { name: "calendar" }, label: "تقویم", icon: "▦" },
   { to: { name: "symptoms" }, label: "علائم", icon: "✎", selfOnly: true },
+  { to: { name: "guide" }, label: "راهنما", icon: "ℹ" },
   { to: { name: "settings" }, label: "تنظیمات", icon: "⚙" },
 ];
 </script>
@@ -15,7 +16,7 @@ const NAV_ITEMS = [
 <template>
   <div class="grid min-h-screen w-full grid-cols-1 bg-slate-100 dark:bg-slate-950 lg:grid-cols-[220px_1fr]">
     <aside class="hidden flex-col gap-1 border-l border-slate-200 p-4 dark:border-slate-900 lg:flex">
-      <p class="mb-4 px-2 text-lg font-semibold text-slate-900 dark:text-slate-100">ماهک</p>
+      <p class="mb-4 px-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Period Tracker</p>
       <RouterLink
         v-for="item in NAV_ITEMS.filter((i) => !i.selfOnly || !appModeStore.isPartnerMode)"
         :key="item.label"
@@ -32,7 +33,7 @@ const NAV_ITEMS = [
       <RouterView />
     </main>
 
-    <nav class="fixed inset-x-0 bottom-0 z-10 grid grid-cols-4 gap-1 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
+    <nav class="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 gap-1 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
       <RouterLink
         v-for="item in NAV_ITEMS.filter((i) => !i.selfOnly || !appModeStore.isPartnerMode)"
         :key="item.label"
