@@ -43,7 +43,7 @@ const sortedSymptoms = computed(() =>
         <span class="text-slate-500 dark:text-slate-400">{{ toJalaliLabel(symptom.date) }}</span>
         <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200">
           <span v-if="symptom.mood">{{ MOOD_EMOJI[symptom.mood] }}</span>
-          <span>درد {{ symptom.painLevel }}/۴</span>
+          <span>درد {{ symptom.painLevel }}/4</span>
           <span class="text-xs text-slate-500 dark:text-slate-400">{{ FLOW_LABEL[symptom.flowLevel] }}</span>
         </span>
       </li>
