@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["icons/*.png"],
       manifest: {
-        name: "ماهک , ردیاب عادت‌ماهیانه",
-        short_name: "ماهک , ردیاب عادت‌ماهیانه",
+        name: "ردیاب عادت‌ماهیانه",
+        short_name: "ردیاب عادت‌ماهیانه",
         description: "با ماهک به راحتی عادت ماهیانه خود را ردیابی کنید",
         theme_color: "#f8fafc",
         background_color: "#f8fafc",
