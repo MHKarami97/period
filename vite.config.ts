@@ -7,14 +7,19 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not "autoUpdate"): a new service worker installs in the
+      // background but waits for the user's explicit confirmation via
+      // UpdatePrompt.vue before it takes over — required so the "new
+      // version available" message can actually be shown instead of the
+      // app silently swapping itself out from under the user.
+      registerType: "prompt",
       includeAssets: ["icons/*.png", "fonts/**/*"],
       manifest: {
-        name: "ماهک | ردیاب عادت‌ماهیانه",
-        short_name: "ماهک | ردیاب عادت‌ماهیانه",
-        description: "با ماهک به راحتی عادت ماهیانه خود را ردیابی کنید",
-        theme_color: "#0f172a",
-        background_color: "#0f172a",
+        name: "ردیاب عادت‌ماهیانه",
+        short_name: "ردیاب عادت‌ماهیانه",
+        description: "ردیاب عادت‌ماهیانه",
+        theme_color: "#f8fafc",
+        background_color: "#f8fafc",
         display: "standalone",
         start_url: "/",
         icons: [
@@ -30,6 +35,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Without this, a waiting worker can be starved by open tabs and
+        // "needRefresh" may never resolve after clicking update.
+        clientsClaim: true,
+        skipWaiting: false,
       },
     }),
   ],
