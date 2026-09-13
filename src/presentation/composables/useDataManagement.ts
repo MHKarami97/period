@@ -3,18 +3,14 @@ import { useSymptomStore } from "@application/stores/symptomStore";
 import { useProfileStore } from "@application/stores/profileStore";
 import { PrintReportService } from "@infrastructure/pdf/PrintReportService";
 import { JsonBackupService } from "@infrastructure/backup/JsonBackupService";
+import { useAppModeStore } from "@application/stores/appModeStore";
+import { useUserProfileStore } from "@application/stores/userProfileStore";
 
-/**
- * useDataManagement - Presentation-layer composable exposing the data
- * export/import/reporting actions to the Settings view. The PDF report
- * operates on the CURRENTLY ACTIVE profile's in-memory data
- * (cycleStore/symptomStore), while JSON export/import always covers the
- * whole local database (all profiles) since a "backup" is meant to be a
- * full device snapshot, not a per-profile one.
- */
 export function useDataManagement() {
   const cycleStore = useCycleStore();
   const symptomStore = useSymptomStore();
+  const appModeStore = useAppModeStore();
+  const userProfileStore = useUserProfileStore();
   const profileStore = useProfileStore();
 
   async function exportJson(): Promise<void> {
@@ -26,8 +22,12 @@ export function useDataManagement() {
     await Promise.all([profileStore.initialize(), cycleStore.initialize(), symptomStore.initialize()]);
   }
 
-  function downloadSixMonthPdf(): void {
-    PrintReportService.openSixMonthReport(cycleStore.sortedCycles, symptomStore.symptoms, profileStore.activeProfile?.name);
+function downloadSixMonthPdf(): void {
+    const profileName = appModeStore.isPartnerMode
+      ? profileStore.activeProfile?.name
+      : userProfileStore.displayName;
+
+    PrintReportService.openSixMonthReport(cycleStore.sortedCycles, symptomStore.symptoms, profileName);
   }
 
   return { exportJson, importJson, downloadSixMonthPdf };

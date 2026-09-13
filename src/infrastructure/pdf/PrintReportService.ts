@@ -1,3 +1,4 @@
+import { format } from "date-fns-jalali";
 import type { Cycle } from "@domain/entities/Cycle";
 import type { Symptom } from "@domain/entities/Symptom";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
@@ -11,6 +12,10 @@ function escapeHtml(value: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function toJalali(date: DateOnly): string {
+  return format(date.toDate(), "yyyy/MM/dd");
 }
 
 export class PrintReportService {
@@ -33,9 +38,9 @@ export class PrintReportService {
     const cyclesSection = PrintReportService.buildCyclesSection(recentCycles);
     const symptomsSection = PrintReportService.buildSymptomsSection(recentSymptoms);
 
-    const subtitle = profileName
-      ? `تاریخ تولید: ${DateOnly.today().toIsoString()} &nbsp;|&nbsp; فرد: ${escapeHtml(profileName)}`
-      : `تاریخ تولید: ${DateOnly.today().toIsoString()}`;
+    const subtitle = `تاریخ تولید: ${toJalali(DateOnly.today())} &nbsp;|&nbsp; فرد: ${escapeHtml(
+      profileName?.trim() || "ناشناس",
+    )}`;
 
     const html = `<!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -105,9 +110,9 @@ export class PrintReportService {
       <tbody>
         <tr><td>میانگین طول چرخه (WMA)</td><td>${prediction.predictedCycleLengthInDays} روز</td></tr>
         <tr><td>میانگین طول پریود</td><td>${prediction.predictedPeriodLengthInDays} روز</td></tr>
-        <tr><td>پریود بعدی (پیش‌بینی)</td><td>${prediction.nextPeriodStartDate.toIsoString()}</td></tr>
-        <tr><td>روز تخمک‌گذاری (پیش‌بینی)</td><td>${prediction.ovulationDate.toIsoString()}</td></tr>
-        <tr><td>پنجره باروری</td><td>${prediction.fertileWindowStart.toIsoString()} تا ${prediction.fertileWindowEnd.toIsoString()}</td></tr>
+        <tr><td>پریود بعدی (پیش‌بینی)</td><td>${toJalali(prediction.nextPeriodStartDate)}</td></tr>
+        <tr><td>روز تخمک‌گذاری (پیش‌بینی)</td><td>${toJalali(prediction.ovulationDate)}</td></tr>
+        <tr><td>پنجره باروری</td><td>${toJalali(prediction.fertileWindowStart)} تا ${toJalali(prediction.fertileWindowEnd)}</td></tr>
       </tbody>
     </table>`;
   }
@@ -117,8 +122,8 @@ export class PrintReportService {
       .map(
         (cycle) => `
         <tr>
-          <td>${cycle.startDate.toIsoString()}</td>
-          <td>${cycle.endDate ? cycle.endDate.toIsoString() : "در جریان"}</td>
+          <td>${toJalali(cycle.startDate)}</td>
+          <td>${cycle.endDate ? toJalali(cycle.endDate) : "در جریان"}</td>
           <td>${cycle.periodLengthInDays !== null ? `${cycle.periodLengthInDays} روز` : "-"}</td>
         </tr>`,
       )
@@ -137,7 +142,7 @@ export class PrintReportService {
       .map(
         (symptom) => `
         <tr>
-          <td>${symptom.date.toIsoString()}</td>
+          <td>${toJalali(symptom.date)}</td>
           <td>${symptom.mood ? escapeHtml(symptom.mood) : "-"}</td>
           <td>${symptom.painLevel}/۴</td>
           <td>${escapeHtml(symptom.flowLevel)}</td>

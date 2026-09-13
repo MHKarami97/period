@@ -37,7 +37,7 @@ export const useProfileStore = defineStore("profile", () => {
     if (allProfiles.length === 0 && appModeStore.isSelfMode) {
       const defaultProfile = Profile.reconstitute({
         id: DEFAULT_PROFILE_ID,
-        name: "من",
+        name: "کاربر",
         createdAt: DateOnly.today(),
       });
       await profileRepository.save(defaultProfile);
