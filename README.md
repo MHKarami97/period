@@ -1,8 +1,8 @@
 # Period — Local-First Menstrual Cycle Tracker (PWA)
 
-Local-first, privacy-first, offline-capable menstrual cycle tracker built with **Vue 3**, **Domain-Driven Design**, and **Clean Architecture**. All data stays on-device (IndexedDB via Dexie.js) — nothing is sent to a server.
+Local-first, privacy-first, offline-capable menstrual cycle tracker built with **Vue 3**, **Domain-Driven Design**, and **Clean Architecture**. All data stays on-device (IndexedDB via Dexie.js) — nothing is sent to a server, and the UI ships with a self-hosted font and self-hosted PWA icons (zero third-party/CDN requests).
 
-> Status: **Step 1 delivered** — architecture skeleton, Domain layer (`Cycle` aggregate + WMA prediction algorithm) and Infrastructure layer (Dexie repositories). UI, Pinia stores and PDF export land in the next steps.
+> Status: architecture skeleton, full Domain layer, Infrastructure (Dexie, PDF, JSON backup), Application (Pinia) and Presentation layers are implemented, including a Jalali-native calendar and date picker, PWA icons and offline-safe fonts, and a Vitest unit-test suite for the prediction algorithm.
 
 ## Tech Stack
 
@@ -13,7 +13,9 @@ Local-first, privacy-first, offline-capable menstrual cycle tracker built with *
 | State / Application Services | Pinia |
 | Persistence | Dexie.js (IndexedDB) — local-first, offline-first |
 | Calendar | `date-fns-jalali` (Jalali/Persian calendar in presentation layer only) |
-| Reporting | jsPDF (6-month PDF summary) |
+| Reporting | jsPDF + jspdf-autotable (6-month PDF summary) |
+| Fonts / Icons | Self-hosted Vazirmatn (`public/fonts`) + custom PWA icon set (`public/icons`) — no external CDN |
+| Testing | Vitest (domain layer unit tests) |
 
 ## Architecture — Clean / Onion Architecture
 
@@ -22,86 +24,82 @@ Dependencies point **inward only**: `presentation → application → domain ←
 ```
 src/
 ├── domain/                     # Enterprise business rules — framework-agnostic, 100% unit-testable
-│   ├── entities/
-│   │   ├── Cycle.ts             # Aggregate Root: start/end dates, invariants, corrections
-│   │   └── Symptom.ts           # Entity: one logged day (mood, pain, flow)
-│   ├── valueObjects/
-│   │   ├── DateOnly.ts          # Immutable calendar-day VO (calendar-system agnostic)
-│   │   ├── CyclePhase.ts        # MENSTRUAL | FOLLICULAR | OVULATION | LUTEAL
-│   │   ├── FlowLevel.ts         # NONE..HEAVY
-│   │   └── Mood.ts
+│   ├── entities/                Cycle.ts (Aggregate Root), Symptom.ts (Entity)
+│   ├── valueObjects/             DateOnly, CyclePhase, FlowLevel, Mood
 │   ├── services/
-│   │   └── CyclePredictionService.ts   # Pure WMA prediction algorithm (see below)
-│   └── repositories/            # Ports (interfaces) — Dependency Inversion
-│       ├── ICycleRepository.ts
-│       └── ISymptomRepository.ts
+│   │   ├── CyclePredictionService.ts       # Pure WMA prediction algorithm
+│   │   └── CyclePredictionService.spec.ts  # Vitest unit tests
+│   └── repositories/             ICycleRepository, ISymptomRepository (Ports)
 │
-├── infrastructure/               # Adapters — implement domain ports with real tech
-│   ├── database/
-│   │   └── AppDatabase.ts        # Dexie schema (IndexedDB)
-│   ├── repositories/
-│   │   ├── DexieCycleRepository.ts     # implements ICycleRepository
-│   │   └── DexieSymptomRepository.ts   # implements ISymptomRepository
-│   └── pdf/                      # (next step) jsPDF report generation
+├── infrastructure/
+│   ├── database/                 AppDatabase.ts (Dexie schema)
+│   ├── repositories/             DexieCycleRepository, DexieSymptomRepository
+│   ├── pdf/                      PdfReportService.ts (jsPDF 6-month report)
+│   └── backup/                   JsonBackupService.ts (export/import whole DB)
 │
-├── application/                  # Pinia stores acting as Application Services
-│   ├── stores/
-│   │   ├── cycleStore.ts         # orchestrates Cycle aggregate + repository
-│   │   └── symptomStore.ts
-│   └── dto/                      # data shaped for the presentation layer
+├── application/
+│   └── stores/                   cycleStore, symptomStore, appModeStore (Pinia = Application Services)
 │
-├── presentation/                 # Vue-specific: components, views, composables
-│   ├── components/
-│   │   ├── dashboard/            # circular cycle-day chart, quick actions
-│   │   ├── calendar/             # Jalali calendar grid
-│   │   └── symptoms/             # symptom logger form
-│   ├── views/
-│   ├── composables/
-│   └── styles/
-│
-├── App.vue
-└── main.ts
+└── presentation/
+    ├── components/
+    │   ├── dashboard/             CircularCycleChart, QuickActions
+    │   ├── calendar/              JalaliCalendarGrid
+    │   ├── symptoms/              SymptomLoggerForm
+    │   ├── settings/              DataManagementPanel
+    │   ├── onboarding/            RoleSelector (Dual Mode)
+    │   ├── layout/                AppShell (desktop sidebar + mobile bottom nav)
+    │   └── shared/                JalaliDatePicker
+    ├── composables/               useJalali, useCycleDashboard, useDataManagement
+    ├── router/                    vue-router with onboarding + partner-mode guards
+    └── styles/
+
+public/
+├── icons/     # icon-48/72/96/144/192/512.png — referenced directly in the PWA manifest
+└── fonts/     # Vazirmatn-font-face.css + webfonts/*.woff2 — loaded via <link>, no Google Fonts CDN
 ```
 
 ## Prediction Algorithm — Weighted Moving Average (WMA)
 
-Implemented in `src/domain/services/CyclePredictionService.ts`, fully pure and unit-testable with no external dependency.
+Implemented in `src/domain/services/CyclePredictionService.ts`, fully pure, dependency-free and covered by Vitest.
 
 ```
 nextCycleLength = (C1 × 3 + C2 × 2 + C3 × 1) / 6
 ```
 
-- `C1` = most recent completed cycle length (days between the last two period start dates)
-- `C2` = the cycle before that
-- `C3` = the cycle before `C2`
-- If fewer than 3 historical cycles exist, weights are re-normalized over the available samples instead of failing (e.g. with 2 cycles: `(C1×2 + C2×1) / 3`).
+- `C1` = most recent completed cycle length, `C2` the one before, `C3` before that.
+- With fewer than 3 historical cycles, weights are re-normalized over the available samples (e.g. 2 cycles: `(C1×2 + C2×1)/3`); with zero history, falls back to the clinical default of 28 days.
 
-**Ovulation date** = `nextPeriodStartDate − 14 days` (fixed luteal phase, per the standard clinical assumption that the luteal phase length is far more stable than the follicular phase). The fertile window is modeled as 5 days before to 1 day after ovulation.
+**Ovulation date** = `nextPeriodStartDate − 14 days` (fixed luteal phase). Fertile window: 5 days before to 1 day after ovulation.
 
 ## Dual Mode
 
-Two roles are supported at the domain/application boundary:
+- **Self-tracking**: full write access — log periods, symptoms, corrections.
+- **Partner-tracking**: read-only projection — current phase, next-period countdown, calendar; the Symptoms route is guarded and redirects to the dashboard.
 
-- **Self-tracking**: full write access — log periods, symptoms (mood/pain/flow), corrections.
-- **Partner-tracking**: read-only projection — current phase, next period countdown, calendar — no symptom logging UI.
+## Fonts and Icons
 
-The mode is a UI/application concern (a feature flag in the Pinia store), not a domain concept — the `Cycle` and `Symptom` aggregates are identical regardless of who is viewing them.
+- The app self-hosts **Vazirmatn** (`public/fonts/Vazirmatn-font-face.css` + `public/fonts/webfonts/*.woff2`), loaded via a `<link>` tag in `index.html` and set as the default `font-family` in Tailwind (`fontFamily.vazir`) — no Google Fonts or other CDN request is made anywhere in the app, which keeps it fully functional offline.
+- PWA icons come from `public/icons/icon-{48,72,96,144,192,512}.png` and are wired into the `vite-plugin-pwa` manifest with both `any` and `maskable` purposes for the 192/512 sizes.
 
 ## Getting Started
 
 ```bash
 npm install
-npm run dev      # Vite dev server
-npm run build    # type-check + production build
+npm run dev        # Vite dev server
+npm run build       # type-check + production build
+npm run test        # Vitest unit tests (domain layer)
 ```
 
-## Roadmap (next steps)
+## Roadmap
 
-1. Pinia application stores (`cycleStore`, `symptomStore`) wiring domain + Dexie repositories.
-2. Presentation layer: circular dashboard chart, Jalali calendar grid, symptom logger, quick actions (start/end period, backdate correction).
-3. `PdfReportService` (jsPDF) — 6-month summary export.
-4. JSON export/import for the whole Dexie database.
-5. PWA install prompt, offline shell caching via `vite-plugin-pwa`.
+- [x] Domain layer: `Cycle` aggregate, `Symptom` entity, WMA prediction service
+- [x] Infrastructure: Dexie repositories, PDF report, JSON backup/restore
+- [x] Application: Pinia stores as Application Services
+- [x] Presentation: dashboard, Jalali calendar, symptom logger, settings, dual-mode onboarding
+- [x] Self-hosted fonts and PWA icons (no external CDN)
+- [x] Vitest unit tests for the prediction algorithm
+- [ ] Vue Test Utils component tests for `JalaliDatePicker` / `JalaliCalendarGrid`
+- [ ] Push notifications reminder (day-before-period) via Web Push + Service Worker
 
 ## References
 
@@ -109,4 +107,6 @@ npm run build    # type-check + production build
 - [Vite PWA plugin](https://vite-pwa-org.netlify.app/)
 - [Pinia documentation](https://pinia.vuejs.org/)
 - [date-fns-jalali](https://github.com/date-fns-jalali/date-fns-jalali)
+- [Vazirmatn font](https://github.com/rastikerdar/vazirmatn)
+- [Vitest documentation](https://vitest.dev/)
 - Domain-Driven Design, Eric Evans (Aggregate Root, Value Object, Repository pattern)

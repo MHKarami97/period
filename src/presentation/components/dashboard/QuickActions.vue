@@ -2,15 +2,17 @@
 import { ref } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { useCycleStore } from "@application/stores/cycleStore";
+import JalaliDatePicker from "@presentation/components/shared/JalaliDatePicker.vue";
 
 /**
  * QuickActions - "start/end period" primary action plus early/late date
- * correction. Any correction immediately rewrites predictions because
- * cycleStore.prediction is a computed getter derived from cycleStore.cycles.
+ * correction via the Jalali-native date picker. Any correction immediately
+ * rewrites predictions because cycleStore.prediction is a computed getter
+ * derived from cycleStore.cycles.
  */
 const cycleStore = useCycleStore();
 const isAdjustingDate = ref(false);
-const adjustedDateInput = ref(DateOnly.today().toIsoString());
+const adjustedDate = ref(DateOnly.today());
 
 async function handlePrimaryAction(): Promise<void> {
   const current = cycleStore.currentCycle;
@@ -26,11 +28,10 @@ async function applyDateCorrection(): Promise<void> {
   if (!current) {
     return;
   }
-  const newDate = DateOnly.fromIsoString(adjustedDateInput.value);
   if (current.isOngoing) {
-    await cycleStore.correctStartDate(current.id, newDate);
+    await cycleStore.correctStartDate(current.id, adjustedDate.value);
   } else {
-    await cycleStore.correctEndDate(current.id, newDate);
+    await cycleStore.correctEndDate(current.id, adjustedDate.value);
   }
   isAdjustingDate.value = false;
 }
@@ -55,7 +56,9 @@ async function applyDateCorrection(): Promise<void> {
     </button>
 
     <div v-if="isAdjustingDate" class="flex items-center gap-2">
-      <input v-model="adjustedDateInput" type="date" class="flex-1 rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-100" />
+      <div class="flex-1">
+        <JalaliDatePicker v-model="adjustedDate" />
+      </div>
       <button type="button" class="rounded-lg bg-teal-500/90 px-3 py-2 text-sm font-medium text-white hover:bg-teal-500" @click="applyDateCorrection">
         اعمال
       </button>
