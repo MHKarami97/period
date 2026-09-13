@@ -42,7 +42,7 @@ watch(
 <template>
   <div class="grid min-h-screen w-full grid-cols-1 bg-slate-100 dark:bg-slate-950 lg:grid-cols-[220px_1fr]">
     <aside class="hidden flex-col gap-1 border-l border-slate-200 p-4 dark:border-slate-900 lg:flex">
-      <p class="mb-4 px-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Period Tracker</p>
+      <p class="mb-4 px-2 text-lg font-semibold text-slate-900 dark:text-slate-100">ماهک</p>
       <RouterLink
         v-for="item in NAV_ITEMS.filter((i) => !i.selfOnly || !appModeStore.isPartnerMode)"
         :key="item.label"

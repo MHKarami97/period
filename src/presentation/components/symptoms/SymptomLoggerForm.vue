@@ -87,8 +87,9 @@ async function save(): Promise<void> {
       <textarea v-model="note" rows="2" class="w-full resize-none rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"></textarea>
     </div>
 
-    <button type="button" class="rounded-xl bg-teal-500/90 px-4 py-3 font-medium text-white hover:bg-teal-500" @click="save">
-      ذخیره علائم امروز
-    </button>
+    <button type="button" class="rounded-xl bg-teal-500/90 px-4 py-3 font-medium text-white hover:bg-teal-500 disabled:opacity-60" :disabled="isSaving" @click="save">
+  {{ isSaving ? "در حال ذخیره..." : "ذخیره علائم امروز" }}
+</button>
+<p v-if="saveError" class="text-xs text-rose-500 dark:text-rose-300">{{ saveError }}</p>
   </div>
 </template>
