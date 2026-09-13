@@ -1,5 +1,6 @@
 export * from "./entities/Cycle";
 export * from "./entities/Symptom";
+export * from "./entities/Profile";
 export * from "./valueObjects/DateOnly";
 export * from "./valueObjects/CyclePhase";
 export * from "./valueObjects/FlowLevel";
@@ -7,3 +8,4 @@ export * from "./valueObjects/Mood";
 export * from "./services/CyclePredictionService";
 export * from "./repositories/ICycleRepository";
 export * from "./repositories/ISymptomRepository";
+export * from "./repositories/IProfileRepository";

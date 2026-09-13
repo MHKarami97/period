@@ -2,10 +2,10 @@ import { Symptom } from "../entities/Symptom";
 import { DateOnly } from "../valueObjects/DateOnly";
 
 export interface ISymptomRepository {
-  getAll(): Promise<Symptom[]>;
-  getByDate(date: DateOnly): Promise<Symptom | null>;
-  getInRange(start: DateOnly, end: DateOnly): Promise<Symptom[]>;
-  save(symptom: Symptom): Promise<void>;
+  getAllForProfile(profileId: string): Promise<Symptom[]>;
+  getByDateForProfile(profileId: string, date: DateOnly): Promise<Symptom | null>;
+  getInRangeForProfile(profileId: string, start: DateOnly, end: DateOnly): Promise<Symptom[]>;
+  save(symptom: Symptom, profileId: string): Promise<void>;
   delete(id: string): Promise<void>;
-  clear(): Promise<void>;
+  clearForProfile(profileId: string): Promise<void>;
 }

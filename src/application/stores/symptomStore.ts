@@ -5,6 +5,7 @@ import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { Mood } from "@domain/valueObjects/Mood";
 import { FlowLevel } from "@domain/valueObjects/FlowLevel";
 import { DexieSymptomRepository } from "@infrastructure/repositories/DexieSymptomRepository";
+import { useProfileStore } from "./profileStore";
 
 const symptomRepository = new DexieSymptomRepository();
 
@@ -17,13 +18,11 @@ export interface LogSymptomInput {
 }
 
 /**
- * symptomStore - Application Service for the daily Symptom log.
- * Implemented as a Pinia setup store with `shallowRef<Symptom[]>` for the
- * same reason as cycleStore: `Symptom`/`DateOnly` carry private fields, and
- * Vue's deep `reactive()` (used by options-API stores) strips that private
- * brand at the type level, breaking assignability back to `Symptom[]`.
- * `shallowRef` + whole-array reassignment keeps both the domain model's
- * encapsulation and its exact TypeScript type intact.
+ * symptomStore - Application Service for the daily Symptom log, scoped to
+ * whichever Profile is currently active (see profileStore), the same way
+ * cycleStore is. One Symptom per (profile, calendar day): the id is
+ * deterministically derived from the profile id + ISO date so `save`
+ * naturally upserts without an extra lookup round-trip.
  */
 export const useSymptomStore = defineStore("symptom", () => {
   const symptoms = shallowRef<Symptom[]>([]);
@@ -34,9 +33,10 @@ export const useSymptomStore = defineStore("symptom", () => {
   );
 
   async function initialize(): Promise<void> {
+    const profileStore = useProfileStore();
     isLoading.value = true;
     try {
-      symptoms.value = await symptomRepository.getAll();
+      symptoms.value = await symptomRepository.getAllForProfile(profileStore.activeProfileId);
     } finally {
       isLoading.value = false;
     }
@@ -47,7 +47,8 @@ export const useSymptomStore = defineStore("symptom", () => {
   }
 
   async function logSymptom(input: LogSymptomInput): Promise<void> {
-    const id = `symptom_${input.date.toIsoString()}`;
+    const profileStore = useProfileStore();
+    const id = `symptom_${profileStore.activeProfileId}_${input.date.toIsoString()}`;
     const symptom = Symptom.create({
       id,
       date: input.date,
@@ -57,7 +58,7 @@ export const useSymptomStore = defineStore("symptom", () => {
       note: input.note,
     });
 
-    await symptomRepository.save(symptom);
+    await symptomRepository.save(symptom, profileStore.activeProfileId);
 
     const next = [...symptoms.value];
     const index = next.findIndex((existing) => existing.id === id);
@@ -74,10 +75,5 @@ export const useSymptomStore = defineStore("symptom", () => {
     symptoms.value = symptoms.value.filter((symptom) => symptom.id !== id);
   }
 
-  async function clearAll(): Promise<void> {
-    await symptomRepository.clear();
-    symptoms.value = [];
-  }
-
-  return { symptoms, isLoading, byDateMap, initialize, getForDate, logSymptom, deleteSymptom, clearAll };
+  return { symptoms, isLoading, byDateMap, initialize, getForDate, logSymptom, deleteSymptom };
 });

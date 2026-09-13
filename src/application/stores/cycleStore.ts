@@ -4,29 +4,23 @@ import { Cycle } from "@domain/entities/Cycle";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { CyclePredictionService } from "@domain/services/CyclePredictionService";
 import { DexieCycleRepository } from "@infrastructure/repositories/DexieCycleRepository";
+import { useProfileStore } from "./profileStore";
 
 /**
  * cycleStore - Application Service orchestrating the Cycle aggregate with
- * the persistence port.
+ * the persistence port, scoped to whichever Profile is currently active
+ * (see profileStore). Every read/write forwards `profileStore.activeProfileId`
+ * to the repository, so switching the active profile and calling
+ * `initialize()` again transparently swaps in a different person's data.
  *
- * Implemented as a Pinia SETUP store (not the options-API store) and backed
- * by `shallowRef` rather than a plain `reactive()` array. This is a
- * deliberate choice, not a style preference:
- *
- *  - `Cycle`/`DateOnly` are immutable domain objects with a private
- *    backing field (`props` / `timestampUtcMidnight`). Vue's `reactive()`
- *    (used internally by Pinia's options-API `state()`) deep-proxies every
- *    nested object and its type-level `UnwrapRef<T>` mapped type does not
- *    preserve TypeScript's private-field brand, which made `Cycle[]`
- *    un-assignable to itself after a round trip through the store
- *    (TS2322 "Property 'props' is missing in type ... but required in
- *    type 'Cycle'"). `shallowRef` never recurses into the object graph, so
- *    the class identity — and its encapsulation — survives untouched.
- *  - Every mutation on `Cycle` already returns a brand-new instance
- *    (see Cycle.endPeriod/correctStartDate/correctEndDate), so the store
- *    never needs to mutate an existing array in place; it always assigns a
- *    new array to `cycles.value`, which is exactly what `shallowRef` is
- *    designed for and is also the cheapest reactivity shape performance-wise.
+ * Implemented as a Pinia SETUP store backed by `shallowRef` rather than a
+ * plain `reactive()` array: `Cycle`/`DateOnly` are immutable domain objects
+ * with a private backing field, and Vue's `reactive()` type-level
+ * `UnwrapRef<T>` does not preserve TypeScript's private-field brand, which
+ * breaks assignability back to `Cycle[]`. `shallowRef` never recurses into
+ * the object graph, so the class identity — and its encapsulation — is
+ * preserved, and every mutation already returns a brand-new instance
+ * anyway (see Cycle.endPeriod/correctStartDate/correctEndDate).
  */
 const cycleRepository = new DexieCycleRepository();
 
@@ -64,21 +58,23 @@ export const useCycleStore = defineStore("cycle", () => {
   );
 
   async function initialize(): Promise<void> {
+    const profileStore = useProfileStore();
     isLoading.value = true;
     try {
-      cycles.value = await cycleRepository.getAll();
+      cycles.value = await cycleRepository.getAllForProfile(profileStore.activeProfileId);
     } finally {
       isLoading.value = false;
     }
   }
 
   async function mutateCycle(cycleId: string, mutate: (cycle: Cycle) => Cycle): Promise<void> {
+    const profileStore = useProfileStore();
     const index = cycles.value.findIndex((cycle) => cycle.id === cycleId);
     if (index === -1) {
       throw new Error(`Cycle ${cycleId} not found.`);
     }
     const updated = mutate(cycles.value[index]);
-    await cycleRepository.save(updated);
+    await cycleRepository.save(updated, profileStore.activeProfileId);
 
     const next = [...cycles.value];
     next.splice(index, 1, updated);
@@ -86,8 +82,9 @@ export const useCycleStore = defineStore("cycle", () => {
   }
 
   async function startPeriod(startDate: DateOnly = DateOnly.today()): Promise<void> {
+    const profileStore = useProfileStore();
     const cycle = Cycle.start({ id: generateId(), startDate });
-    await cycleRepository.save(cycle);
+    await cycleRepository.save(cycle, profileStore.activeProfileId);
     cycles.value = [...cycles.value, cycle];
   }
 
@@ -108,11 +105,6 @@ export const useCycleStore = defineStore("cycle", () => {
     cycles.value = cycles.value.filter((cycle) => cycle.id !== cycleId);
   }
 
-  async function clearAll(): Promise<void> {
-    await cycleRepository.clear();
-    cycles.value = [];
-  }
-
   return {
     cycles,
     isLoading,
@@ -129,6 +121,5 @@ export const useCycleStore = defineStore("cycle", () => {
     correctStartDate,
     correctEndDate,
     deleteCycle,
-    clearAll,
   };
 });

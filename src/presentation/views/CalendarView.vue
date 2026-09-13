@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useAppModeStore } from "@application/stores/appModeStore";
-import { useUserProfileStore } from "@application/stores/userProfileStore";
+import { useProfileStore } from "@application/stores/profileStore";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { useJalali } from "@presentation/composables/useJalali";
 import JalaliCalendarGrid from "@presentation/components/calendar/JalaliCalendarGrid.vue";
+import ProfileSwitcher from "@presentation/components/shared/ProfileSwitcher.vue";
 
 const cycleStore = useCycleStore();
 const appModeStore = useAppModeStore();
-const userProfileStore = useUserProfileStore();
+const profileStore = useProfileStore();
 const { toJalaliLabel } = useJalali();
 
 const title = computed<string>(() => {
-  const name = userProfileStore.displayName;
   if (appModeStore.isPartnerMode) {
-    return name ? `تقویم ${name}` : "تقویم";
+    const trackedName = profileStore.activeProfile?.name;
+    return trackedName ? `تقویم ${trackedName}` : "تقویم";
   }
   return "تقویم";
 });
@@ -49,15 +50,13 @@ const currentPeriodInfo = computed(() => {
     endLabel: current.endDate ? toJalaliLabel(current.endDate) : "",
   };
 });
-
-onMounted(() => {
-  cycleStore.initialize();
-});
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ title }}</h1>
+
+    <ProfileSwitcher v-if="appModeStore.isPartnerMode" />
 
     <div
       v-if="currentPeriodInfo"

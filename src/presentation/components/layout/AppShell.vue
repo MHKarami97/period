@@ -1,8 +1,15 @@
 <script setup lang="ts">
+import { onMounted, watch } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 import { useAppModeStore } from "@application/stores/appModeStore";
+import { useProfileStore } from "@application/stores/profileStore";
+import { useCycleStore } from "@application/stores/cycleStore";
+import { useSymptomStore } from "@application/stores/symptomStore";
 
 const appModeStore = useAppModeStore();
+const profileStore = useProfileStore();
+const cycleStore = useCycleStore();
+const symptomStore = useSymptomStore();
 
 const NAV_ITEMS = [
   { to: { name: "dashboard" }, label: "داشبورد", icon: "◐" },
@@ -11,6 +18,25 @@ const NAV_ITEMS = [
   { to: { name: "guide" }, label: "راهنما", icon: "ℹ" },
   { to: { name: "settings" }, label: "تنظیمات", icon: "⚙" },
 ];
+
+/**
+ * AppShell is the single persistent layout mounted for the whole
+ * authenticated area (everything under /app), so it is the right place to
+ * bootstrap the active Profile and load its Cycle/Symptom data exactly
+ * once, then keep them in sync whenever the active profile changes
+ * (e.g. a partner switching from "همسر" to "خواهر").
+ */
+onMounted(async () => {
+  await profileStore.initialize();
+  await Promise.all([cycleStore.initialize(), symptomStore.initialize()]);
+});
+
+watch(
+  () => profileStore.activeProfileId,
+  async () => {
+    await Promise.all([cycleStore.initialize(), symptomStore.initialize()]);
+  },
+);
 </script>
 
 <template>
@@ -33,12 +59,18 @@ const NAV_ITEMS = [
       <RouterView />
     </main>
 
-    <nav class="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 gap-1 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
+    <!--
+      flex + justify-center (not grid-cols-N) so the bottom nav stays
+      centered regardless of how many items are visible: partner mode
+      hides "علائم", leaving 4 items instead of 5, which looked lopsided
+      with a fixed 5-column grid.
+    -->
+    <nav class="fixed inset-x-0 bottom-0 z-10 flex items-center justify-center gap-6 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
       <RouterLink
         v-for="item in NAV_ITEMS.filter((i) => !i.selfOnly || !appModeStore.isPartnerMode)"
         :key="item.label"
         :to="item.to"
-        class="flex flex-col items-center gap-1 rounded-lg py-1 text-[11px] text-slate-500 dark:text-slate-400"
+        class="flex flex-col items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-slate-500 dark:text-slate-400"
         active-class="text-teal-600 dark:text-teal-300"
       >
         <span class="text-base">{{ item.icon }}</span>

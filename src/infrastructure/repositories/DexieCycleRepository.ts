@@ -6,13 +6,15 @@ import { appDatabase, type CycleRecord } from "../database/AppDatabase";
 /**
  * DexieCycleRepository - Adapter implementing the ICycleRepository port
  * declared in the domain layer, using IndexedDB (via Dexie) as the storage
- * mechanism. Follows the Data Mapper pattern: persistence records
- * (CycleRecord) are translated to/from rich domain entities (Cycle) here,
- * so the domain stays free of any persistence concern.
+ * mechanism. Every read/write is scoped by `profileId` so cycles logged
+ * for different tracked people never overlap. Follows the Data Mapper
+ * pattern: persistence records (CycleRecord) are translated to/from rich
+ * domain entities (Cycle) here, keeping the domain free of persistence
+ * concerns (a Cycle itself has no notion of "which profile it belongs to").
  */
 export class DexieCycleRepository implements ICycleRepository {
-  public async getAll(): Promise<Cycle[]> {
-    const records = await appDatabase.cycles.orderBy("startDateIso").toArray();
+  public async getAllForProfile(profileId: string): Promise<Cycle[]> {
+    const records = await appDatabase.cycles.where("profileId").equals(profileId).sortBy("startDateIso");
     return records.map(DexieCycleRepository.toDomain);
   }
 
@@ -21,16 +23,16 @@ export class DexieCycleRepository implements ICycleRepository {
     return record ? DexieCycleRepository.toDomain(record) : null;
   }
 
-  public async save(cycle: Cycle): Promise<void> {
-    await appDatabase.cycles.put(DexieCycleRepository.toRecord(cycle));
+  public async save(cycle: Cycle, profileId: string): Promise<void> {
+    await appDatabase.cycles.put(DexieCycleRepository.toRecord(cycle, profileId));
   }
 
   public async delete(id: string): Promise<void> {
     await appDatabase.cycles.delete(id);
   }
 
-  public async clear(): Promise<void> {
-    await appDatabase.cycles.clear();
+  public async clearForProfile(profileId: string): Promise<void> {
+    await appDatabase.cycles.where("profileId").equals(profileId).delete();
   }
 
   private static toDomain(record: CycleRecord): Cycle {
@@ -42,10 +44,11 @@ export class DexieCycleRepository implements ICycleRepository {
     });
   }
 
-  private static toRecord(cycle: Cycle): CycleRecord {
+  private static toRecord(cycle: Cycle, profileId: string): CycleRecord {
     const plain = cycle.toPlainObject();
     return {
       id: plain.id,
+      profileId,
       startDateIso: plain.startDate.toIsoString(),
       endDateIso: plain.endDate ? plain.endDate.toIsoString() : null,
       isEarlyOrLateAdjusted: plain.isEarlyOrLateAdjusted ? 1 : 0,

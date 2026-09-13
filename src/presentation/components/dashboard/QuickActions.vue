@@ -1,21 +1,35 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
+import { computed, shallowRef } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { useCycleStore } from "@application/stores/cycleStore";
+import { useAppModeStore } from "@application/stores/appModeStore";
+import { useProfileStore } from "@application/stores/profileStore";
 import JalaliDatePicker from "@presentation/components/shared/JalaliDatePicker.vue";
 
 /**
  * QuickActions - "start/end period" primary action plus early/late date
- * correction via the Jalali-native date picker. `adjustedDate` uses
- * `shallowRef` (not `ref`) because `DateOnly` is an immutable Value Object
- * with a private field; `ref()`'s deep `UnwrapRef` type strips that private
- * brand and breaks assignability back to `DateOnly`. Any correction
- * immediately rewrites predictions because cycleStore.prediction is a
- * computed getter derived from cycleStore.cycles.
+ * correction via the Jalali-native date picker.
+ *
+ * Available in BOTH self and partner mode: a partner needs to be able to
+ * log when the person they track started her period, not just view a
+ * prediction. Only the button label changes — it includes the active
+ * profile's name in partner mode ("ثبت شروع پریود همسر") so it is always
+ * clear whose period is being recorded when several profiles exist.
  */
 const cycleStore = useCycleStore();
+const appModeStore = useAppModeStore();
+const profileStore = useProfileStore();
+
 const isAdjustingDate = shallowRef(false);
 const adjustedDate = shallowRef(DateOnly.today());
+
+const primaryActionLabel = computed<string>(() => {
+  const base = cycleStore.currentCycle?.isOngoing ? "ثبت پایان پریود" : "ثبت شروع پریود";
+  if (appModeStore.isPartnerMode && profileStore.activeProfile) {
+    return `${base} ${profileStore.activeProfile.name}`;
+  }
+  return base;
+});
 
 async function handlePrimaryAction(): Promise<void> {
   const current = cycleStore.currentCycle;
@@ -47,7 +61,7 @@ async function applyDateCorrection(): Promise<void> {
       class="w-full rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99]"
       @click="handlePrimaryAction"
     >
-      {{ cycleStore.currentCycle?.isOngoing ? "ثبت پایان پریود" : "ثبت شروع پریود" }}
+      {{ primaryActionLabel }}
     </button>
 
     <button

@@ -6,34 +6,38 @@ import { FlowLevel } from "@domain/valueObjects/FlowLevel";
 import { appDatabase, type SymptomRecord } from "../database/AppDatabase";
 
 export class DexieSymptomRepository implements ISymptomRepository {
-  public async getAll(): Promise<Symptom[]> {
-    const records = await appDatabase.symptoms.orderBy("dateIso").toArray();
+  public async getAllForProfile(profileId: string): Promise<Symptom[]> {
+    const records = await appDatabase.symptoms.where("profileId").equals(profileId).sortBy("dateIso");
     return records.map(DexieSymptomRepository.toDomain);
   }
 
-  public async getByDate(date: DateOnly): Promise<Symptom | null> {
-    const record = await appDatabase.symptoms.where("dateIso").equals(date.toIsoString()).first();
+  public async getByDateForProfile(profileId: string, date: DateOnly): Promise<Symptom | null> {
+    const record = await appDatabase.symptoms
+      .where("[profileId+dateIso]")
+      .equals([profileId, date.toIsoString()])
+      .first();
     return record ? DexieSymptomRepository.toDomain(record) : null;
   }
 
-  public async getInRange(start: DateOnly, end: DateOnly): Promise<Symptom[]> {
+  public async getInRangeForProfile(profileId: string, start: DateOnly, end: DateOnly): Promise<Symptom[]> {
     const records = await appDatabase.symptoms
-      .where("dateIso")
-      .between(start.toIsoString(), end.toIsoString(), true, true)
+      .where("profileId")
+      .equals(profileId)
+      .and((record) => record.dateIso >= start.toIsoString() && record.dateIso <= end.toIsoString())
       .toArray();
     return records.map(DexieSymptomRepository.toDomain);
   }
 
-  public async save(symptom: Symptom): Promise<void> {
-    await appDatabase.symptoms.put(DexieSymptomRepository.toRecord(symptom));
+  public async save(symptom: Symptom, profileId: string): Promise<void> {
+    await appDatabase.symptoms.put(DexieSymptomRepository.toRecord(symptom, profileId));
   }
 
   public async delete(id: string): Promise<void> {
     await appDatabase.symptoms.delete(id);
   }
 
-  public async clear(): Promise<void> {
-    await appDatabase.symptoms.clear();
+  public async clearForProfile(profileId: string): Promise<void> {
+    await appDatabase.symptoms.where("profileId").equals(profileId).delete();
   }
 
   private static toDomain(record: SymptomRecord): Symptom {
@@ -47,10 +51,11 @@ export class DexieSymptomRepository implements ISymptomRepository {
     });
   }
 
-  private static toRecord(symptom: Symptom): SymptomRecord {
+  private static toRecord(symptom: Symptom, profileId: string): SymptomRecord {
     const plain = symptom.toPlainObject();
     return {
       id: plain.id,
+      profileId,
       dateIso: plain.date.toIsoString(),
       mood: plain.mood,
       painLevel: plain.painLevel,

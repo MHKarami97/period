@@ -2,15 +2,14 @@ import { Cycle } from "../entities/Cycle";
 
 /**
  * ICycleRepository - Port (in the Hexagonal/Ports & Adapters sense).
- * The domain and application layers depend on this abstraction only;
- * the concrete Dexie-backed adapter lives in /src/infrastructure and is
- * wired up at the application (Pinia store) boundary, keeping the
- * dependency arrow pointing inward (Dependency Inversion Principle).
+ * Every operation is scoped to a `profileId` (see the `Profile` aggregate)
+ * so multiple tracked people can share the same local database without
+ * their cycles ever mixing together.
  */
 export interface ICycleRepository {
-  getAll(): Promise<Cycle[]>;
+  getAllForProfile(profileId: string): Promise<Cycle[]>;
   getById(id: string): Promise<Cycle | null>;
-  save(cycle: Cycle): Promise<void>;
+  save(cycle: Cycle, profileId: string): Promise<void>;
   delete(id: string): Promise<void>;
-  clear(): Promise<void>;
+  clearForProfile(profileId: string): Promise<void>;
 }
