@@ -1,18 +1,32 @@
 import { defineStore } from "pinia";
+import { shallowRef, computed } from "vue";
 import { Cycle } from "@domain/entities/Cycle";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
-import { CyclePredictionService, type CyclePrediction } from "@domain/services/CyclePredictionService";
-import { CyclePhase } from "@domain/valueObjects/CyclePhase";
+import { CyclePredictionService } from "@domain/services/CyclePredictionService";
 import { DexieCycleRepository } from "@infrastructure/repositories/DexieCycleRepository";
 
 /**
  * cycleStore - Application Service orchestrating the Cycle aggregate with
- * the persistence port. Pinia here plays the role Application Services
- * play in DDD: it never contains business rules itself, it only
- * sequences calls into the domain (Cycle, CyclePredictionService) and the
- * repository (DexieCycleRepository, injected as a concrete adapter since
- * this is a small local-first SPA with a single implementation — a DI
- * container would be introduced only if a second adapter appeared).
+ * the persistence port.
+ *
+ * Implemented as a Pinia SETUP store (not the options-API store) and backed
+ * by `shallowRef` rather than a plain `reactive()` array. This is a
+ * deliberate choice, not a style preference:
+ *
+ *  - `Cycle`/`DateOnly` are immutable domain objects with a private
+ *    backing field (`props` / `timestampUtcMidnight`). Vue's `reactive()`
+ *    (used internally by Pinia's options-API `state()`) deep-proxies every
+ *    nested object and its type-level `UnwrapRef<T>` mapped type does not
+ *    preserve TypeScript's private-field brand, which made `Cycle[]`
+ *    un-assignable to itself after a round trip through the store
+ *    (TS2322 "Property 'props' is missing in type ... but required in
+ *    type 'Cycle'"). `shallowRef` never recurses into the object graph, so
+ *    the class identity — and its encapsulation — survives untouched.
+ *  - Every mutation on `Cycle` already returns a brand-new instance
+ *    (see Cycle.endPeriod/correctStartDate/correctEndDate), so the store
+ *    never needs to mutate an existing array in place; it always assigns a
+ *    new array to `cycles.value`, which is exactly what `shallowRef` is
+ *    designed for and is also the cheapest reactivity shape performance-wise.
  */
 const cycleRepository = new DexieCycleRepository();
 
@@ -20,81 +34,101 @@ function generateId(): string {
   return crypto.randomUUID();
 }
 
-export const useCycleStore = defineStore("cycle", {
-  state: () => ({
-    cycles: [] as Cycle[],
-    isLoading: false,
-  }),
-  getters: {
-    sortedCycles(state): Cycle[] {
-      return [...state.cycles].sort((a, b) => a.startDate.diffInDays(b.startDate));
-    },
-    currentCycle(): Cycle | null {
-      const sorted = this.sortedCycles;
-      return sorted.length > 0 ? sorted[sorted.length - 1] : null;
-    },
-    hasHistory(state): boolean {
-      return state.cycles.length > 0;
-    },
-    prediction(): CyclePrediction | null {
-      return this.hasHistory ? CyclePredictionService.predictNextCycle(this.sortedCycles) : null;
-    },
-    currentPhase(): CyclePhase {
-      return CyclePredictionService.resolveCurrentPhase(this.sortedCycles);
-    },
-    currentCycleDayNumber(): number | null {
-      return this.hasHistory ? CyclePredictionService.currentCycleDayNumber(this.sortedCycles) : null;
-    },
-    daysUntilNextPeriod(): number | null {
-      return this.hasHistory ? CyclePredictionService.daysUntilNextPeriod(this.sortedCycles) : null;
-    },
-  },
-  actions: {
-    async initialize(): Promise<void> {
-      this.isLoading = true;
-      try {
-        this.cycles = await cycleRepository.getAll();
-      } finally {
-        this.isLoading = false;
-      }
-    },
+export const useCycleStore = defineStore("cycle", () => {
+  const cycles = shallowRef<Cycle[]>([]);
+  const isLoading = shallowRef(false);
 
-    async startPeriod(startDate: DateOnly = DateOnly.today()): Promise<void> {
-      const cycle = Cycle.start({ id: generateId(), startDate });
-      await cycleRepository.save(cycle);
-      this.cycles.push(cycle);
-    },
+  const sortedCycles = computed<Cycle[]>(() =>
+    [...cycles.value].sort((a, b) => a.startDate.diffInDays(b.startDate)),
+  );
 
-    async endPeriod(cycleId: string, endDate: DateOnly = DateOnly.today()): Promise<void> {
-      await this.mutateCycle(cycleId, (cycle) => cycle.endPeriod(endDate));
-    },
+  const currentCycle = computed<Cycle | null>(() => {
+    const sorted = sortedCycles.value;
+    return sorted.length > 0 ? sorted[sorted.length - 1] : null;
+  });
 
-    async correctStartDate(cycleId: string, newStartDate: DateOnly): Promise<void> {
-      await this.mutateCycle(cycleId, (cycle) => cycle.correctStartDate(newStartDate));
-    },
+  const hasHistory = computed<boolean>(() => cycles.value.length > 0);
 
-    async correctEndDate(cycleId: string, newEndDate: DateOnly): Promise<void> {
-      await this.mutateCycle(cycleId, (cycle) => cycle.correctEndDate(newEndDate));
-    },
+  const prediction = computed(() =>
+    hasHistory.value ? CyclePredictionService.predictNextCycle(sortedCycles.value) : null,
+  );
 
-    async deleteCycle(cycleId: string): Promise<void> {
-      await cycleRepository.delete(cycleId);
-      this.cycles = this.cycles.filter((cycle) => cycle.id !== cycleId);
-    },
+  const currentPhase = computed(() => CyclePredictionService.resolveCurrentPhase(sortedCycles.value));
 
-    async clearAll(): Promise<void> {
-      await cycleRepository.clear();
-      this.cycles = [];
-    },
+  const currentCycleDayNumber = computed<number | null>(() =>
+    hasHistory.value ? CyclePredictionService.currentCycleDayNumber(sortedCycles.value) : null,
+  );
 
-    async mutateCycle(cycleId: string, mutate: (cycle: Cycle) => Cycle): Promise<void> {
-      const index = this.cycles.findIndex((cycle) => cycle.id === cycleId);
-      if (index === -1) {
-        throw new Error(`Cycle ${cycleId} not found.`);
-      }
-      const updated = mutate(this.cycles[index]);
-      await cycleRepository.save(updated);
-      this.cycles.splice(index, 1, updated);
-    },
-  },
+  const daysUntilNextPeriod = computed<number | null>(() =>
+    hasHistory.value ? CyclePredictionService.daysUntilNextPeriod(sortedCycles.value) : null,
+  );
+
+  async function initialize(): Promise<void> {
+    isLoading.value = true;
+    try {
+      cycles.value = await cycleRepository.getAll();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function mutateCycle(cycleId: string, mutate: (cycle: Cycle) => Cycle): Promise<void> {
+    const index = cycles.value.findIndex((cycle) => cycle.id === cycleId);
+    if (index === -1) {
+      throw new Error(`Cycle ${cycleId} not found.`);
+    }
+    const updated = mutate(cycles.value[index]);
+    await cycleRepository.save(updated);
+
+    const next = [...cycles.value];
+    next.splice(index, 1, updated);
+    cycles.value = next;
+  }
+
+  async function startPeriod(startDate: DateOnly = DateOnly.today()): Promise<void> {
+    const cycle = Cycle.start({ id: generateId(), startDate });
+    await cycleRepository.save(cycle);
+    cycles.value = [...cycles.value, cycle];
+  }
+
+  async function endPeriod(cycleId: string, endDate: DateOnly = DateOnly.today()): Promise<void> {
+    await mutateCycle(cycleId, (cycle) => cycle.endPeriod(endDate));
+  }
+
+  async function correctStartDate(cycleId: string, newStartDate: DateOnly): Promise<void> {
+    await mutateCycle(cycleId, (cycle) => cycle.correctStartDate(newStartDate));
+  }
+
+  async function correctEndDate(cycleId: string, newEndDate: DateOnly): Promise<void> {
+    await mutateCycle(cycleId, (cycle) => cycle.correctEndDate(newEndDate));
+  }
+
+  async function deleteCycle(cycleId: string): Promise<void> {
+    await cycleRepository.delete(cycleId);
+    cycles.value = cycles.value.filter((cycle) => cycle.id !== cycleId);
+  }
+
+  async function clearAll(): Promise<void> {
+    await cycleRepository.clear();
+    cycles.value = [];
+  }
+
+  return {
+    cycles,
+    isLoading,
+    sortedCycles,
+    currentCycle,
+    hasHistory,
+    prediction,
+    currentPhase,
+    currentCycleDayNumber,
+    daysUntilNextPeriod,
+    initialize,
+    startPeriod,
+    endPeriod,
+    correctStartDate,
+    correctEndDate,
+    deleteCycle,
+    clearAll,
+  };
 });

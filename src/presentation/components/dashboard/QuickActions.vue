@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { shallowRef } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { useCycleStore } from "@application/stores/cycleStore";
 import JalaliDatePicker from "@presentation/components/shared/JalaliDatePicker.vue";
 
 /**
  * QuickActions - "start/end period" primary action plus early/late date
- * correction via the Jalali-native date picker. Any correction immediately
- * rewrites predictions because cycleStore.prediction is a computed getter
- * derived from cycleStore.cycles.
+ * correction via the Jalali-native date picker. `adjustedDate` uses
+ * `shallowRef` (not `ref`) because `DateOnly` is an immutable Value Object
+ * with a private field; `ref()`'s deep `UnwrapRef` type strips that private
+ * brand and breaks assignability back to `DateOnly`. Any correction
+ * immediately rewrites predictions because cycleStore.prediction is a
+ * computed getter derived from cycleStore.cycles.
  */
 const cycleStore = useCycleStore();
-const isAdjustingDate = ref(false);
-const adjustedDate = ref(DateOnly.today());
+const isAdjustingDate = shallowRef(false);
+const adjustedDate = shallowRef(DateOnly.today());
 
 async function handlePrimaryAction(): Promise<void> {
   const current = cycleStore.currentCycle;

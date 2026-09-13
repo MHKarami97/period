@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { useSymptomStore } from "@application/stores/symptomStore";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import SymptomLoggerForm from "@presentation/components/symptoms/SymptomLoggerForm.vue";
 
 const symptomStore = useSymptomStore();
-const selectedDate = ref(DateOnly.today());
+// shallowRef, not ref: DateOnly is an immutable Value Object with a private
+// field, and ref()'s deep UnwrapRef type strips that private brand.
+const selectedDate = shallowRef(DateOnly.today());
 
 onMounted(() => {
   symptomStore.initialize();

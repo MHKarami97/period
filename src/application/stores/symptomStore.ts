@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { shallowRef, computed } from "vue";
 import { Symptom } from "@domain/entities/Symptom";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { Mood } from "@domain/valueObjects/Mood";
@@ -17,63 +18,66 @@ export interface LogSymptomInput {
 
 /**
  * symptomStore - Application Service for the daily Symptom log.
- * One Symptom per calendar day: the id is deterministically derived from
- * the ISO date so `save` naturally upserts (create-or-update) without an
- * extra lookup round-trip.
+ * Implemented as a Pinia setup store with `shallowRef<Symptom[]>` for the
+ * same reason as cycleStore: `Symptom`/`DateOnly` carry private fields, and
+ * Vue's deep `reactive()` (used by options-API stores) strips that private
+ * brand at the type level, breaking assignability back to `Symptom[]`.
+ * `shallowRef` + whole-array reassignment keeps both the domain model's
+ * encapsulation and its exact TypeScript type intact.
  */
-export const useSymptomStore = defineStore("symptom", {
-  state: () => ({
-    symptoms: [] as Symptom[],
-    isLoading: false,
-  }),
-  getters: {
-    byDateMap(state): Map<string, Symptom> {
-      return new Map(state.symptoms.map((symptom) => [symptom.date.toIsoString(), symptom]));
-    },
-  },
-  actions: {
-    async initialize(): Promise<void> {
-      this.isLoading = true;
-      try {
-        this.symptoms = await symptomRepository.getAll();
-      } finally {
-        this.isLoading = false;
-      }
-    },
+export const useSymptomStore = defineStore("symptom", () => {
+  const symptoms = shallowRef<Symptom[]>([]);
+  const isLoading = shallowRef(false);
 
-    getForDate(date: DateOnly): Symptom | null {
-      return this.byDateMap.get(date.toIsoString()) ?? null;
-    },
+  const byDateMap = computed<Map<string, Symptom>>(
+    () => new Map(symptoms.value.map((symptom) => [symptom.date.toIsoString(), symptom])),
+  );
 
-    async logSymptom(input: LogSymptomInput): Promise<void> {
-      const id = `symptom_${input.date.toIsoString()}`;
-      const symptom = Symptom.create({
-        id,
-        date: input.date,
-        mood: input.mood,
-        painLevel: input.painLevel,
-        flowLevel: input.flowLevel,
-        note: input.note,
-      });
+  async function initialize(): Promise<void> {
+    isLoading.value = true;
+    try {
+      symptoms.value = await symptomRepository.getAll();
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-      await symptomRepository.save(symptom);
+  function getForDate(date: DateOnly): Symptom | null {
+    return byDateMap.value.get(date.toIsoString()) ?? null;
+  }
 
-      const index = this.symptoms.findIndex((existing) => existing.id === id);
-      if (index === -1) {
-        this.symptoms.push(symptom);
-      } else {
-        this.symptoms.splice(index, 1, symptom);
-      }
-    },
+  async function logSymptom(input: LogSymptomInput): Promise<void> {
+    const id = `symptom_${input.date.toIsoString()}`;
+    const symptom = Symptom.create({
+      id,
+      date: input.date,
+      mood: input.mood,
+      painLevel: input.painLevel,
+      flowLevel: input.flowLevel,
+      note: input.note,
+    });
 
-    async deleteSymptom(id: string): Promise<void> {
-      await symptomRepository.delete(id);
-      this.symptoms = this.symptoms.filter((symptom) => symptom.id !== id);
-    },
+    await symptomRepository.save(symptom);
 
-    async clearAll(): Promise<void> {
-      await symptomRepository.clear();
-      this.symptoms = [];
-    },
-  },
+    const next = [...symptoms.value];
+    const index = next.findIndex((existing) => existing.id === id);
+    if (index === -1) {
+      next.push(symptom);
+    } else {
+      next.splice(index, 1, symptom);
+    }
+    symptoms.value = next;
+  }
+
+  async function deleteSymptom(id: string): Promise<void> {
+    await symptomRepository.delete(id);
+    symptoms.value = symptoms.value.filter((symptom) => symptom.id !== id);
+  }
+
+  async function clearAll(): Promise<void> {
+    await symptomRepository.clear();
+    symptoms.value = [];
+  }
+
+  return { symptoms, isLoading, byDateMap, initialize, getForDate, logSymptom, deleteSymptom, clearAll };
 });
