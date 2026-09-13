@@ -6,11 +6,12 @@ import { useJalali } from "@presentation/composables/useJalali";
 
 /**
  * JalaliCalendarGrid - month grid distinguishing:
- *  - the CURRENT ongoing period range (solid rose + ring, highest priority)
- *  - past logged/completed period days (solid rose fill)
- *  - predicted next period window (rose outline)
- *  - predicted fertile / ovulation window (lavender fill)
- *  - today (teal ring)
+ *  - CURRENT ongoing period, confirmed days (startDate..today) — solid rose + ring
+ *  - CURRENT ongoing period, expected remaining days (today+1..predicted end) — lighter rose
+ *  - past logged/completed period days — solid rose fill
+ *  - predicted next period window — rose outline
+ *  - predicted fertile / ovulation window — lavender fill
+ *  - today — teal ring
  */
 const cycleStore = useCycleStore();
 const { toJalaliLabel, monthTitle, nextMonth, previousMonth, buildMonthGrid, isSameJalaliMonth } = useJalali();
@@ -20,12 +21,26 @@ const gridDays = computed(() => buildMonthGrid(monthAnchor.value));
 const today = DateOnly.today();
 
 /**
- * The range of the period that is still bleeding right now (if any):
- * from its logged start date up to today. Kept separate from
- * `isLoggedPeriodDay` so it can be styled more prominently on the grid,
- * matching how the fertile window gets its own distinct treatment.
+ * While a period is ongoing, its end date is unknown, so a naive
+ * "startDate..today" range would silently stop highlighting on the
+ * calendar the moment "today" is reached — even though the period is
+ * expected to continue. This computes the expected full range using the
+ * same predicted period length (`predictedPeriodLengthInDays`) the WMA
+ * prediction service already derives from historical cycles, so days
+ * AFTER today that are still part of the expected period are highlighted
+ * too (with a lighter, "not yet confirmed" style).
  */
-function isCurrentOngoingPeriodDay(day: DateOnly): boolean {
+const ongoingPeriodExpectedEnd = computed<DateOnly | null>(() => {
+  const current = cycleStore.currentCycle;
+  const prediction = cycleStore.prediction;
+  if (!current || !current.isOngoing || !prediction) {
+    return null;
+  }
+  const predictedEnd = current.startDate.addDays(prediction.predictedPeriodLengthInDays - 1);
+  return predictedEnd.isBefore(today) ? today : predictedEnd;
+});
+
+function isConfirmedOngoingPeriodDay(day: DateOnly): boolean {
   const current = cycleStore.currentCycle;
   if (!current || !current.isOngoing) {
     return false;
@@ -33,10 +48,19 @@ function isCurrentOngoingPeriodDay(day: DateOnly): boolean {
   return day.isBetweenInclusive(current.startDate, today);
 }
 
+function isExpectedRemainingOngoingPeriodDay(day: DateOnly): boolean {
+  const current = cycleStore.currentCycle;
+  const expectedEnd = ongoingPeriodExpectedEnd.value;
+  if (!current || !current.isOngoing || !expectedEnd) {
+    return false;
+  }
+  return day.isAfter(today) && !day.isAfter(expectedEnd);
+}
+
 function isLoggedPeriodDay(day: DateOnly): boolean {
   return cycleStore.sortedCycles.some((cycle) => {
     if (cycle.isOngoing) {
-      return false; // already covered by isCurrentOngoingPeriodDay with its own style
+      return false; // covered separately by the two ongoing-period checks above
     }
     return day.isBetweenInclusive(cycle.startDate, cycle.endDate as DateOnly);
   });
@@ -63,8 +87,10 @@ function dayClasses(day: DateOnly): string {
     classes.push("text-slate-700 dark:text-slate-200");
   }
 
-  if (isCurrentOngoingPeriodDay(day)) {
+  if (isConfirmedOngoingPeriodDay(day)) {
     classes.push("bg-rose-600 text-white ring-2 ring-rose-300 font-semibold dark:ring-rose-500/60");
+  } else if (isExpectedRemainingOngoingPeriodDay(day)) {
+    classes.push("bg-rose-200 text-rose-700 ring-1 ring-rose-400 dark:bg-rose-900/40 dark:text-rose-200 dark:ring-rose-500/50");
   } else if (isLoggedPeriodDay(day)) {
     classes.push("bg-rose-500/80 text-white");
   } else if (isPredictedPeriodDay(day)) {
@@ -96,7 +122,8 @@ function dayClasses(day: DateOnly): string {
     </div>
 
     <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
-      <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600 ring-2 ring-rose-300"></span> بازه فعلی پریود</span>
+      <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600 ring-2 ring-rose-300"></span> بازه فعلی پریود (تاکنون)</span>
+      <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-200 ring-1 ring-rose-400"></span> ادامه احتمالی پریود فعلی</span>
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-500/80"></span> پریود ثبت‌شده (قبلی)</span>
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full ring-1 ring-rose-400/70"></span> پریود پیش‌بینی‌شده</span>
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-violet-400/40"></span> پنجره باروری</span>
