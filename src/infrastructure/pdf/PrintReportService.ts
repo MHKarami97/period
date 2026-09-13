@@ -13,17 +13,6 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/**
- * PrintReportService - Infrastructure adapter that renders the 6-month
- * summary as a Persian, right-to-left HTML document and hands it to the
- * BROWSER's own print engine for "Save as PDF". This deliberately
- * replaces a jsPDF + manual glyph-shaping approach: real browsers already
- * implement correct Arabic/Persian contextual shaping and bidi text
- * layout natively, which is both more correct and has zero extra
- * dependencies to maintain. Uses the same self-hosted Vazirmatn .woff2
- * files already shipped for the web UI — no separate TTF conversion
- * needed.
- */
 export class PrintReportService {
   public static openSixMonthReport(
     cycles: readonly Cycle[],
