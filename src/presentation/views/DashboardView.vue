@@ -80,21 +80,20 @@ watch(
         <p v-if="hasUsableScope" class="max-w-xs text-xs text-slate-500 dark:text-slate-400">
           {{
             appModeStore.isPartnerMode
-              ? "به‌محض ثبت اولین پریود، نمودار و پیش‌بینی‌ها اینجا نمایش داده می‌شود."
+              ? "با دکمه «ثبت شروع پریود» می‌توانید تاریخ پریود همین فرد را ثبت کنید."
               : "با دکمه «ثبت شروع پریود» شروع کنید تا نمودار چرخه و پیش‌بینی‌ها فعال شود."
           }}
         </p>
       </section>
 
-      <section v-if="!appModeStore.isPartnerMode" class="lg:col-span-5">
+      <section v-if="hasUsableScope" class="lg:col-span-5">
         <QuickActions />
       </section>
-
       <section
         v-else
         class="flex items-center rounded-2xl bg-white p-6 text-sm text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-800 lg:col-span-5"
       >
-        نمای شریک فقط‌خواندنی است؛ ثبت پریود و علائم فقط در حالت «ردیابی برای خود» در دسترس است.
+        برای ثبت پریود، ابتدا یک فرد را از بالا اضافه یا انتخاب کنید.
       </section>
 
       <section v-if="hasUsableScope && cycleStore.hasHistory" class="lg:col-span-12">
