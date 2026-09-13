@@ -57,8 +57,13 @@ export const useCycleStore = defineStore("cycle", () => {
     hasHistory.value ? CyclePredictionService.daysUntilNextPeriod(sortedCycles.value) : null,
   );
 
-  async function initialize(): Promise<void> {
+    async function initialize(): Promise<void> {
     const profileStore = useProfileStore();
+    if (!profileStore.activeProfileId) {
+      cycles.value = [];
+      return;
+    }
+
     isLoading.value = true;
     try {
       cycles.value = await cycleRepository.getAllForProfile(profileStore.activeProfileId);
@@ -69,6 +74,10 @@ export const useCycleStore = defineStore("cycle", () => {
 
   async function mutateCycle(cycleId: string, mutate: (cycle: Cycle) => Cycle): Promise<void> {
     const profileStore = useProfileStore();
+    if (!profileStore.activeProfileId) {
+      throw new Error("No active profile selected.");
+    }
+
     const index = cycles.value.findIndex((cycle) => cycle.id === cycleId);
     if (index === -1) {
       throw new Error(`Cycle ${cycleId} not found.`);
@@ -83,6 +92,10 @@ export const useCycleStore = defineStore("cycle", () => {
 
   async function startPeriod(startDate: DateOnly = DateOnly.today()): Promise<void> {
     const profileStore = useProfileStore();
+    if (!profileStore.activeProfileId) {
+      throw new Error("No active profile selected.");
+    }
+
     const cycle = Cycle.start({ id: generateId(), startDate });
     await cycleRepository.save(cycle, profileStore.activeProfileId);
     cycles.value = [...cycles.value, cycle];
