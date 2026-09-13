@@ -1,0 +1,64 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { DateOnly } from "@domain/valueObjects/DateOnly";
+import { useCycleStore } from "@application/stores/cycleStore";
+
+/**
+ * QuickActions - "start/end period" primary action plus early/late date
+ * correction. Any correction immediately rewrites predictions because
+ * cycleStore.prediction is a computed getter derived from cycleStore.cycles.
+ */
+const cycleStore = useCycleStore();
+const isAdjustingDate = ref(false);
+const adjustedDateInput = ref(DateOnly.today().toIsoString());
+
+async function handlePrimaryAction(): Promise<void> {
+  const current = cycleStore.currentCycle;
+  if (!current || !current.isOngoing) {
+    await cycleStore.startPeriod(DateOnly.today());
+  } else {
+    await cycleStore.endPeriod(current.id, DateOnly.today());
+  }
+}
+
+async function applyDateCorrection(): Promise<void> {
+  const current = cycleStore.currentCycle;
+  if (!current) {
+    return;
+  }
+  const newDate = DateOnly.fromIsoString(adjustedDateInput.value);
+  if (current.isOngoing) {
+    await cycleStore.correctStartDate(current.id, newDate);
+  } else {
+    await cycleStore.correctEndDate(current.id, newDate);
+  }
+  isAdjustingDate.value = false;
+}
+</script>
+
+<template>
+  <div class="flex flex-col gap-3 rounded-2xl bg-slate-900 p-4 shadow-sm ring-1 ring-slate-800">
+    <button
+      type="button"
+      class="w-full rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99]"
+      @click="handlePrimaryAction"
+    >
+      {{ cycleStore.currentCycle?.isOngoing ? "ثبت پایان پریود" : "ثبت شروع پریود" }}
+    </button>
+
+    <button
+      type="button"
+      class="text-sm text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
+      @click="isAdjustingDate = !isAdjustingDate"
+    >
+      ویرایش تاریخ (زودتر/دیرتر شروع/پایان شده)
+    </button>
+
+    <div v-if="isAdjustingDate" class="flex items-center gap-2">
+      <input v-model="adjustedDateInput" type="date" class="flex-1 rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-100" />
+      <button type="button" class="rounded-lg bg-teal-500/90 px-3 py-2 text-sm font-medium text-white hover:bg-teal-500" @click="applyDateCorrection">
+        اعمال
+      </button>
+    </div>
+  </div>
+</template>
