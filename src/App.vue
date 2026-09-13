@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useThemeSync } from "@presentation/composables/useThemeSync";
 import UpdatePrompt from "@presentation/components/shared/UpdatePrompt.vue";
+import ToastHost from "@presentation/components/shared/ToastHost.vue";
 
 /**
  * Root shell: the router owns layout composition (onboarding vs. the full
@@ -14,4 +15,5 @@ useThemeSync();
 <template>
   <RouterView />
   <UpdatePrompt />
+   <ToastHost />
 </template>

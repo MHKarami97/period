@@ -4,6 +4,7 @@ import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { Mood } from "@domain/valueObjects/Mood";
 import { FlowLevel } from "@domain/valueObjects/FlowLevel";
 import { useSymptomStore } from "@application/stores/symptomStore";
+import { useToast } from "@presentation/composables/useToast";
 
 const props = defineProps<{ date: DateOnly }>();
 const symptomStore = useSymptomStore();
@@ -43,6 +44,8 @@ function loadExisting(): void {
 
 watch(() => props.date, loadExisting, { immediate: true });
 
+const { showToast } = useToast();
+
 async function save(): Promise<void> {
   saveError.value = null;
   isSaving.value = true;
@@ -54,6 +57,7 @@ async function save(): Promise<void> {
       flowLevel: flowLevel.value,
       note: note.value || null,
     });
+    showToast("علائم با موفقیت ذخیره شد ✅");
   } catch (error) {
     saveError.value =
       error instanceof Error && error.message === "No active profile selected."
