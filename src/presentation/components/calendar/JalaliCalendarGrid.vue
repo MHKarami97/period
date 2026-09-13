@@ -41,17 +41,17 @@ function dayClasses(day: DateOnly): string {
   const classes: string[] = ["relative flex h-10 items-center justify-center rounded-lg text-sm"];
 
   if (!isSameJalaliMonth(day, monthAnchor.value)) {
-    classes.push("text-slate-600");
+    classes.push("text-slate-300 dark:text-slate-600");
   } else {
-    classes.push("text-slate-200");
+    classes.push("text-slate-700 dark:text-slate-200");
   }
 
   if (isLoggedPeriodDay(day)) {
     classes.push("bg-rose-500/80 text-white");
   } else if (isPredictedPeriodDay(day)) {
-    classes.push("ring-1 ring-rose-400/70 text-rose-300");
+    classes.push("ring-1 ring-rose-400/70 text-rose-500 dark:text-rose-300");
   } else if (isFertileWindowDay(day)) {
-    classes.push("bg-violet-400/20 text-violet-200");
+    classes.push("bg-violet-400/20 text-violet-600 dark:text-violet-200");
   }
 
   if (day.isSameDay(today)) {
@@ -63,11 +63,11 @@ function dayClasses(day: DateOnly): string {
 </script>
 
 <template>
-  <div class="rounded-2xl bg-slate-900 p-4 shadow-sm ring-1 ring-slate-800">
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <div class="mb-3 flex items-center justify-between">
-      <button type="button" class="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-800" @click="monthAnchor = previousMonth(monthAnchor)">‹</button>
-      <span class="font-medium text-slate-100">{{ monthTitle(monthAnchor) }}</span>
-      <button type="button" class="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-800" @click="monthAnchor = nextMonth(monthAnchor)">›</button>
+      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = previousMonth(monthAnchor)">‹</button>
+      <span class="font-medium text-slate-900 dark:text-slate-100">{{ monthTitle(monthAnchor) }}</span>
+      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = nextMonth(monthAnchor)">›</button>
     </div>
 
     <div class="grid grid-cols-7 gap-1">
@@ -76,7 +76,7 @@ function dayClasses(day: DateOnly): string {
       </div>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-400">
+    <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-500/80"></span> پریود ثبت‌شده</span>
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full ring-1 ring-rose-400/70"></span> پریود پیش‌بینی‌شده</span>
       <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-violet-400/40"></span> پنجره باروری</span>

@@ -52,16 +52,16 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex flex-col gap-5 rounded-2xl bg-slate-900 p-5 shadow-sm ring-1 ring-slate-800">
+  <div class="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <div>
-      <p class="mb-2 text-sm text-slate-400">خلق و خو</p>
+      <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">خلق و خو</p>
       <div class="flex flex-wrap gap-2">
         <button
           v-for="option in MOOD_OPTIONS"
           :key="option.value"
           type="button"
           class="flex flex-col items-center rounded-xl px-3 py-2 text-xs transition"
-          :class="selectedMood === option.value ? 'bg-teal-500/20 ring-1 ring-teal-400 text-teal-200' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+          :class="selectedMood === option.value ? 'bg-teal-500/10 ring-1 ring-teal-500 text-teal-600 dark:bg-teal-500/20 dark:ring-teal-400 dark:text-teal-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
           @click="selectedMood = option.value"
         >
           <span class="text-lg">{{ option.emoji }}</span>
@@ -71,20 +71,20 @@ async function save(): Promise<void> {
     </div>
 
     <div>
-      <p class="mb-2 text-sm text-slate-400">سطح درد: {{ painLevel }} / 4</p>
+      <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">سطح درد: {{ painLevel }} / 4</p>
       <input v-model.number="painLevel" type="range" min="0" max="4" step="1" class="w-full accent-rose-400" />
     </div>
 
     <div>
-      <p class="mb-2 text-sm text-slate-400">میزان خونریزی</p>
-      <select v-model="flowLevel" class="w-full rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-100">
+      <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">میزان خونریزی</p>
+      <select v-model="flowLevel" class="w-full rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100">
         <option v-for="option in FLOW_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
       </select>
     </div>
 
     <div>
-      <p class="mb-2 text-sm text-slate-400">یادداشت (اختیاری)</p>
-      <textarea v-model="note" rows="2" class="w-full resize-none rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-100"></textarea>
+      <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">یادداشت (اختیاری)</p>
+      <textarea v-model="note" rows="2" class="w-full resize-none rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"></textarea>
     </div>
 
     <button type="button" class="rounded-xl bg-teal-500/90 px-4 py-3 font-medium text-white hover:bg-teal-500" @click="save">

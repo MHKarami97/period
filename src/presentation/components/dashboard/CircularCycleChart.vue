@@ -24,7 +24,7 @@ const dashOffset = computed(() => CIRCUMFERENCE * (1 - props.progressRatio));
 <template>
   <div class="relative flex aspect-square w-full max-w-xs items-center justify-center sm:max-w-sm">
     <svg viewBox="0 0 200 200" class="h-full w-full -rotate-90">
-      <circle cx="100" cy="100" :r="RADIUS" fill="none" stroke-width="14" class="stroke-slate-800" />
+      <circle cx="100" cy="100" :r="RADIUS" fill="none" stroke-width="14" class="stroke-slate-200 dark:stroke-slate-800" />
       <circle
         cx="100"
         cy="100"
@@ -39,10 +39,10 @@ const dashOffset = computed(() => CIRCUMFERENCE * (1 - props.progressRatio));
       />
     </svg>
     <div class="absolute flex flex-col items-center gap-1 text-center">
-      <span class="text-4xl font-bold text-slate-50">{{ currentDay }}</span>
-      <span class="text-xs text-slate-400">از {{ cycleLength }} روز چرخه</span>
-      <span class="mt-2 rounded-full bg-slate-800 px-3 py-1 text-sm" :class="accentClass">{{ phaseLabel }}</span>
-      <span v-if="daysUntilNextPeriod !== null" class="mt-1 text-xs text-slate-400">
+      <span class="text-4xl font-bold text-slate-900 dark:text-slate-50">{{ currentDay }}</span>
+      <span class="text-xs text-slate-500 dark:text-slate-400">از {{ cycleLength }} روز چرخه</span>
+      <span class="mt-2 rounded-full bg-slate-100 px-3 py-1 text-sm dark:bg-slate-800" :class="accentClass">{{ phaseLabel }}</span>
+      <span v-if="daysUntilNextPeriod !== null" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
         {{ daysUntilNextPeriod > 0 ? `${daysUntilNextPeriod} روز تا پریود بعدی` : "پریود امروز پیش‌بینی شده" }}
       </span>
     </div>

@@ -41,7 +41,7 @@ async function applyDateCorrection(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 rounded-2xl bg-slate-900 p-4 shadow-sm ring-1 ring-slate-800">
+  <div class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <button
       type="button"
       class="w-full rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99]"
@@ -52,7 +52,7 @@ async function applyDateCorrection(): Promise<void> {
 
     <button
       type="button"
-      class="text-sm text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
+      class="text-sm text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
       @click="isAdjustingDate = !isAdjustingDate"
     >
       ویرایش تاریخ (زودتر/دیرتر شروع/پایان شده)
