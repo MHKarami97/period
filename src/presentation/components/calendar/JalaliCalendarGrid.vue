@@ -110,9 +110,9 @@ function dayClasses(day: DateOnly): string {
 <template>
   <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <div class="mb-3 flex items-center justify-between">
-      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = previousMonth(monthAnchor)">›</button>
+      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = previousMonth(monthAnchor)">‹</button>
       <span class="font-medium text-slate-900 dark:text-slate-100">{{ monthTitle(monthAnchor) }}</span>
-      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = nextMonth(monthAnchor)">‹</button>
+      <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = nextMonth(monthAnchor)">›</button>
     </div>
 
     <div class="grid grid-cols-7 gap-1">
