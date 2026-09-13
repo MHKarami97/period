@@ -5,6 +5,7 @@ import { Mood } from "@domain/valueObjects/Mood";
 import { FlowLevel } from "@domain/valueObjects/FlowLevel";
 import { useSymptomStore } from "@application/stores/symptomStore";
 import { useToast } from "@presentation/composables/useToast";
+import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
 
 const props = defineProps<{ date: DateOnly }>();
 const symptomStore = useSymptomStore();
@@ -34,6 +35,8 @@ const note = ref("");
 const isSaving = ref(false);
 const saveError = ref<string | null>(null);
 
+const isOverwriteConfirmOpen = ref(false);
+
 function loadExisting(): void {
   const existing = symptomStore.getForDate(props.date);
   selectedMood.value = existing?.mood ?? null;
@@ -45,6 +48,15 @@ function loadExisting(): void {
 watch(() => props.date, loadExisting, { immediate: true });
 
 const { showToast } = useToast();
+
+function requestSave(): void {
+  const existing = symptomStore.getForDate(props.date);
+  if (existing) {
+    isOverwriteConfirmOpen.value = true;
+  } else {
+    save();
+  }
+}
 
 async function save(): Promise<void> {
   saveError.value = null;
@@ -105,9 +117,17 @@ async function save(): Promise<void> {
       <textarea v-model="note" rows="2" class="w-full resize-none rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"></textarea>
     </div>
 
-    <button type="button" class="rounded-xl bg-teal-500/90 px-4 py-3 font-medium text-white hover:bg-teal-500 disabled:opacity-60" :disabled="isSaving" @click="save">
-  {{ isSaving ? "در حال ذخیره..." : "ذخیره علائم امروز" }}
-</button>
-<p v-if="saveError" class="text-xs text-rose-500 dark:text-rose-300">{{ saveError }}</p>
+    <button type="button" class="rounded-xl bg-teal-500/90 px-4 py-3 font-medium text-white hover:bg-teal-500 disabled:opacity-60" :disabled="isSaving" @click="requestSave">
+      {{ isSaving ? "در حال ذخیره..." : "ذخیره علائم امروز" }}
+    </button>
+    <p v-if="saveError" class="text-xs text-rose-500 dark:text-rose-300">{{ saveError }}</p>
+
+    <ConfirmDialog
+      v-model="isOverwriteConfirmOpen"
+      title="بازنویسی علائم این روز؟"
+      message="برای این تاریخ قبلاً علائمی ثبت شده است. با ادامه، مقادیر قبلی با مقادیر جدید جایگزین می‌شوند."
+      confirm-label="بله، بازنویسی کن"
+      @confirm="save"
+    />
   </div>
 </template>

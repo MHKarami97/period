@@ -39,14 +39,17 @@ const sortedSymptoms = computed(() =>
     </p>
 
     <ul v-else class="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-      <li v-for="symptom in sortedSymptoms" :key="symptom.id" class="flex items-center justify-between gap-3 py-2.5 text-sm">
-        <span class="text-slate-500 dark:text-slate-400">{{ toJalaliLabel(symptom.date) }}</span>
-        <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200">
-          <span v-if="symptom.mood">{{ MOOD_EMOJI[symptom.mood] }}</span>
-          <span>درد {{ symptom.painLevel }}/4</span>
-          <span class="text-xs text-slate-500 dark:text-slate-400">{{ FLOW_LABEL[symptom.flowLevel] }}</span>
-        </span>
-      </li>
+<li v-for="symptom in sortedSymptoms" :key="symptom.id" class="flex flex-col gap-1 py-2.5 text-sm">
+  <div class="flex items-center justify-between gap-3">
+    <span class="text-slate-500 dark:text-slate-400">{{ toJalaliLabel(symptom.date) }}</span>
+    <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+      <span v-if="symptom.mood">{{ MOOD_EMOJI[symptom.mood] }}</span>
+      <span>درد {{ symptom.painLevel }}/۴</span>
+      <span class="text-xs text-slate-500 dark:text-slate-400">{{ FLOW_LABEL[symptom.flowLevel] }}</span>
+    </span>
+  </div>
+  <p v-if="symptom.note" class="text-xs text-slate-500 dark:text-slate-400">{{ symptom.note }}</p>
+</li>
     </ul>
   </div>
 </template>

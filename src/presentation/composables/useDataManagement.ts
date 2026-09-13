@@ -1,7 +1,7 @@
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useSymptomStore } from "@application/stores/symptomStore";
 import { useProfileStore } from "@application/stores/profileStore";
-import { PdfReportService } from "@infrastructure/pdf/PdfReportService";
+import { PrintReportService } from "@infrastructure/pdf/PrintReportService";
 import { JsonBackupService } from "@infrastructure/backup/JsonBackupService";
 
 /**
@@ -27,7 +27,7 @@ export function useDataManagement() {
   }
 
   function downloadSixMonthPdf(): void {
-    PdfReportService.download(cycleStore.sortedCycles, symptomStore.symptoms, profileStore.activeProfile?.name);
+    PrintReportService.openSixMonthReport(cycleStore.sortedCycles, symptomStore.symptoms, profileStore.activeProfile?.name);
   }
 
   return { exportJson, importJson, downloadSixMonthPdf };
