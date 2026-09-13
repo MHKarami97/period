@@ -30,8 +30,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        // Without this, a waiting worker can be starved by open tabs and
-        // "needRefresh" may never resolve after clicking update.
         clientsClaim: true,
         skipWaiting: false,
       },
