@@ -4,35 +4,37 @@ import { Profile } from "@domain/entities/Profile";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { DexieProfileRepository } from "@infrastructure/repositories/DexieProfileRepository";
 import { DEFAULT_PROFILE_ID } from "@infrastructure/database/AppDatabase";
+import { useAppModeStore } from "./appModeStore";
 
 const profileRepository = new DexieProfileRepository();
 const ACTIVE_PROFILE_STORAGE_KEY = "period-tracker:activeProfileId";
 
-/**
- * profileStore - Application Service for multi-person tracking. A single
- * device (typically a partner's phone) can hold several Profiles (wife,
- * sister, daughter, ...); every Cycle/Symptom is scoped to whichever
- * profile is currently active. Self-tracking mode simply never exposes UI
- * to switch profiles, so it transparently keeps using the one default
- * profile created on first launch.
- */
 export const useProfileStore = defineStore("profile", () => {
   const profiles = shallowRef<Profile[]>([]);
-  const activeProfileId = ref<string>(localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY) ?? DEFAULT_PROFILE_ID);
-
-  const activeProfile = computed<Profile | null>(
-    () => profiles.value.find((profile) => profile.id === activeProfileId.value) ?? null,
+  const activeProfileId = ref<string | null>(
+    localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY),
   );
 
-  function persistActiveProfileId(id: string): void {
+  const activeProfile = computed<Profile | null>(
+    () =>
+      profiles.value.find((profile) => profile.id === activeProfileId.value) ??
+      null,
+  );
+
+  function persistActiveProfileId(id: string | null): void {
     activeProfileId.value = id;
-    localStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, id);
+    if (id) {
+      localStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, id);
+    } else {
+      localStorage.removeItem(ACTIVE_PROFILE_STORAGE_KEY);
+    }
   }
 
   async function initialize(): Promise<void> {
+    const appModeStore = useAppModeStore();
     let allProfiles = await profileRepository.getAll();
 
-    if (allProfiles.length === 0) {
+    if (allProfiles.length === 0 && appModeStore.isSelfMode) {
       const defaultProfile = Profile.reconstitute({
         id: DEFAULT_PROFILE_ID,
         name: "من",
@@ -43,6 +45,11 @@ export const useProfileStore = defineStore("profile", () => {
     }
 
     profiles.value = allProfiles;
+
+    if (allProfiles.length === 0) {
+      persistActiveProfileId(null);
+      return;
+    }
 
     if (!allProfiles.some((profile) => profile.id === activeProfileId.value)) {
       persistActiveProfileId(allProfiles[0].id);
@@ -75,20 +82,23 @@ export const useProfileStore = defineStore("profile", () => {
   }
 
   async function removeProfile(id: string): Promise<void> {
-    if (profiles.value.length <= 1) {
-      return; // always keep at least one profile
+    const appModeStore = useAppModeStore();
+    if (appModeStore.isSelfMode) {
+      return;
     }
+
     await profileRepository.delete(id);
     profiles.value = profiles.value.filter((profile) => profile.id !== id);
+
     if (activeProfileId.value === id) {
-      persistActiveProfileId(profiles.value[0].id);
+      const fallback = profiles.value[0]?.id ?? null;
+      persistActiveProfileId(fallback);
     }
   }
 
   function reset(): void {
     profiles.value = [];
-    localStorage.removeItem(ACTIVE_PROFILE_STORAGE_KEY);
-    activeProfileId.value = DEFAULT_PROFILE_ID;
+    persistActiveProfileId(null);
   }
 
   return {
