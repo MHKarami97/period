@@ -7,17 +7,12 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      // "prompt" (not "autoUpdate"): a new service worker installs in the
-      // background but waits for the user's explicit confirmation via
-      // UpdatePrompt.vue before it takes over — required so the "new
-      // version available" message can actually be shown instead of the
-      // app silently swapping itself out from under the user.
       registerType: "prompt",
-      includeAssets: ["icons/*.png", "fonts/**/*"],
+      includeAssets: ["icons/*.png"],
       manifest: {
-        name: "ردیاب عادت‌ماهیانه",
-        short_name: "ردیاب عادت‌ماهیانه",
-        description: "ردیاب عادت‌ماهیانه",
+        name: "ماهک | ردیاب عادت‌ماهیانه",
+        short_name: "ماهک | ردیاب عادت‌ماهیانه",
+        description: "با ماهک به راحتی عادت ماهیانه خود را ردیابی کنید",
         theme_color: "#f8fafc",
         background_color: "#f8fafc",
         display: "standalone",
