@@ -17,13 +17,6 @@ export interface LogSymptomInput {
   note?: string | null;
 }
 
-/**
- * symptomStore - Application Service for the daily Symptom log, scoped to
- * whichever Profile is currently active (see profileStore), the same way
- * cycleStore is. One Symptom per (profile, calendar day): the id is
- * deterministically derived from the profile id + ISO date so `save`
- * naturally upserts without an extra lookup round-trip.
- */
 export const useSymptomStore = defineStore("symptom", () => {
   const symptoms = shallowRef<Symptom[]>([]);
   const isLoading = shallowRef(false);
@@ -34,6 +27,11 @@ export const useSymptomStore = defineStore("symptom", () => {
 
   async function initialize(): Promise<void> {
     const profileStore = useProfileStore();
+    if (!profileStore.activeProfileId) {
+      symptoms.value = [];
+      return;
+    }
+
     isLoading.value = true;
     try {
       symptoms.value = await symptomRepository.getAllForProfile(profileStore.activeProfileId);
@@ -48,6 +46,10 @@ export const useSymptomStore = defineStore("symptom", () => {
 
   async function logSymptom(input: LogSymptomInput): Promise<void> {
     const profileStore = useProfileStore();
+    if (!profileStore.activeProfileId) {
+      throw new Error("No active profile selected.");
+    }
+
     const id = `symptom_${profileStore.activeProfileId}_${input.date.toIsoString()}`;
     const symptom = Symptom.create({
       id,

@@ -17,7 +17,7 @@ const symptomStore = useSymptomStore();
 
 const isAdding = ref(false);
 const newProfileName = ref("");
-const NAME_SUGGESTIONS = ["همسر", "خواهر", "دختر", "مادر"];
+const NAME_SUGGESTIONS = ["همسر", "شریک", "خواهر", "دختر", "مادر"];
 
 /**
  * Switching the active profile changes what cycleStore/symptomStore should
@@ -46,57 +46,80 @@ async function addProfile(name: string): Promise<void> {
   newProfileName.value = "";
   isAdding.value = false;
 }
+
+function cancelAdding(): void {
+  newProfileName.value = "";
+  isAdding.value = false;
+}
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-    <button
-      v-for="profile in profileStore.profiles"
-      :key="profile.id"
-      type="button"
-      class="rounded-full px-3 py-1.5 text-sm"
-      :class="
-        profile.id === profileStore.activeProfileId
-          ? 'bg-teal-500/90 text-white'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-      "
-      @click="selectProfile(profile.id)"
-    >
-      {{ profile.name }}
-    </button>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <button
+        v-for="profile in profileStore.profiles"
+        :key="profile.id"
+        type="button"
+        class="rounded-full px-3 py-1.5 text-sm"
+        :class="
+          profile.id === profileStore.activeProfileId
+            ? 'bg-teal-500/90 text-white'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+        "
+        @click="selectProfile(profile.id)"
+      >
+        {{ profile.name }}
+      </button>
 
-    <button
-      v-if="!isAdding"
-      type="button"
-      class="rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-      @click="isAdding = true"
-    >
-      + افزودن فرد
-    </button>
+      <button
+        type="button"
+        class="rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        @click="isAdding = !isAdding"
+      >
+        + افزودن فرد
+      </button>
+    </div>
 
-    <div v-else class="flex flex-wrap items-center gap-2">
+    <div
+      v-if="isAdding"
+      class="flex flex-col gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+    >
       <input
         v-model="newProfileName"
         type="text"
         placeholder="مثلاً همسر"
-        class="rounded-lg bg-slate-100 px-3 py-1.5 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+        class="w-full rounded-lg bg-slate-100 px-3 py-1.5 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
         @keyup.enter="addProfile(newProfileName)"
       />
-      <button
-        v-for="suggestion in NAME_SUGGESTIONS"
-        :key="suggestion"
-        type="button"
-        class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-        @click="addProfile(suggestion)"
-      >
-        {{ suggestion }}
-      </button>
-      <button type="button" class="rounded-full bg-teal-500/90 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-500" @click="addProfile(newProfileName)">
-        افزودن
-      </button>
-      <button type="button" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="isAdding = false">
-        انصراف
-      </button>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="suggestion in NAME_SUGGESTIONS"
+          :key="suggestion"
+          type="button"
+          class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          @click="addProfile(suggestion)"
+        >
+          {{ suggestion }}
+        </button>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          class="rounded-lg px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          @click="cancelAdding"
+        >
+          انصراف
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-teal-500/90 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-500"
+          @click="addProfile(newProfileName)"
+        >
+          افزودن
+        </button>
+      </div>
     </div>
   </div>
 </template>
