@@ -30,6 +30,9 @@ const painLevel = ref(0);
 const flowLevel = ref<FlowLevel>(FlowLevel.None);
 const note = ref("");
 
+const isSaving = ref(false);
+const saveError = ref<string | null>(null);
+
 function loadExisting(): void {
   const existing = symptomStore.getForDate(props.date);
   selectedMood.value = existing?.mood ?? null;
@@ -41,13 +44,24 @@ function loadExisting(): void {
 watch(() => props.date, loadExisting, { immediate: true });
 
 async function save(): Promise<void> {
-  await symptomStore.logSymptom({
-    date: props.date,
-    mood: selectedMood.value,
-    painLevel: painLevel.value,
-    flowLevel: flowLevel.value,
-    note: note.value || null,
-  });
+  saveError.value = null;
+  isSaving.value = true;
+  try {
+    await symptomStore.logSymptom({
+      date: props.date,
+      mood: selectedMood.value,
+      painLevel: painLevel.value,
+      flowLevel: flowLevel.value,
+      note: note.value || null,
+    });
+  } catch (error) {
+    saveError.value =
+      error instanceof Error && error.message === "No active profile selected."
+        ? "قبل از ثبت علائم، ابتدا یک نفر را در بالای داشبورد انتخاب کنید."
+        : "ذخیره علائم با خطا مواجه شد. دوباره تلاش کنید.";
+  } finally {
+    isSaving.value = false;
+  }
 }
 </script>
 
