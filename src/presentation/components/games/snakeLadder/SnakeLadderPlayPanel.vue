@@ -1,0 +1,99 @@
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { useSnakeLadderStore } from "@application/stores/snakeLadderStore";
+import { PlayerRole, type TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
+import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
+import GameModal from "@presentation/components/games/GameModal.vue";
+import SnakeLadderBoardGrid from "./SnakeLadderBoardGrid.vue";
+import type { BoardToken } from "./boardToken";
+
+const ROLE_DOT_CLASS: Record<PlayerRole, string> = {
+  [PlayerRole.Woman]: "bg-fuchsia-500",
+  [PlayerRole.Man]: "bg-sky-500",
+};
+
+const store = useSnakeLadderStore();
+const isQuitConfirmOpen = ref(false);
+
+const tokens = computed<BoardToken[]>(() =>
+  store.players.map((player) => ({ role: player.role, position: player.position })),
+);
+
+const lastTurnDescription = computed(() => (store.lastTurn ? describeTurn(store.lastTurn) : null));
+
+function describeTurn(turn: TurnResult): string {
+  const base = `${turn.playerName}: تاس ${turn.dice} → خانه ${turn.landedCell}`;
+  if (!turn.jump) return base;
+  return turn.jump.kind === "snake"
+    ? `${base} — 🐍 مار! برگشت به خانه ${turn.jump.to}`
+    : `${base} — 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
+}
+</script>
+
+<template>
+  <div class="flex flex-col gap-4">
+    <section class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div v-if="store.currentPlayer" class="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+          <span class="h-3 w-3 rounded-full" :class="ROLE_DOT_CLASS[store.currentPlayer.role]" />
+          نوبت {{ store.currentPlayer.name }}
+        </div>
+        <div class="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <span v-for="player in store.players" :key="player.role" class="flex items-center gap-1">
+            <span class="h-2 w-2 rounded-full" :class="ROLE_DOT_CLASS[player.role]" />
+            {{ player.name }}: {{ player.position || "شروع" }}
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="w-full rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="!store.canRoll"
+        @click="store.rollDice()"
+      >
+        🎲 انداختن تاس
+      </button>
+
+      <p v-if="lastTurnDescription" class="text-sm text-slate-600 dark:text-slate-300" aria-live="polite">{{ lastTurnDescription }}</p>
+    </section>
+
+    <SnakeLadderBoardGrid :board="store.board" :tokens="tokens" />
+
+    <button
+      type="button"
+      class="mx-auto rounded-lg px-3 py-2 text-xs text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800"
+      @click="isQuitConfirmOpen = true"
+    >
+      خروج از بازی و بازگشت به تنظیمات
+    </button>
+
+    <ConfirmDialog
+      v-model="isQuitConfirmOpen"
+      title="خروج از بازی؟"
+      message="پیشرفت بازی فعلی از بین می‌رود، ولی تنظیمات تخته حفظ می‌شود."
+      confirm-label="خروج"
+      @confirm="store.quitGame()"
+    />
+
+    <GameModal
+      v-if="store.pendingChallenge"
+      :title="`🔥 چالش ${store.pendingChallenge.playerName}`"
+      :message="store.pendingChallenge.challengeText ?? ''"
+      primary-label="انجام شد"
+      secondary-label="رد کردن"
+      @primary="store.acknowledgeChallenge()"
+      @secondary="store.acknowledgeChallenge()"
+    />
+
+    <GameModal
+      v-if="store.winner"
+      :title="`🏆 ${store.winner.name} برنده شد`"
+      message="به خانه ۱۰۰ رسید. برنده‌ی واقعی هر دوی شما هستید؛ بازی دوباره؟"
+      primary-label="بازی دوباره"
+      secondary-label="بازگشت به تنظیمات"
+      @primary="store.startGame()"
+      @secondary="store.quitGame()"
+    />
+  </div>
+</template>

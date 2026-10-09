@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { to: { name: "calendar" }, label: "تقویم", icon: "▦" },
   { to: { name: "symptoms" }, label: "علائم", icon: "✎", selfOnly: true },
   { to: { name: "guide" }, label: "راهنما", icon: "ℹ" },
+  { to: { name: "games" }, label: "بازی‌ها", icon: "🎲" },
   { to: { name: "settings" }, label: "تنظیمات", icon: "⚙" },
 ];
 
@@ -65,7 +66,7 @@ watch(
       hides "علائم", leaving 4 items instead of 5, which looked lopsided
       with a fixed 5-column grid.
     -->
-    <nav class="fixed inset-x-0 bottom-0 z-10 flex items-center justify-center gap-6 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
+    <nav class="fixed inset-x-0 bottom-0 z-10 flex items-center justify-center gap-3 sm:gap-6 border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 lg:hidden">
       <RouterLink
         v-for="item in NAV_ITEMS.filter((i) => !i.selfOnly || !appModeStore.isPartnerMode)"
         :key="item.label"
