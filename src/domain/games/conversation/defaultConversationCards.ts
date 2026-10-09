@@ -1,0 +1,48 @@
+import { ConversationCardFactory, ConversationCategory, type ConversationCard } from "./ConversationCard";
+
+function card(id: string, category: ConversationCategory, text: string): ConversationCard {
+  return ConversationCardFactory.create({ id, category, text });
+}
+
+export const DEFAULT_CONVERSATION_CARDS: readonly ConversationCard[] = [
+  card("default-conversation-individual-1", ConversationCategory.Individual, "چه چیزی این روزها بیشتر از همه ذهنت را مشغول کرده است؟"),
+  card("default-conversation-individual-2", ConversationCategory.Individual, "آخرین باری که از خودت واقعاً راضی بودی کی بود و چرا؟"),
+  card("default-conversation-individual-3", ConversationCategory.Individual, "اگر یک هفته‌ی کاملاً آزاد داشتی، چه می‌کردی؟"),
+  card("default-conversation-individual-4", ConversationCategory.Individual, "چه ترسی داری که کمتر به کسی گفته‌ای؟"),
+  card("default-conversation-individual-5", ConversationCategory.Individual, "چه عادتی در خودت را دوست داری تغییر بدهی؟"),
+  card("default-conversation-individual-6", ConversationCategory.Individual, "وقتی استرس داری، چه چیزی آرامت می‌کند؟"),
+  card("default-conversation-individual-7", ConversationCategory.Individual, "کدام موفقیت کوچک اخیرت را کسی ندیده؟"),
+  card("default-conversation-individual-8", ConversationCategory.Individual, "در چه موقعیتی بیشتر احساس می‌کنی خودِ واقعی‌ات هستی؟"),
+  card("default-conversation-couple-1", ConversationCategory.Couple, "چه چیزی در رابطه‌ی ما بیشتر از همه تو را خوشحال می‌کند؟"),
+  card("default-conversation-couple-2", ConversationCategory.Couple, "چه زمانی بیشتر احساس می‌کنی دوستت دارم؟"),
+  card("default-conversation-couple-3", ConversationCategory.Couple, "یک کار کوچک که روزت را بهتر می‌کند چیست؟"),
+  card("default-conversation-couple-4", ConversationCategory.Couple, "چه کاری را دوست داری بیشتر با هم انجام دهیم؟"),
+  card("default-conversation-couple-5", ConversationCategory.Couple, "کدام لحظه از رابطه‌مان را دوست داری دوباره تجربه کنی؟"),
+  card("default-conversation-couple-6", ConversationCategory.Couple, "چه چیزی هست که گاهی می‌خواهی بگویی ولی نمی‌گویی؟"),
+  card("default-conversation-couple-7", ConversationCategory.Couple, "چطور می‌توانیم وقتی اختلاف نظر داریم بهتر با هم حرف بزنیم؟"),
+  card("default-conversation-couple-8", ConversationCategory.Couple, "قوی‌ترین ویژگی همسرت از نگاه تو چیست؟"),
+  card("default-conversation-family-1", ConversationCategory.Family, "کدام خاطره‌ی کودکی‌ات با خانواده را بیشتر دوست داری؟"),
+  card("default-conversation-family-2", ConversationCategory.Family, "چه چیزی از خانواده‌ات را می‌خواهی در خانواده‌ی خودمان ادامه دهیم؟"),
+  card("default-conversation-family-3", ConversationCategory.Family, "چه چیزی از رفتار خانواده‌ات را دوست نداشتی و نمی‌خواهی تکرار کنی؟"),
+  card("default-conversation-family-4", ConversationCategory.Family, "رابطه‌مان با خانواده‌های هم چطور باشد تا هر دو راحت باشیم؟"),
+  card("default-conversation-family-5", ConversationCategory.Family, "چه سنت یا آیینی را دوست داری برای خودمان بسازیم؟"),
+  card("default-conversation-family-6", ConversationCategory.Family, "از کدام عضو خانواده بیشتر چیز یاد گرفته‌ای؟"),
+  card("default-conversation-family-7", ConversationCategory.Family, "مرزهای ما درباره‌ی دخالت دیگران چیست؟"),
+  card("default-conversation-family-8", ConversationCategory.Family, "یک روز عالی خانوادگی برای تو چه شکلی است؟"),
+  card("default-conversation-intimacy-1", ConversationCategory.Intimacy, "چه نوع لمسی در طول روز تو را بیشتر به من نزدیک می‌کند؟"),
+  card("default-conversation-intimacy-2", ConversationCategory.Intimacy, "چه چیزی کمک می‌کند در لحظه‌های صمیمی راحت‌تر باشی؟"),
+  card("default-conversation-intimacy-3", ConversationCategory.Intimacy, "بیشتر چه زمانی از هفته دوست داری وقت صمیمی داشته باشیم؟"),
+  card("default-conversation-intimacy-4", ConversationCategory.Intimacy, "چه چیز تازه‌ای هست که کنجکاو امتحانش باشی؟ (اگر راحتی بگو)"),
+  card("default-conversation-intimacy-5", ConversationCategory.Intimacy, "چه حرفی در صمیمیت تو را بیشتر دوست‌داشته‌شده می‌کند؟"),
+  card("default-conversation-intimacy-6", ConversationCategory.Intimacy, "چه چیزی باعث می‌شود حس کنی خواسته می‌شوی؟"),
+  card("default-conversation-intimacy-7", ConversationCategory.Intimacy, "کدام خاطره‌ی صمیمی ما برایت از همه شیرین‌تر بود؟"),
+  card("default-conversation-intimacy-8", ConversationCategory.Intimacy, "چطور می‌توانیم وقتی خسته‌ایم هم صمیمیت را حفظ کنیم؟"),
+  card("default-conversation-pastfuture-1", ConversationCategory.PastFuture, "اولین برداشتت از من چه بود؟"),
+  card("default-conversation-pastfuture-2", ConversationCategory.PastFuture, "کدام لحظه را نقطه‌ی عطف رابطه‌مان می‌دانی؟"),
+  card("default-conversation-pastfuture-3", ConversationCategory.PastFuture, "پنج سال دیگر خودمان را کجا می‌بینی؟"),
+  card("default-conversation-pastfuture-4", ConversationCategory.PastFuture, "کدام رویای مشترک را هنوز شروع نکرده‌ایم؟"),
+  card("default-conversation-pastfuture-5", ConversationCategory.PastFuture, "از گذشته چه درسی گرفته‌ای که می‌خواهی در آینده به کار ببری؟"),
+  card("default-conversation-pastfuture-6", ConversationCategory.PastFuture, "کدام سفر یا ماجراجویی را دوست داری با هم تجربه کنیم؟"),
+  card("default-conversation-pastfuture-7", ConversationCategory.PastFuture, "چه چیزی را می‌خواهی ده سال دیگر هنوز با هم داشته باشیم؟"),
+  card("default-conversation-pastfuture-8", ConversationCategory.PastFuture, "اگر می‌توانستی یک روز از گذشته‌ی مشترکمان را دوباره زندگی کنی، کدام را انتخاب می‌کردی؟"),
+];
