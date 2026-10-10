@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /positions-data/
+Disallow: /app/games
+Disallow: /app/positions

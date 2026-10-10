@@ -6,3 +6,6 @@ dist-ssr
 .DS_Store
 *.log
 dev-dist
+
+# plaintext positions (source of the encrypted files) - NEVER commit
+private/

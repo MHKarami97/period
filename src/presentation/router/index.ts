@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAccessStore } from "@application/stores/accessStore";
 import { useAppModeStore } from "@application/stores/appModeStore";
-import { useGameAccessStore } from "@application/stores/gameAccessStore";
 import { GAME_CATALOG } from "@presentation/games/gameCatalog";
 
 const router = createRouter({
@@ -26,6 +26,7 @@ const router = createRouter({
           component: game.loadView,
           meta: { requiresGameAccess: true },
         })),
+        { path: "positions", name: "positions", component: () => import("@presentation/views/PositionsView.vue") },
         { path: "guide", name: "guide", component: () => import("@presentation/views/GuideView.vue") },
         { path: "settings", name: "settings", component: () => import("@presentation/views/SettingsView.vue") },
       ],
@@ -45,7 +46,7 @@ router.beforeEach((to) => {
   if (to.name === "symptoms" && appModeStore.isPartnerMode) {
     return { name: "dashboard" };
   }
-  if (to.meta.requiresGameAccess && !useGameAccessStore().isUnlocked) {
+  if (to.meta.requiresGameAccess && !useAccessStore().isUnlocked) {
     return { name: "games" };
   }
   return true;
