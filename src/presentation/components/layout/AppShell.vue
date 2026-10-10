@@ -71,14 +71,8 @@ watch(
       <RouterView />
     </main>
 
-    <!--
-      flex + justify-center (not grid-cols-N) so the bottom nav stays
-      centered regardless of how many items are visible: partner mode
-      hides "علائم", leaving 4 items instead of 5, which looked lopsided
-      with a fixed 5-column grid.
-    -->
     <nav
-      class="fixed inset-x-0 bottom-0 z-10 flex items-center justify-start gap-3 overflow-x-auto border-t border-slate-200 bg-white/95 p-2 px-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 sm:justify-center sm:gap-6 lg:hidden"
+      class="fixed inset-x-0 bottom-0 z-10 flex items-center gap-3 overflow-x-auto border-t border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-900 dark:bg-slate-950/95 sm:gap-6 lg:hidden"
     >
       <RouterLink
         v-for="item in NAV_ITEMS.filter(
@@ -86,7 +80,7 @@ watch(
         )"
         :key="item.label"
         :to="item.to"
-        class="flex shrink-0 flex-col items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] text-slate-500 dark:text-slate-400"
+        class="flex shrink-0 flex-col items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] text-slate-500 first:ms-auto last:me-auto dark:text-slate-400"
         active-class="text-teal-600 dark:text-teal-300"
       >
         <span class="text-base">{{ item.icon }}</span>
