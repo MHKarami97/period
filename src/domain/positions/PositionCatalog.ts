@@ -1,3 +1,4 @@
+import type { IRandomSource } from "../games/IRandomSource";
 import { FACET_KEYS, FACET_LABELS_FA, FacetKey, toDisplayLabel } from "./facets";
 import { normalizeSearchText } from "./normalizeSearchText";
 import type { Position } from "./Position";
@@ -29,6 +30,20 @@ export class PositionCatalog {
 
   public static create(positions: readonly Position[]): PositionCatalog {
     return new PositionCatalog(positions);
+  }
+
+  /**
+   * Picks one random position from `candidates`. When there is more than one
+   * candidate, the position with `excludeId` (the one currently shown) is
+   * skipped so pressing "random" always changes the result.
+   */
+  public static pickRandom(
+    candidates: readonly Position[],
+    random: IRandomSource,
+    excludeId: string | null = null,
+  ): Position | null {
+    const pool = excludeId !== null && candidates.length > 1 ? candidates.filter((position) => position.id !== excludeId) : candidates;
+    return pool.length === 0 ? null : pool[random.nextInt(0, pool.length - 1)];
   }
 
   public get size(): number {

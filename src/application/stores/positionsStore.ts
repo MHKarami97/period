@@ -5,6 +5,7 @@ import { InvalidAccessPasswordError } from "@domain/positions/errors";
 import type { Position } from "@domain/positions/Position";
 import { PositionCatalog } from "@domain/positions/PositionCatalog";
 import { PositionFilter } from "@domain/positions/PositionFilter";
+import { MathRandomSource } from "@infrastructure/random/MathRandomSource";
 import { EncryptedPositionsSource } from "@infrastructure/positions/EncryptedPositionsSource";
 import { useAccessStore } from "./accessStore";
 
@@ -14,6 +15,7 @@ export type LoadStatus = "idle" | "loading" | "ready" | "error";
 export type LoadErrorKind = "password" | "data";
 
 const source = new EncryptedPositionsSource();
+const randomSource = new MathRandomSource();
 
 /**
  * positionsStore - Application Service for the positions section: decrypts
@@ -90,6 +92,11 @@ export const usePositionsStore = defineStore("positions", () => {
     }
   }
 
+  /** Random pick among the CURRENT results (respects search and filters), never the same item twice in a row. */
+  function pickRandom(excludeId: string | null): Position | null {
+    return PositionCatalog.pickRandom(results.value, randomSource, excludeId);
+  }
+
   function resolveImage(position: Position): Promise<string | null> {
     return source.resolveImageUrl(position);
   }
@@ -121,6 +128,7 @@ export const usePositionsStore = defineStore("positions", () => {
     toggleFilter,
     clearFilters,
     loadMore,
+    pickRandom,
     resolveImage,
   };
 });

@@ -5,7 +5,14 @@ import type { Position } from "@domain/positions/Position";
 
 const ROOT_MARGIN = "300px";
 
-const props = defineProps<{ position: Position }>();
+const props = withDefaults(
+  defineProps<{
+    position: Position;
+    /** Load immediately instead of waiting until the image is near the viewport (used in the detail dialog). */
+    eager?: boolean;
+  }>(),
+  { eager: false },
+);
 
 const store = usePositionsStore();
 const host = ref<HTMLElement | null>(null);
@@ -22,8 +29,12 @@ async function loadImage(): Promise<void> {
   }
 }
 
-/** The image is fetched and decrypted only when it is about to scroll into view. */
+/** In lists, the image is fetched and decrypted only when it is about to scroll into view. */
 onMounted(() => {
+  if (props.eager) {
+    void loadImage();
+    return;
+  }
   if (!host.value) return;
   observer = new IntersectionObserver(
     (entries) => {
@@ -49,7 +60,10 @@ onBeforeUnmount(() => observer?.disconnect());
       decoding="async"
       draggable="false"
     />
-    <span v-else-if="hasFailed" class="text-2xl opacity-50" aria-hidden="true">🖼</span>
+    <span v-else-if="hasFailed" class="flex flex-col items-center gap-1 text-xs text-slate-400" role="img" aria-label="عکس در دسترس نیست">
+      <span class="text-2xl opacity-60" aria-hidden="true">🖼</span>
+      <span v-if="eager">عکس بارگذاری نشد</span>
+    </span>
     <span v-else class="h-full w-full animate-pulse bg-slate-200 dark:bg-slate-700" aria-hidden="true" />
   </div>
 </template>

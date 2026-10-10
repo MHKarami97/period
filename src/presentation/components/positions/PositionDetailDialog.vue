@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { FACET_KEYS, FACET_LABELS_FA, toDisplayLabel } from "@domain/positions/facets";
 import type { Position } from "@domain/positions/Position";
 import PositionImage from "./PositionImage.vue";
 
-const props = defineProps<{ position: Position | null }>();
-const emit = defineEmits<{ (event: "close"): void }>();
+const props = defineProps<{ position: Position | null; canPickRandom: boolean }>();
+const emit = defineEmits<{
+  (event: "close"): void;
+  (event: "random"): void;
+}>();
+
+const scroller = ref<HTMLElement | null>(null);
 
 function onKeydown(event: KeyboardEvent): void {
   if (event.key === "Escape" && props.position) emit("close");
@@ -17,6 +22,7 @@ watch(
   () => props.position,
   (position) => {
     document.body.style.overflow = position ? "hidden" : "";
+    scroller.value?.scrollTo({ top: 0 });
   },
 );
 
@@ -48,9 +54,9 @@ onBeforeUnmount(() => {
           </button>
         </header>
 
-        <div class="flex flex-col gap-4 overflow-y-auto p-4">
-          <div v-if="position.image" class="h-72 w-full overflow-hidden rounded-xl sm:h-96">
-            <PositionImage :position="position" />
+        <div ref="scroller" class="flex flex-col gap-4 overflow-y-auto p-4">
+          <div v-if="position.image" :key="position.id" class="h-80 w-full shrink-0 overflow-hidden rounded-xl sm:h-[26rem]">
+            <PositionImage :position="position" eager />
           </div>
 
           <template v-for="key in FACET_KEYS" :key="key">
@@ -70,6 +76,16 @@ onBeforeUnmount(() => {
 
           <p v-if="position.content" class="whitespace-pre-line text-sm leading-8 text-slate-700 dark:text-slate-200">{{ position.content }}</p>
         </div>
+
+        <footer v-if="canPickRandom" class="border-t border-slate-200 p-3 dark:border-slate-800">
+          <button
+            type="button"
+            class="w-full rounded-xl bg-rose-500/90 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-500"
+            @click="emit('random')"
+          >
+            🎲 یک پوزیشن تصادفی دیگر
+          </button>
+        </footer>
       </article>
     </div>
   </Teleport>

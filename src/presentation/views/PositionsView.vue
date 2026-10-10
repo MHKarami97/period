@@ -34,6 +34,11 @@ watch(searchText, (text) => {
 
 const { sentinel } = useInfiniteScroll(() => store.loadMore(), () => store.visible.length);
 
+function openRandomPosition(): void {
+  const picked = store.pickRandom(selectedPosition.value?.id ?? null);
+  if (picked) selectedPosition.value = picked;
+}
+
 function relock(): void {
   selectedPosition.value = null;
   accessStore.lock();
@@ -71,21 +76,29 @@ onBeforeUnmount(() => {
 
       <template v-else>
         <div class="flex flex-col gap-3 p-4 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-          <div class="flex items-center gap-2">
-            <input
-              v-model="searchText"
-              type="search"
-              placeholder="جستجو در عنوان، تگ‌ها و متن…"
-              class="min-w-0 flex-1 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
-            />
+          <input
+            v-model="searchText"
+            type="search"
+            placeholder="جستجو در عنوان، تگ‌ها و متن…"
+            class="w-full rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+          />
+          <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              class="shrink-0 rounded-lg px-3 py-2 text-sm transition"
+              class="rounded-lg px-3 py-2 text-sm transition"
               :class="isFilterOpen || store.filter.activeCount > 0 ? 'bg-teal-500/10 text-teal-600 ring-1 ring-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:ring-teal-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
               :aria-expanded="isFilterOpen"
               @click="isFilterOpen = !isFilterOpen"
             >
               فیلتر<span v-if="store.filter.activeCount > 0"> ({{ store.filter.activeCount }})</span>
+            </button>
+            <button
+              type="button"
+              class="rounded-lg bg-rose-500/90 px-3 py-2 text-sm font-medium text-white transition hover:bg-rose-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="store.results.length === 0"
+              @click="openRandomPosition"
+            >
+              🎲 پوزیشن تصادفی
             </button>
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
@@ -110,6 +123,11 @@ onBeforeUnmount(() => {
       </template>
     </template>
 
-    <PositionDetailDialog :position="selectedPosition" @close="selectedPosition = null" />
+    <PositionDetailDialog
+      :position="selectedPosition"
+      :can-pick-random="store.results.length > 0"
+      @close="selectedPosition = null"
+      @random="openRandomPosition"
+    />
   </div>
 </template>
