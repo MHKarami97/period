@@ -3,6 +3,8 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 
+const SECONDS_PER_DAY = 60 * 60 * 24;
+
 export default defineConfig({
   plugins: [
     vue(),
@@ -32,6 +34,29 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         clientsClaim: true,
         skipWaiting: false,
+        runtimeCaching: [
+          {
+            // Catalog: always try the network first so edits show up, fall back to cache when offline.
+            urlPattern: /\/positions-data\/positions\.enc$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "positions-catalog",
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 2, maxAgeSeconds: 90 * SECONDS_PER_DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            // Encrypted images: file names change on every re-encryption, so cache-first is safe.
+            urlPattern: /\/positions-data\/images\/[^/]+\.enc$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "positions-images",
+              expiration: { maxEntries: 400, maxAgeSeconds: 90 * SECONDS_PER_DAY, purgeOnQuotaError: true },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],

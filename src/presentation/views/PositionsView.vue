@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from "vue";
+import { onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import { useAccessStore } from "@application/stores/accessStore";
 import { usePositionsStore } from "@application/stores/positionsStore";
 import type { Position } from "@domain/positions/Position";
@@ -16,7 +16,7 @@ const store = usePositionsStore();
 
 const searchText = ref(store.query);
 const isFilterOpen = ref(false);
-const selectedPosition = ref<Position | null>(null);
+const selectedPosition = shallowRef<Position | null>(null);
 let searchTimeoutId: number | null = null;
 
 watch(

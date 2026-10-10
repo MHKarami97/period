@@ -65,7 +65,7 @@ export class EncryptedPositionsSource implements IPositionsSource {
     this.key = null;
   }
 
-  private static async fetchBytes(relativePath: string): Promise<Uint8Array> {
+  private static async fetchBytes(relativePath: string): Promise<ArrayBuffer> {
     let response: Response;
     try {
       response = await fetch(`${DATA_FOLDER}${relativePath}`);
@@ -75,6 +75,6 @@ export class EncryptedPositionsSource implements IPositionsSource {
     if (!response.ok) {
       throw new PositionsDataError(`Positions file not found (${response.status}).`);
     }
-    return new Uint8Array(await response.arrayBuffer());
+    return response.arrayBuffer();
   }
 }

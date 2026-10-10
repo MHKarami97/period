@@ -10,7 +10,7 @@ const MAX_ACCEPTED_ITERATIONS = 5_000_000;
 
 export interface OpenedCatalog {
   key: CryptoKey;
-  plaintext: Uint8Array;
+  plaintext: ArrayBuffer;
 }
 
 /**
@@ -18,25 +18,27 @@ export interface OpenedCatalog {
  * scripts/encrypt-positions.mjs (keep both in sync):
  *   catalog: "PTR1" | iterations (uint32 BE) | salt (16) | iv (12) | AES-GCM ciphertext+tag
  *   image  : iv (12) | AES-GCM ciphertext+tag   (same key as the catalog)
+ * Works on ArrayBuffer/BufferSource (not Uint8Array) so it compiles with every
+ * TypeScript version, including the generic Uint8Array<ArrayBufferLike> of TS >= 5.7.
  * The key is derived once per session with PBKDF2-HMAC-SHA256 and kept as a
  * non-extractable CryptoKey. AES-GCM authenticates the data, so a wrong
  * password is detected reliably (decryption fails) instead of yielding garbage.
  */
 export class PositionsCipher {
-  public static async openCatalog(password: string, bytes: Uint8Array): Promise<OpenedCatalog> {
-    if (bytes.length <= CATALOG_HEADER_LENGTH || new TextDecoder().decode(bytes.subarray(0, MAGIC_LENGTH)) !== MAGIC) {
+  public static async openCatalog(password: string, bytes: ArrayBuffer): Promise<OpenedCatalog> {
+    const magic = bytes.byteLength >= MAGIC_LENGTH ? new TextDecoder().decode(new Uint8Array(bytes, 0, MAGIC_LENGTH)) : "";
+    if (bytes.byteLength <= CATALOG_HEADER_LENGTH || magic !== MAGIC) {
       throw new PositionsDataError("Unrecognised positions file format.");
     }
 
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const iterations = view.getUint32(MAGIC_LENGTH, false);
+    const iterations = new DataView(bytes).getUint32(MAGIC_LENGTH, false);
     if (iterations < 1 || iterations > MAX_ACCEPTED_ITERATIONS) {
       throw new PositionsDataError("Unsupported key-derivation settings.");
     }
 
     const saltStart = MAGIC_LENGTH + ITERATIONS_LENGTH;
-    const salt = bytes.slice(saltStart, saltStart + SALT_LENGTH);
-    const iv = bytes.slice(saltStart + SALT_LENGTH, CATALOG_HEADER_LENGTH);
+    const salt = new Uint8Array(bytes, saltStart, SALT_LENGTH);
+    const iv = new Uint8Array(bytes, saltStart + SALT_LENGTH, IV_LENGTH);
     const ciphertext = bytes.slice(CATALOG_HEADER_LENGTH);
 
     const key = await PositionsCipher.deriveKey(password, salt, iterations);
@@ -44,14 +46,14 @@ export class PositionsCipher {
     return { key, plaintext };
   }
 
-  public static async decryptFile(key: CryptoKey, bytes: Uint8Array): Promise<Uint8Array> {
-    if (bytes.length <= IV_LENGTH) {
+  public static async decryptFile(key: CryptoKey, bytes: ArrayBuffer): Promise<ArrayBuffer> {
+    if (bytes.byteLength <= IV_LENGTH) {
       throw new PositionsDataError("Unrecognised image file format.");
     }
-    return PositionsCipher.decrypt(key, bytes.slice(0, IV_LENGTH), bytes.slice(IV_LENGTH));
+    return PositionsCipher.decrypt(key, new Uint8Array(bytes, 0, IV_LENGTH), bytes.slice(IV_LENGTH));
   }
 
-  private static async deriveKey(password: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
+  private static async deriveKey(password: string, salt: BufferSource, iterations: number): Promise<CryptoKey> {
     const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
     return crypto.subtle.deriveKey(
       { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
@@ -62,9 +64,9 @@ export class PositionsCipher {
     );
   }
 
-  private static async decrypt(key: CryptoKey, iv: Uint8Array, ciphertext: Uint8Array): Promise<Uint8Array> {
+  private static async decrypt(key: CryptoKey, iv: BufferSource, ciphertext: BufferSource): Promise<ArrayBuffer> {
     try {
-      return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext));
+      return await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
     } catch {
       throw new InvalidAccessPasswordError();
     }
