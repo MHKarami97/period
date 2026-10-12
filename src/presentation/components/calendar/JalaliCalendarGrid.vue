@@ -4,15 +4,6 @@ import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useJalali } from "@presentation/composables/useJalali";
 
-/**
- * JalaliCalendarGrid - month grid distinguishing:
- *  - CURRENT ongoing period, confirmed days (startDate..today) — solid rose + ring
- *  - CURRENT ongoing period, expected remaining days (today+1..predicted end) — lighter rose
- *  - past logged/completed period days — solid rose fill
- *  - predicted next period window — rose outline
- *  - predicted fertile / ovulation window — lavender fill
- *  - today — teal ring
- */
 const cycleStore = useCycleStore();
 const { toJalaliLabel, monthTitle, nextMonth, previousMonth, buildMonthGrid, isSameJalaliMonth } = useJalali();
 
@@ -20,16 +11,16 @@ const monthAnchor = ref(new Date());
 const gridDays = computed(() => buildMonthGrid(monthAnchor.value));
 const today = DateOnly.today();
 
-/**
- * While a period is ongoing, its end date is unknown, so a naive
- * "startDate..today" range would silently stop highlighting on the
- * calendar the moment "today" is reached — even though the period is
- * expected to continue. This computes the expected full range using the
- * same predicted period length (`predictedPeriodLengthInDays`) the WMA
- * prediction service already derives from historical cycles, so days
- * AFTER today that are still part of the expected period are highlighted
- * too (with a lighter, "not yet confirmed" style).
- */
+const weekDays = [
+  { short: "ش", full: "شنبه" },
+  { short: "ی", full: "یکشنبه" },
+  { short: "د", full: "دوشنبه" },
+  { short: "س", full: "سه‌شنبه" },
+  { short: "چ", full: "چهارشنبه" },
+  { short: "پ", full: "پنج‌شنبه" },
+  { short: "ج", full: "جمعه" },
+];
+
 const ongoingPeriodExpectedEnd = computed<DateOnly | null>(() => {
   const current = cycleStore.currentCycle;
   const prediction = cycleStore.prediction;
@@ -60,7 +51,7 @@ function isExpectedRemainingOngoingPeriodDay(day: DateOnly): boolean {
 function isLoggedPeriodDay(day: DateOnly): boolean {
   return cycleStore.sortedCycles.some((cycle) => {
     if (cycle.isOngoing) {
-      return false; // covered separately by the two ongoing-period checks above
+      return false;
     }
     return day.isBetweenInclusive(cycle.startDate, cycle.endDate as DateOnly);
   });
@@ -115,6 +106,19 @@ function dayClasses(day: DateOnly): string {
       <button type="button" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" @click="monthAnchor = nextMonth(monthAnchor)">›</button>
     </div>
 
+    <div class="mb-2 grid grid-cols-7 gap-1 text-center">
+      <div 
+        v-for="day in weekDays" 
+        :key="day.short" 
+        class="text-xs font-medium text-slate-400 dark:text-slate-500"
+        :title="day.full"
+        :aria-label="day.full"
+      >
+        {{ day.short }}
+      </div>
+    </div>
+
+    <!-- گرید روزهای ماه -->
     <div class="grid grid-cols-7 gap-1">
       <div v-for="day in gridDays" :key="day.toIsoString()" :class="dayClasses(day)">
         {{ toJalaliLabel(day, "d") }}
