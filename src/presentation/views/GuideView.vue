@@ -9,7 +9,7 @@ import GuideSection from "@presentation/components/guide/GuideSection.vue";
  *
  * Reference ranges/warning signs are based on ACOG, Mayo Clinic, MSD
  * Manuals and CDC patient-education material (see sources listed at the
- * bottom of the page) — general information only, not a diagnosis.
+ * bottom of the page) - general information only, not a diagnosis.
  */
 const normalRanges = [
   { label: "طول کل چرخه", value: "۲۱ تا ۳۸ روز (میانگین رایج ۲۸ روز)" },
@@ -42,7 +42,7 @@ const emergencySigns = [
 
     <GuideSection title="این اپلیکیشن چطور کار می‌کند" icon="📱">
       <p>
-        این اپلیکیشن یک ردیاب سیکل قاعدگی آفلاین است؛ یعنی تمام داده‌های شما (تاریخ‌های پریود، علائم) فقط روی همین دستگاه و در حافظه سیستم شما ذخیره می‌شود و به هیچ سروری ارسال نمی‌شود.
+        این اپلیکیشن یک ردیاب سیکل قاعدگی آفلاین است؛ یعنی تمام داده‌های شما (تاریخ‌های پریود، علائم) فقط روی همین دستگاه و در حافظه سیستم  شما ذخیره می‌شود و به هیچ سروری ارسال نمی‌شود.
       </p>
       <p><strong>حالت دوگانه:</strong> در ابتدا نقش خود را انتخاب می‌کنید: «ردیابی برای خود» با دسترسی کامل به ثبت پریود و علائم، یا «ردیابی شریک» با نمای فقط‌خواندنی که فقط تاریخ‌ها، فاز فعلی و روزهای باقیمانده را نشان می‌دهد.</p>
       <p><strong>داشبورد:</strong> نمودار دایره‌ای روز فعلی چرخه را از کل طول چرخه پیش‌بینی‌شده نشان می‌دهد، همراه با نام فاز فعلی (قاعدگی، فولیکولار، تخمک‌گذاری، لوتئال) و شمارش معکوس تا پریود بعدی.</p>

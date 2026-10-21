@@ -4,7 +4,8 @@ import { useRouter } from "vue-router";
 import { useAppModeStore } from "@application/stores/appModeStore";
 import { useUserProfileStore } from "@application/stores/userProfileStore";
 import { useProfileStore } from "@application/stores/profileStore";
-import { DatabaseResetService } from "@infrastructure/backup/DatabaseResetService";
+import { useTelegramReminderStore } from "@application/stores/telegramReminderStore";
+import { FullWipeService } from "@infrastructure/backup/FullWipeService";
 import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
 
 /**
@@ -12,11 +13,11 @@ import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
  *
  *  1. "خروج" (sign out / switch role): only resets the Dual-Mode role
  *     selection and sends the user back to onboarding. It does NOT touch
- *     any stored data — the whole point is to let someone switch from
+ *     any stored data - the whole point is to let someone switch from
  *     self-tracking to partner-tracking (or vice-versa) on the same
  *     device without losing anything already logged.
  *  2. "پاک‌کردن کامل اطلاعات" (full reset): the only action that actually
- *     deletes everything — every profile and all of their cycles/symptoms
+ *     deletes everything - every profile and all of their cycles/symptoms
  *     (via DatabaseResetService, which wipes ALL profiles, not just the
  *     active one). Reserved for when a genuinely different person will
  *     start fresh on this device. Both actions require explicit
@@ -26,6 +27,7 @@ const router = useRouter();
 const appModeStore = useAppModeStore();
 const userProfileStore = useUserProfileStore();
 const profileStore = useProfileStore();
+const telegramStore = useTelegramReminderStore();
 
 const isLogoutConfirmOpen = ref(false);
 const isResetConfirmOpen = ref(false);
@@ -35,12 +37,19 @@ function logout(): void {
   router.push({ name: "onboarding" });
 }
 
+/**
+ * Full wipe: unlink Telegram on the server first (the link code is erased locally right after),
+ * then remove the database, vault, localStorage, caches and service worker, and reload from scratch.
+ */
 async function resetAllData(): Promise<void> {
-  await DatabaseResetService.resetAll();
+  if (telegramStore.isEnabled) {
+    await telegramStore.disable();
+  }
+  await FullWipeService.wipeEverything();
   userProfileStore.setDisplayName("");
   profileStore.reset();
   appModeStore.resetRole();
-  router.push({ name: "onboarding" });
+  window.location.replace("/");
 }
 </script>
 
@@ -75,7 +84,7 @@ async function resetAllData(): Promise<void> {
     <ConfirmDialog
       v-model="isResetConfirmOpen"
       title="پاک‌کردن کامل اطلاعات؟"
-      message="این عمل غیرقابل بازگشت است: تمام پروفایل‌های ثبت‌شده (خود، همسر، خواهر و ...)، پریودها، علائم و نام نمایشی برای همیشه پاک می‌شوند. فقط در صورتی این کار را انجام دهید که می‌خواهید شخص دیگری از ابتدا از این دستگاه استفاده کند. پیشنهاد می‌شود قبل از این کار از «خروجی JSON» در همین صفحه استفاده کنید."
+      message="این عمل غیرقابل بازگشت است: تمام پروفایل‌ها، پریودها، علائم، همه‌ی یادداشت‌ها و عکس‌های همدل، قفل و رمز، اتصال تلگرام و تنظیمات برای همیشه از این دستگاه پاک می‌شوند و برنامه از نو شروع می‌شود. قبل از این کار از «بکاپ رمزنگاری‌شده» در همین صفحه استفاده کنید."
       confirm-label="بله، همه‌چیز را پاک کن"
       danger
       @confirm="resetAllData"

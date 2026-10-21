@@ -10,10 +10,16 @@ import { appDatabase } from "../database/AppDatabase";
  */
 export class DatabaseResetService {
   public static async resetAll(): Promise<void> {
-    await appDatabase.transaction("rw", appDatabase.profiles, appDatabase.cycles, appDatabase.symptoms, async () => {
-      await appDatabase.profiles.clear();
-      await appDatabase.cycles.clear();
-      await appDatabase.symptoms.clear();
-    });
+    await appDatabase.transaction(
+      "rw",
+      [appDatabase.profiles, appDatabase.cycles, appDatabase.symptoms, appDatabase.hamdelEntries, appDatabase.hamdelPhotos],
+      async () => {
+        await appDatabase.profiles.clear();
+        await appDatabase.cycles.clear();
+        await appDatabase.symptoms.clear();
+        await appDatabase.hamdelEntries.clear();
+        await appDatabase.hamdelPhotos.clear();
+      },
+    );
   }
 }

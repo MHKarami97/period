@@ -1,6 +1,6 @@
-# Period — Local-First Menstrual Cycle Tracker (PWA)
+# Period - Local-First Menstrual Cycle Tracker (PWA)
 
-Local-first, privacy-first, offline-capable menstrual cycle tracker built with **Vue 3**, **Domain-Driven Design**, and **Clean Architecture**. All data stays on-device (IndexedDB via Dexie.js) — nothing is sent to a server, and the UI ships with a self-hosted font and self-hosted PWA icons (zero third-party/CDN requests).
+Local-first, privacy-first, offline-capable menstrual cycle tracker built with **Vue 3**, **Domain-Driven Design**, and **Clean Architecture**. All data stays on-device (IndexedDB via Dexie.js) - nothing is sent to a server, and the UI ships with a self-hosted font and self-hosted PWA icons (zero third-party/CDN requests).
 
 > Status: architecture skeleton, full Domain layer, Infrastructure (Dexie, PDF, JSON backup), Application (Pinia) and Presentation layers are implemented, including a Jalali-native calendar and date picker, PWA icons and offline-safe fonts, and a Vitest unit-test suite for the prediction algorithm.
 
@@ -11,19 +11,19 @@ Local-first, privacy-first, offline-capable menstrual cycle tracker built with *
 | UI | Vue 3 (Composition API, `<script setup>`), Tailwind CSS |
 | Build | Vite, `vite-plugin-pwa` |
 | State / Application Services | Pinia |
-| Persistence | Dexie.js (IndexedDB) — local-first, offline-first |
+| Persistence | Dexie.js (IndexedDB) - local-first, offline-first |
 | Calendar | `date-fns-jalali` (Jalali/Persian calendar in presentation layer only) |
 | Reporting | jsPDF + jspdf-autotable (6-month PDF summary) |
-| Fonts / Icons | Self-hosted Vazirmatn (`public/fonts`) + custom PWA icon set (`public/icons`) — no external CDN |
+| Fonts / Icons | Self-hosted Vazirmatn (`public/fonts`) + custom PWA icon set (`public/icons`) - no external CDN |
 | Testing | Vitest (domain layer unit tests) |
 
-## Architecture — Clean / Onion Architecture
+## Architecture - Clean / Onion Architecture
 
 Dependencies point **inward only**: `presentation → application → domain ← infrastructure`. The `domain` folder has zero imports from Vue, Pinia or Dexie.
 
 ```
 src/
-├── domain/                     # Enterprise business rules — framework-agnostic, 100% unit-testable
+├── domain/                     # Enterprise business rules - framework-agnostic, 100% unit-testable
 │   ├── entities/                Cycle.ts (Aggregate Root), Symptom.ts (Entity)
 │   ├── valueObjects/             DateOnly, CyclePhase, FlowLevel, Mood
 │   ├── services/
@@ -54,11 +54,11 @@ src/
     └── styles/
 
 public/
-├── icons/     # icon-48/72/96/144/192/512.png — referenced directly in the PWA manifest
-└── fonts/     # Vazirmatn-font-face.css + webfonts/*.woff2 — loaded via <link>, no Google Fonts CDN
+├── icons/     # icon-48/72/96/144/192/512.png - referenced directly in the PWA manifest
+└── fonts/     # Vazirmatn-font-face.css + webfonts/*.woff2 - loaded via <link>, no Google Fonts CDN
 ```
 
-## Prediction Algorithm — Weighted Moving Average (WMA)
+## Prediction Algorithm - Weighted Moving Average (WMA)
 
 Implemented in `src/domain/services/CyclePredictionService.ts`, fully pure, dependency-free and covered by Vitest.
 
@@ -73,12 +73,12 @@ nextCycleLength = (C1 × 3 + C2 × 2 + C3 × 1) / 6
 
 ## Dual Mode
 
-- **Self-tracking**: full write access — log periods, symptoms, corrections.
-- **Partner-tracking**: read-only projection — current phase, next-period countdown, calendar; the Symptoms route is guarded and redirects to the dashboard.
+- **Self-tracking**: full write access - log periods, symptoms, corrections.
+- **Partner-tracking**: read-only projection - current phase, next-period countdown, calendar; the Symptoms route is guarded and redirects to the dashboard.
 
 ## Fonts and Icons
 
-- The app self-hosts **Vazirmatn** (`public/fonts/Vazirmatn-font-face.css` + `public/fonts/webfonts/*.woff2`), loaded via a `<link>` tag in `index.html` and set as the default `font-family` in Tailwind (`fontFamily.vazir`) — no Google Fonts or other CDN request is made anywhere in the app, which keeps it fully functional offline.
+- The app self-hosts **Vazirmatn** (`public/fonts/Vazirmatn-font-face.css` + `public/fonts/webfonts/*.woff2`), loaded via a `<link>` tag in `index.html` and set as the default `font-family` in Tailwind (`fontFamily.vazir`) - no Google Fonts or other CDN request is made anywhere in the app, which keeps it fully functional offline.
 - PWA icons come from `public/icons/icon-{48,72,96,144,192,512}.png` and are wired into the `vite-plugin-pwa` manifest with both `any` and `maskable` purposes for the 192/512 sizes.
 
 ## Getting Started

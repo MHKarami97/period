@@ -27,6 +27,28 @@ export interface SymptomRecord {
   note: string | null;
 }
 
+export interface HamdelEntryRecord {
+  id: string;
+  profileId: string;
+  section: string;
+  /** Indexed copy of the section's date field (ISO yyyy-MM-dd) for sorting and reminders. */
+  dateIso: string | null;
+  /** Codec-encoded personal values (plain JSON now, ciphertext once app encryption is on). */
+  payload: string;
+  createdAtIso: string;
+  updatedAtIso: string;
+}
+
+export interface HamdelPhotoRecord {
+  id: string;
+  entryId: string;
+  profileId: string;
+  mime: string;
+  /** Codec-encoded image bytes (plain now, ciphertext once app encryption is on). */
+  bytes: ArrayBuffer;
+  createdAtIso: string;
+}
+
 /**
  * AppDatabase - Infrastructure adapter around IndexedDB via Dexie.js.
  *
@@ -40,6 +62,8 @@ export class AppDatabase extends Dexie {
   public readonly cycles!: Table<CycleRecord, string>;
   public readonly symptoms!: Table<SymptomRecord, string>;
   public readonly profiles!: Table<ProfileRecord, string>;
+  public readonly hamdelEntries!: Table<HamdelEntryRecord, string>;
+  public readonly hamdelPhotos!: Table<HamdelPhotoRecord, string>;
 
   public constructor() {
     super("PeriodTrackerDatabase");
@@ -74,6 +98,16 @@ export class AppDatabase extends Dexie {
             record.profileId = DEFAULT_PROFILE_ID;
           });
       });
+
+    // Version 3: "Hamdel" (partner knowledge notebook). Only new tables are listed.
+    this.version(3).stores({
+      hamdelEntries: "id, profileId, section, dateIso, [profileId+section]",
+    });
+
+    // Version 4: photos attached to Hamdel diary entries.
+    this.version(4).stores({
+      hamdelPhotos: "id, entryId, profileId",
+    });
   }
 }
 

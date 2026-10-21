@@ -5,6 +5,7 @@ import DisplayNameForm from "@presentation/components/settings/DisplayNameForm.v
 import AboutSection from "@presentation/components/settings/AboutSection.vue";
 import AccountActionsPanel from "@presentation/components/settings/AccountActionsPanel.vue";
 import TelegramReminderPanel from "@presentation/components/settings/TelegramReminderPanel.vue";
+import SecurityPanel from "@presentation/components/settings/SecurityPanel.vue";
 </script>
 
 <template>
@@ -16,6 +17,7 @@ import TelegramReminderPanel from "@presentation/components/settings/TelegramRem
       <AccountActionsPanel />
     </div>
     <div class="flex flex-col gap-4 lg:col-span-6">
+      <SecurityPanel />
       <DataManagementPanel />
       <AboutSection />
     </div>

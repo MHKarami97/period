@@ -14,7 +14,11 @@ export class DexieProfileRepository implements IProfileRepository {
   }
 
   public async delete(id: string): Promise<void> {
-    await appDatabase.profiles.delete(id);
+    await appDatabase.transaction("rw", [appDatabase.profiles, appDatabase.hamdelEntries, appDatabase.hamdelPhotos], async () => {
+      await appDatabase.profiles.delete(id);
+      await appDatabase.hamdelEntries.where("profileId").equals(id).delete();
+      await appDatabase.hamdelPhotos.where("profileId").equals(id).delete();
+    });
   }
 
   private static toDomain(record: ProfileRecord): Profile {

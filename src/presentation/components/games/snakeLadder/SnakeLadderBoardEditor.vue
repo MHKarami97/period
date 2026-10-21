@@ -115,7 +115,7 @@ function applyChange(): void {
         </label>
 
         <label v-if="mode === 'challenge'" class="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
-          متن چالش — برای نام‌ها از «{player}» (کسی که روی خانه رسید) و «{partner}» (طرف مقابل) استفاده کنید.
+          متن چالش - برای نام‌ها از «{player}» (کسی که روی خانه رسید) و «{partner}» (طرف مقابل) استفاده کنید.
           <textarea
             v-model="textInput"
             rows="3"

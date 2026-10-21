@@ -18,7 +18,7 @@ import { useProfileStore } from "./profileStore";
  * with a private backing field, and Vue's `reactive()` type-level
  * `UnwrapRef<T>` does not preserve TypeScript's private-field brand, which
  * breaks assignability back to `Cycle[]`. `shallowRef` never recurses into
- * the object graph, so the class identity — and its encapsulation — is
+ * the object graph, so the class identity - and its encapsulation - is
  * preserved, and every mutation already returns a brand-new instance
  * anyway (see Cycle.endPeriod/correctStartDate/correctEndDate).
  */

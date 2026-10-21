@@ -26,8 +26,8 @@ function describeTurn(turn: TurnResult): string {
   const base = `${turn.playerName}: تاس ${turn.dice} → خانه ${turn.landedCell}`;
   if (!turn.jump) return base;
   return turn.jump.kind === "snake"
-    ? `${base} — 🐍 مار! برگشت به خانه ${turn.jump.to}`
-    : `${base} — 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
+    ? `${base} - 🐍 مار! برگشت به خانه ${turn.jump.to}`
+    : `${base} - 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
 }
 </script>
 

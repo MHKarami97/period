@@ -12,7 +12,7 @@ export interface PhaseGuidance {
  * general wellness/self-care suggestions (for the person tracking) and
  * support suggestions (for a partner in read-only mode). This is
  * localized copy, not a business rule, so it intentionally lives in
- * presentation/ rather than domain/ — the domain only ever produces the
+ * presentation/ rather than domain/ - the domain only ever produces the
  * `CyclePhase` value, never opinions about what to do with it.
  *
  * These are general wellness tips, not medical advice; the UI always

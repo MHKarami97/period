@@ -5,12 +5,14 @@ import { useAppModeStore } from "@application/stores/appModeStore";
 import { useProfileStore } from "@application/stores/profileStore";
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useSymptomStore } from "@application/stores/symptomStore";
+import { useHamdelStore } from "@application/stores/hamdelStore";
 import { useTelegramReminderStore } from "@application/stores/telegramReminderStore";
 
 const appModeStore = useAppModeStore();
 const profileStore = useProfileStore();
 const cycleStore = useCycleStore();
 const symptomStore = useSymptomStore();
+const hamdelStore = useHamdelStore();
 const telegramReminderStore = useTelegramReminderStore();
 
 const NAV_ITEMS = [
@@ -18,31 +20,33 @@ const NAV_ITEMS = [
   { to: { name: "calendar" }, label: "تقویم", icon: "📅" },
   { to: { name: "symptoms" }, label: "علائم", icon: "💊", selfOnly: true },
   { to: { name: "guide" }, label: "راهنما", icon: "🔍" },
+  { to: { name: "hamdel" }, label: "همدل", icon: "💞" },
   { to: { name: "games" }, label: "بازی‌ها", icon: "🎲" },
   { to: { name: "positions" }, label: "پوزیشن‌ها", icon: "📖" },
   { to: { name: "settings" }, label: "تنظیمات", icon: "⚙️" },
 ];
 
+/** One schedule per Telegram link: period reminders and Hamdel reminders are always sent together. */
+function syncReminders(): Promise<void> {
+  return telegramReminderStore.syncReminders(cycleStore.sortedCycles, hamdelStore.entries);
+}
+
 onMounted(async () => {
   await profileStore.initialize();
-  await Promise.all([cycleStore.initialize(), symptomStore.initialize(), telegramReminderStore.initialize()]);
-  await telegramReminderStore.syncReminders(cycleStore.sortedCycles);
+  await Promise.all([cycleStore.initialize(), symptomStore.initialize(), hamdelStore.load(), telegramReminderStore.initialize()]);
+  await syncReminders();
 });
 
 watch(
   () => profileStore.activeProfileId,
   async () => {
-    await Promise.all([cycleStore.initialize(), symptomStore.initialize()]);
-    await telegramReminderStore.syncReminders(cycleStore.sortedCycles);
+    await Promise.all([cycleStore.initialize(), symptomStore.initialize(), hamdelStore.load()]);
+    await syncReminders();
   },
 );
 
-watch(
-  () => cycleStore.sortedCycles,
-  async (cycles) => {
-    await telegramReminderStore.syncReminders(cycles);
-  },
-);
+watch(() => cycleStore.sortedCycles, syncReminders);
+watch(() => hamdelStore.entries, syncReminders);
 </script>
 
 <template>

@@ -12,7 +12,7 @@ import JalaliDatePicker from "@presentation/components/shared/JalaliDatePicker.v
  *
  * Available in BOTH self and partner mode: a partner needs to be able to
  * log when the person they track started her period, not just view a
- * prediction. Only the button label changes — it includes the active
+ * prediction. Only the button label changes - it includes the active
  * profile's name in partner mode ("ثبت شروع پریود همسر") so it is always
  * clear whose period is being recorded when several profiles exist.
  */

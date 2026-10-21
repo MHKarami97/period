@@ -6,7 +6,11 @@ import {
   type TelegramLinkState,
 } from "@infrastructure/telegram/TelegramLinkService";
 import { MahakReminderApiClient } from "@infrastructure/telegram/MahakReminderApiClient";
-import { MahakReminderPlanner } from "@domain/services/MahakReminderPlanner";
+import { jalaliYearlyCalendar } from "@infrastructure/calendar/JalaliYearlyCalendar";
+import { MahakReminderPlanner, type PlannedMahakEvent } from "@domain/services/MahakReminderPlanner";
+import { planHamdelReminders } from "@domain/hamdel/reminderPlanner";
+import type { HamdelEntry } from "@domain/hamdel/HamdelEntry";
+import { DateOnly } from "@domain/valueObjects/DateOnly";
 import type { Cycle } from "@domain/entities/Cycle";
 
 const telegramLinkService = new TelegramLinkService();
@@ -20,6 +24,8 @@ export const useTelegramReminderStore = defineStore("telegramReminder", () => {
   const username = ref<string | null>(null);
   const isWorking = shallowRef(false);
   const error = ref<string | null>(null);
+  // The server replaces the WHOLE schedule on every sync, so syncs are queued and run one at a time.
+  let syncQueue: Promise<void> = Promise.resolve();
 
   const isEnabled = computed(() => state.value !== "disabled" && state.value !== "unconfigured");
   const isLinked = computed(() => state.value === "linked");
@@ -65,9 +71,19 @@ export const useTelegramReminderStore = defineStore("telegramReminder", () => {
     } finally { isWorking.value = false; }
   }
 
-  async function syncReminders(cycles: readonly Cycle[]): Promise<void> {
-    if (!isLinked.value) return;
-    await reminderGateway.sync(MahakReminderPlanner.plan(cycles));
+  function buildEvents(cycles: readonly Cycle[], hamdelEntries: readonly HamdelEntry[]): PlannedMahakEvent[] {
+    return [...MahakReminderPlanner.plan(cycles), ...planHamdelReminders(hamdelEntries, DateOnly.today(), jalaliYearlyCalendar)];
+  }
+
+  /** Sends period reminders and Hamdel reminders together (one schedule per link). */
+  function syncReminders(cycles: readonly Cycle[], hamdelEntries: readonly HamdelEntry[] = []): Promise<void> {
+    syncQueue = syncQueue
+      .then(async () => {
+        if (!isLinked.value) return;
+        await reminderGateway.sync(buildEvents(cycles, hamdelEntries));
+      })
+      .catch(() => undefined);
+    return syncQueue;
   }
 
   async function disable(): Promise<void> {

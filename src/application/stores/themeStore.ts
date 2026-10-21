@@ -11,7 +11,7 @@ const DEFAULT_THEME: ThemeMode = "light";
  * (a pragmatic, already-established pattern in this codebase for simple
  * UI preferences that are not part of the Cycle/Symptom domain). Applying
  * the theme to the DOM (toggling the `dark` class on <html>) is
- * deliberately NOT done here — that is a presentation-layer side effect,
+ * deliberately NOT done here - that is a presentation-layer side effect,
  * handled by the `useThemeSync` composable, keeping this store a pure
  * state container.
  */
