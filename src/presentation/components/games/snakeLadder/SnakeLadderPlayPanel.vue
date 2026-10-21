@@ -41,7 +41,6 @@ function describeTurn(turn: TurnResult): string {
         </div>
         <div class="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
           <span v-for="player in store.displayedPlayers" :key="player.role" class="flex items-center gap-1">
-            <PlayerPawn :role="player.role" class="h-5" />
             {{ player.name }}: {{ player.position || "شروع" }}
           </span>
         </div>
