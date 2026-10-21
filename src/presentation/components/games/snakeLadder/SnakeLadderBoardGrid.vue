@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { BOARD_SIZE, type SnakeLadderBoard } from "@domain/games/snakeLadder/SnakeLadderBoard";
-import type { PlayerRole } from "@domain/games/snakeLadder/SnakeLadderGame";
 import PlayerPawn from "./PlayerPawn.vue";
-import type { BoardToken } from "./boardToken";
+import { placePawns, type BoardToken } from "./boardToken";
 
 const COLUMNS = 10;
 
@@ -29,11 +28,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{ (event: "select-cell", cell: number): void }>();
 
-const rolesByCell = computed(() => {
-  const map = new Map<number, PlayerRole[]>();
+const tokensByCell = computed(() => {
+  const map = new Map<number, BoardToken[]>();
   for (const token of props.tokens) {
     if (token.position < 1) continue;
-    map.set(token.position, [...(map.get(token.position) ?? []), token.role]);
+    map.set(token.position, [...(map.get(token.position) ?? []), token]);
   }
   return map;
 });
@@ -47,7 +46,7 @@ const cells = computed(() =>
       kind,
       icon: kind === "snake" ? "🐍" : kind === "ladder" ? "🪜" : kind === "challenge" ? "🔥" : number === BOARD_SIZE ? "🏁" : "",
       targetLabel: target === null ? "" : `${kind === "snake" ? "↓" : "↑"}${target}`,
-      roles: rolesByCell.value.get(number) ?? [],
+      pawns: placePawns(tokensByCell.value.get(number) ?? []),
     };
   }),
 );
@@ -75,24 +74,22 @@ function cellClasses(kind: string, cellNumber: number, hasPawn: boolean): string
       :key="cell.number"
       type="button"
       :disabled="!interactive"
-      :class="cellClasses(cell.kind, cell.number, cell.roles.length > 0)"
+      :class="cellClasses(cell.kind, cell.number, cell.pawns.length > 0)"
       :aria-label="`خانه ${cell.number}`"
       @click="emit('select-cell', cell.number)"
     >
       <span class="text-[10px] font-medium leading-none sm:text-xs">{{ cell.number }}</span>
       <span v-if="cell.icon" class="text-[11px] leading-none sm:text-base">{{ cell.icon }}</span>
       <span v-if="cell.targetLabel" class="text-[8px] leading-none opacity-70 sm:text-[10px]">{{ cell.targetLabel }}</span>
-      <span
-        v-if="cell.roles.length"
-        class="pointer-events-none absolute inset-x-0 bottom-[-12%] flex h-[135%] items-end justify-center"
-      >
-        <PlayerPawn
-          v-for="role in cell.roles"
-          :key="role"
-          :role="role"
-          class="pawn-hop"
-          :class="cell.roles.length > 1 ? '-mx-[8%] h-[92%]' : 'h-full'"
-        />
+      <span v-if="cell.pawns.length" class="pointer-events-none absolute inset-x-0 bottom-[-12%] h-[135%]">
+        <span
+          v-for="pawn in cell.pawns"
+          :key="pawn.role"
+          class="pawn-slot absolute bottom-0 flex"
+          :style="{ left: `${pawn.leftPercent}%`, height: `${pawn.heightPercent}%`, zIndex: pawn.zIndex }"
+        >
+          <PlayerPawn :role="pawn.role" class="pawn-hop" />
+        </span>
       </span>
     </button>
   </div>
@@ -111,6 +108,12 @@ function cellClasses(kind: string, cellNumber: number, hasPawn: boolean): string
   }
 }
 
+/* The slot is centred on `left`; moving between layouts is eased so nothing jumps. */
+.pawn-slot {
+  transform: translateX(-50%);
+  transition: left 180ms ease, height 180ms ease;
+}
+
 .pawn-hop {
   animation: pawn-hop 200ms ease-out;
   transform-origin: bottom center;
@@ -119,6 +122,10 @@ function cellClasses(kind: string, cellNumber: number, hasPawn: boolean): string
 @media (prefers-reduced-motion: reduce) {
   .pawn-hop {
     animation: none;
+  }
+
+  .pawn-slot {
+    transition: none;
   }
 }
 </style>

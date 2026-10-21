@@ -12,7 +12,11 @@ const store = useSnakeLadderStore();
 const isQuitConfirmOpen = ref(false);
 
 const tokens = computed<BoardToken[]>(() =>
-  store.displayedPlayers.map((player) => ({ role: player.role, position: player.position })),
+  store.displayedPlayers.map((player) => ({
+    role: player.role,
+    position: player.position,
+    isMoving: store.isAnimating && store.currentPlayer?.role === player.role,
+  })),
 );
 
 const statusText = computed(() => {
@@ -26,8 +30,8 @@ function describeTurn(turn: TurnResult): string {
   const base = `${turn.playerName}: تاس ${turn.dice} → خانه ${turn.landedCell}`;
   if (!turn.jump) return base;
   return turn.jump.kind === "snake"
-    ? `${base} - 🐍 مار! برگشت به خانه ${turn.jump.to}`
-    : `${base} - 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
+    ? `${base} — 🐍 مار! برگشت به خانه ${turn.jump.to}`
+    : `${base} — 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
 }
 </script>
 
@@ -41,6 +45,7 @@ function describeTurn(turn: TurnResult): string {
         </div>
         <div class="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
           <span v-for="player in store.displayedPlayers" :key="player.role" class="flex items-center gap-1">
+            <PlayerPawn :role="player.role" class="h-5" />
             {{ player.name }}: {{ player.position || "شروع" }}
           </span>
         </div>
