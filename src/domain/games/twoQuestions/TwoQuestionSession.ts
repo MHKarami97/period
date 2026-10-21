@@ -1,3 +1,6 @@
+import type { IRandomSource } from "../IRandomSource";
+import { QUESTION_BANK, type QuestionTier } from "./questionBank";
+
 export const MIN_DURATION_MINUTES = 1;
 export const MAX_DURATION_MINUTES = 10;
 export const DEFAULT_DURATION_MINUTES = 3;
@@ -32,6 +35,7 @@ export class TwoQuestionSession {
     private readonly firstAskerIndex: 0 | 1,
     private readonly durationMinutes: number,
     private readonly stepIndex: number,
+    private readonly questionTemplates: readonly string[],
   ) {}
 
   public static isValidDuration(minutes: number): boolean {
@@ -43,6 +47,7 @@ export class TwoQuestionSession {
     manName: string;
     durationMinutes: number;
     firstAskerIndex?: 0 | 1;
+    random?: IRandomSource;
   }): TwoQuestionSession {
     const names: [string, string] = [input.womanName.trim(), input.manName.trim()];
     if (names.some((name) => name.length === 0 || name.length > MAX_NAME_LENGTH)) {
@@ -51,7 +56,13 @@ export class TwoQuestionSession {
     if (!TwoQuestionSession.isValidDuration(input.durationMinutes)) {
       throw new RangeError(`Duration must be between ${MIN_DURATION_MINUTES} and ${MAX_DURATION_MINUTES} minutes.`);
     }
-    return new TwoQuestionSession(names, input.firstAskerIndex ?? 0, input.durationMinutes, 0);
+    return new TwoQuestionSession(
+      names,
+      input.firstAskerIndex ?? 0,
+      input.durationMinutes,
+      0,
+      TwoQuestionSession.pickTemplates(input.random),
+    );
   }
 
   public get totalSteps(): number {
@@ -78,7 +89,13 @@ export class TwoQuestionSession {
     if (this.isFinished) {
       return this;
     }
-    return new TwoQuestionSession(this.names, this.firstAskerIndex, this.durationMinutes, this.stepIndex + 1);
+    return new TwoQuestionSession(
+      this.names,
+      this.firstAskerIndex,
+      this.durationMinutes,
+      this.stepIndex + 1,
+      this.questionTemplates,
+    );
   }
 
   private buildStep(index: number): SessionStep {
@@ -92,10 +109,7 @@ export class TwoQuestionSession {
     const receiverName = questionKind === "TOUCH_YOU" ? answererName : askerName;
     const minutes = this.durationMinutes;
 
-    const question =
-      questionKind === "TOUCH_YOU"
-        ? `دوست داری ${minutes} دقیقه چطور لمست کنم؟`
-        : `دوست داری ${minutes} دقیقه چطور لمسم کنی؟`;
+    const question = this.questionTemplates[index].replaceAll("{m}", String(minutes));
 
     return {
       questionKind,
@@ -106,5 +120,17 @@ export class TwoQuestionSession {
       questionText: `${askerName} از ${answererName} می‌پرسد: «${question}»`,
       instructionText: `${performerName} به مدت ${minutes} دقیقه، همان‌طور که ${receiverName} خواسته، او را لمس می‌کند. ${receiverName} هر لحظه می‌تواند بگوید «آرام‌تر» یا «بس است».`,
     };
+  }
+
+  /** One template per step: WARM questions in round 1, HOT in round 2; never the same text twice. */
+  private static pickTemplates(random?: IRandomSource): string[] {
+    const tiers: QuestionTier[] = ["WARM", "HOT"];
+    const kinds: QuestionKind[] = ["TOUCH_YOU", "TOUCH_ME"];
+    return tiers.flatMap((tier) =>
+      kinds.map((kind) => {
+        const pool = QUESTION_BANK[kind][tier];
+        return pool[random ? random.nextInt(0, pool.length - 1) : 0];
+      }),
+    );
   }
 }

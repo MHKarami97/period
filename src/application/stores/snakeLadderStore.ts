@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 import { SnakeLadderBoard } from "@domain/games/snakeLadder/SnakeLadderBoard";
 import { SnakeLadderBoardGenerator } from "@domain/games/snakeLadder/SnakeLadderBoardGenerator";
-import { PlayerRole, SnakeLadderGame, type TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
+import { PlayerRole, SnakeLadderGame, type PlayerState, type TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
 import { LocalStorageSnakeLadderSettingsRepository } from "@infrastructure/repositories/LocalStorageSnakeLadderSettingsRepository";
 import { MathRandomSource } from "@infrastructure/random/MathRandomSource";
 
@@ -10,14 +10,27 @@ const settingsRepository = new LocalStorageSnakeLadderSettingsRepository();
 const randomSource = new MathRandomSource();
 const boardGenerator = new SnakeLadderBoardGenerator(randomSource);
 
-const DICE_MIN = 1;
-const DICE_MAX = 6;
+const STEP_DELAY_MS = 260;
+const JUMP_PAUSE_MS = 500;
+const SETTLE_DELAY_MS = 350;
+
+type PawnPositions = Readonly<Record<PlayerRole, number>>;
+
+const START_POSITIONS: PawnPositions = { [PlayerRole.Woman]: 0, [PlayerRole.Man]: 0 };
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
 
 /**
  * snakeLadderStore - Application Service orchestrating the board editor,
  * saved settings and the live game. Pinia SETUP store with shallowRef for the
  * same reason documented in cycleStore: domain objects are immutable class
  * instances with private fields and must not be deep-proxied by Vue.
+ *
+ * The domain resolves a whole turn instantly; this store only replays it as a
+ * cell-by-cell walk (`pawnPositions`) and reveals the outcome (snake/ladder
+ * text, challenge, winner) once the pawn has arrived.
  */
 export const useSnakeLadderStore = defineStore("snakeLadder", () => {
   const board = shallowRef<SnakeLadderBoard>(SnakeLadderBoard.empty());
@@ -29,13 +42,29 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
   const game = shallowRef<SnakeLadderGame | null>(null);
   const lastTurn = shallowRef<TurnResult | null>(null);
   const pendingChallenge = shallowRef<TurnResult | null>(null);
+  const pawnPositions = shallowRef<PawnPositions>(START_POSITIONS);
+  const actingRole = shallowRef<PlayerRole | null>(null);
+  const rolledDice = ref<number | null>(null);
+  const isAnimating = ref(false);
+  let playbackId = 0;
 
   const isPlaying = computed(() => game.value !== null);
-  const winner = computed(() => game.value?.winner ?? null);
-  const currentPlayer = computed(() => game.value?.currentPlayer ?? null);
+  const winner = computed(() => (isAnimating.value ? null : (game.value?.winner ?? null)));
   const players = computed(() => game.value?.playerStates ?? []);
+  const displayedPlayers = computed<PlayerState[]>(() =>
+    players.value.map((player) => ({ ...player, position: pawnPositions.value[player.role] })),
+  );
+  const currentPlayer = computed(() => {
+    const current = game.value?.currentPlayer ?? null;
+    if (actingRole.value === null) {
+      return current;
+    }
+    return players.value.find((player) => player.role === actingRole.value) ?? current;
+  });
   const canStart = computed(() => womanName.value.trim().length > 0 && manName.value.trim().length > 0);
-  const canRoll = computed(() => isPlaying.value && winner.value === null && pendingChallenge.value === null);
+  const canRoll = computed(
+    () => isPlaying.value && !isAnimating.value && winner.value === null && pendingChallenge.value === null,
+  );
 
   function initialize(): void {
     if (isInitialized.value) {
@@ -91,26 +120,71 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
     return true;
   }
 
+  function resetPlayback(): void {
+    playbackId += 1;
+    isAnimating.value = false;
+    actingRole.value = null;
+    rolledDice.value = null;
+    pawnPositions.value = START_POSITIONS;
+    lastTurn.value = null;
+    pendingChallenge.value = null;
+  }
+
   function startGame(): void {
     if (!canStart.value) {
       throw new Error("Both player names are required.");
     }
+    resetPlayback();
     game.value = SnakeLadderGame.start({
       board: board.value,
       womanName: womanName.value,
       manName: manName.value,
       firstRole: randomSource.nextInt(0, 1) === 0 ? PlayerRole.Woman : PlayerRole.Man,
     });
-    lastTurn.value = null;
-    pendingChallenge.value = null;
   }
 
-  function rollDice(): void {
+  function movePawn(role: PlayerRole, cell: number): void {
+    pawnPositions.value = { ...pawnPositions.value, [role]: cell };
+  }
+
+  /** @returns false when the playback was cancelled (quit / restart) midway. */
+  async function playTurn(result: TurnResult, id: number): Promise<boolean> {
+    for (const cell of result.path) {
+      movePawn(result.role, cell);
+      await sleep(STEP_DELAY_MS);
+      if (id !== playbackId) {
+        return false;
+      }
+    }
+    if (result.jump) {
+      await sleep(JUMP_PAUSE_MS);
+      if (id !== playbackId) {
+        return false;
+      }
+      movePawn(result.role, result.jump.to);
+      await sleep(SETTLE_DELAY_MS);
+    }
+    return id === playbackId;
+  }
+
+  async function rollDice(): Promise<void> {
     if (!game.value || !canRoll.value) {
       return;
     }
-    const outcome = game.value.roll(randomSource.nextInt(DICE_MIN, DICE_MAX));
+    const outcome = game.value.roll(game.value.pickDice(randomSource));
+    const id = playbackId;
+
+    actingRole.value = outcome.result.role;
+    rolledDice.value = outcome.result.dice;
+    isAnimating.value = true;
     game.value = outcome.game;
+
+    const completed = await playTurn(outcome.result, id);
+    if (!completed) {
+      return;
+    }
+    isAnimating.value = false;
+    actingRole.value = null;
     lastTurn.value = outcome.result;
     pendingChallenge.value = outcome.result.challengeText ? outcome.result : null;
   }
@@ -120,9 +194,8 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
   }
 
   function quitGame(): void {
+    resetPlayback();
     game.value = null;
-    lastTurn.value = null;
-    pendingChallenge.value = null;
   }
 
   return {
@@ -133,10 +206,13 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
     game,
     lastTurn,
     pendingChallenge,
+    rolledDice,
+    isAnimating,
     isPlaying,
     winner,
     currentPlayer,
     players,
+    displayedPlayers,
     canStart,
     canRoll,
     initialize,

@@ -1,25 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useSnakeLadderStore } from "@application/stores/snakeLadderStore";
-import { PlayerRole, type TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
+import type { TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
 import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
 import GameModal from "@presentation/components/games/GameModal.vue";
+import PlayerPawn from "./PlayerPawn.vue";
 import SnakeLadderBoardGrid from "./SnakeLadderBoardGrid.vue";
 import type { BoardToken } from "./boardToken";
-
-const ROLE_DOT_CLASS: Record<PlayerRole, string> = {
-  [PlayerRole.Woman]: "bg-fuchsia-500",
-  [PlayerRole.Man]: "bg-sky-500",
-};
 
 const store = useSnakeLadderStore();
 const isQuitConfirmOpen = ref(false);
 
 const tokens = computed<BoardToken[]>(() =>
-  store.players.map((player) => ({ role: player.role, position: player.position })),
+  store.displayedPlayers.map((player) => ({ role: player.role, position: player.position })),
 );
 
-const lastTurnDescription = computed(() => (store.lastTurn ? describeTurn(store.lastTurn) : null));
+const statusText = computed(() => {
+  if (store.isAnimating && store.currentPlayer && store.rolledDice !== null) {
+    return `${store.currentPlayer.name}: تاس ${store.rolledDice} 🎲 …`;
+  }
+  return store.lastTurn ? describeTurn(store.lastTurn) : null;
+});
 
 function describeTurn(turn: TurnResult): string {
   const base = `${turn.playerName}: تاس ${turn.dice} → خانه ${turn.landedCell}`;
@@ -35,12 +36,12 @@ function describeTurn(turn: TurnResult): string {
     <section class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div v-if="store.currentPlayer" class="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
-          <span class="h-3 w-3 rounded-full" :class="ROLE_DOT_CLASS[store.currentPlayer.role]" />
+          <PlayerPawn :role="store.currentPlayer.role" class="h-8" />
           نوبت {{ store.currentPlayer.name }}
         </div>
         <div class="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <span v-for="player in store.players" :key="player.role" class="flex items-center gap-1">
-            <span class="h-2 w-2 rounded-full" :class="ROLE_DOT_CLASS[player.role]" />
+          <span v-for="player in store.displayedPlayers" :key="player.role" class="flex items-center gap-1">
+            <PlayerPawn :role="player.role" class="h-5" />
             {{ player.name }}: {{ player.position || "شروع" }}
           </span>
         </div>
@@ -52,10 +53,10 @@ function describeTurn(turn: TurnResult): string {
         :disabled="!store.canRoll"
         @click="store.rollDice()"
       >
-        🎲 انداختن تاس
+        {{ store.isAnimating ? "در حال حرکت…" : "🎲 انداختن تاس" }}
       </button>
 
-      <p v-if="lastTurnDescription" class="text-sm text-slate-600 dark:text-slate-300" aria-live="polite">{{ lastTurnDescription }}</p>
+      <p v-if="statusText" class="text-sm text-slate-600 dark:text-slate-300" aria-live="polite">{{ statusText }}</p>
     </section>
 
     <SnakeLadderBoardGrid :board="store.board" :tokens="tokens" />

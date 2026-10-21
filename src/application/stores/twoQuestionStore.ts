@@ -35,6 +35,7 @@ export const useTwoQuestionStore = defineStore("twoQuestion", () => {
       manName: players.manName,
       durationMinutes: durationMinutes.value,
       firstAskerIndex: randomSource.nextInt(0, 1) === 0 ? 0 : 1,
+      random: randomSource,
     });
     phase.value = "question";
   }
