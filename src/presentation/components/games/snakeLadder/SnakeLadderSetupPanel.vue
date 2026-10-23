@@ -1,9 +1,21 @@
 <script setup lang="ts">
 import { useSnakeLadderStore } from "@application/stores/snakeLadderStore";
 import { useToast } from "@presentation/composables/useToast";
+import {
+  GENERATION_LIMITS,
+  type BoardGenerationOptions,
+} from "@domain/games/snakeLadder/SnakeLadderBoardGenerator";
+import NumberStepper from "../NumberStepper.vue";
+import PlayerNamesForm from "../PlayerNamesForm.vue";
+import BoardIcon from "./BoardIcon.vue";
 import SnakeLadderBoardEditor from "./SnakeLadderBoardEditor.vue";
+import type { BoardIconKind } from "./boardIcons";
 
-const MAX_NAME_LENGTH = 30;
+const GENERATION_FIELDS: ReadonlyArray<{ key: keyof BoardGenerationOptions; label: string; icon: BoardIconKind }> = [
+  { key: "snakeCount", label: "تعداد مار", icon: "snake" },
+  { key: "ladderCount", label: "تعداد نردبان", icon: "ladder" },
+  { key: "challengeCount", label: "تعداد چالش", icon: "challenge" },
+];
 const SECONDARY_BUTTON =
   "rounded-xl bg-slate-100 px-4 py-2.5 text-sm text-slate-900 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700";
 
@@ -27,34 +39,28 @@ function restore(): void {
 
 <template>
   <div class="flex flex-col gap-4">
-    <section class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-      <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">بازیکنان</h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <label class="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
-          <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-fuchsia-500" />نام خانم</span>
-          <input
-            v-model="store.womanName"
-            type="text"
-            :maxlength="MAX_NAME_LENGTH"
-            class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
-        <label class="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
-          <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-sky-500" />نام آقا</span>
-          <input
-            v-model="store.manName"
-            type="text"
-            :maxlength="MAX_NAME_LENGTH"
-            class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
-      </div>
-    </section>
+    <PlayerNamesForm />
 
     <section class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">تنظیم تخته</h2>
       <p class="text-xs text-slate-500 dark:text-slate-400">
         {{ store.board.snakeCount }} مار · {{ store.board.ladderCount }} نردبان · {{ store.board.challengeCount }} چالش
+      </p>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <NumberStepper
+          v-for="field in GENERATION_FIELDS"
+          :key="field.key"
+          :label="field.label"
+          :model-value="store.generationOptions[field.key]"
+          :min="GENERATION_LIMITS[field.key].min"
+          :max="GENERATION_LIMITS[field.key].max"
+          @update:model-value="store.setGenerationOption(field.key, $event)"
+        >
+          <template #icon><BoardIcon :kind="field.icon" class="h-4 w-4" /></template>
+        </NumberStepper>
+      </div>
+      <p class="text-xs text-slate-400 dark:text-slate-500">
+        تعدادها خودکار ذخیره می‌شوند و با دکمه «چیدمان تصادفی جدید» روی تخته اعمال می‌شوند.
       </p>
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <button type="button" :class="SECONDARY_BUTTON" @click="regenerate">🎲 چیدمان تصادفی جدید</button>

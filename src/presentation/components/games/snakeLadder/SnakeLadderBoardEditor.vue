@@ -4,13 +4,15 @@ import { useSnakeLadderStore } from "@application/stores/snakeLadderStore";
 import { BOARD_SIZE, FIRST_CELL, MAX_CHALLENGE_LENGTH, type CellKind } from "@domain/games/snakeLadder/SnakeLadderBoard";
 import { BoardValidationError } from "@domain/games/snakeLadder/BoardValidationError";
 import { useToast } from "@presentation/composables/useToast";
+import BoardIcon from "./BoardIcon.vue";
 import SnakeLadderBoardGrid from "./SnakeLadderBoardGrid.vue";
+import type { BoardIconKind } from "./boardIcons";
 
-const MODE_OPTIONS: ReadonlyArray<{ value: CellKind; label: string }> = [
-  { value: "empty", label: "خالی" },
-  { value: "challenge", label: "🔥 چالش" },
-  { value: "snake", label: "🐍 مار" },
-  { value: "ladder", label: "🪜 نردبان" },
+const MODE_OPTIONS: ReadonlyArray<{ value: CellKind; label: string; icon: BoardIconKind | null }> = [
+  { value: "empty", label: "خالی", icon: null },
+  { value: "challenge", label: "چالش", icon: "challenge" },
+  { value: "snake", label: "مار", icon: "snake" },
+  { value: "ladder", label: "نردبان", icon: "ladder" },
 ];
 
 const store = useSnakeLadderStore();
@@ -68,9 +70,9 @@ function applyChange(): void {
     <SnakeLadderBoardGrid :board="store.board" :selected-cell="selectedCell" interactive @select-cell="selectedCell = $event" />
 
     <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-      <span>🐍 مار (↓ پایین‌ می‌آید)</span>
-      <span>🪜 نردبان (↑ بالا می‌رود)</span>
-      <span>🔥 چالش</span>
+      <span class="inline-flex items-center gap-1"><BoardIcon kind="snake" class="h-4 w-4" />مار (↓ پایین‌ می‌آید)</span>
+      <span class="inline-flex items-center gap-1"><BoardIcon kind="ladder" class="h-4 w-4" />نردبان (↑ بالا می‌رود)</span>
+      <span class="inline-flex items-center gap-1"><BoardIcon kind="challenge" class="h-4 w-4" />چالش</span>
     </div>
 
     <div class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -89,7 +91,7 @@ function applyChange(): void {
             v-for="option in MODE_OPTIONS"
             :key="option.value"
             type="button"
-            class="rounded-lg px-3 py-1.5 text-xs transition"
+            class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs transition"
             :class="
               mode === option.value
                 ? 'bg-teal-500/10 text-teal-600 ring-1 ring-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:ring-teal-400'
@@ -97,6 +99,7 @@ function applyChange(): void {
             "
             @click="mode = option.value"
           >
+            <BoardIcon v-if="option.icon" :kind="option.icon" class="h-4 w-4" />
             {{ option.label }}
           </button>
         </div>

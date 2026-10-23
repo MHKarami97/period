@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { BOARD_SIZE, type SnakeLadderBoard } from "@domain/games/snakeLadder/SnakeLadderBoard";
+import BoardIcon from "./BoardIcon.vue";
 import PlayerPawn from "./PlayerPawn.vue";
+import { iconKindOfCell } from "./boardIcons";
 import { placePawns, type BoardToken } from "./boardToken";
 
 const COLUMNS = 10;
@@ -44,7 +46,7 @@ const cells = computed(() =>
     return {
       number,
       kind,
-      icon: kind === "snake" ? "🐍" : kind === "ladder" ? "🪜" : kind === "challenge" ? "🔥" : number === BOARD_SIZE ? "🏁" : "",
+      iconKind: iconKindOfCell(kind, number),
       targetLabel: target === null ? "" : `${kind === "snake" ? "↓" : "↑"}${target}`,
       pawns: placePawns(tokensByCell.value.get(number) ?? []),
     };
@@ -79,7 +81,7 @@ function cellClasses(kind: string, cellNumber: number, hasPawn: boolean): string
       @click="emit('select-cell', cell.number)"
     >
       <span class="text-[10px] font-medium leading-none sm:text-xs">{{ cell.number }}</span>
-      <span v-if="cell.icon" class="text-[11px] leading-none sm:text-base">{{ cell.icon }}</span>
+      <BoardIcon v-if="cell.iconKind" :kind="cell.iconKind" class="h-3.5 w-3.5 sm:h-5 sm:w-5" />
       <span v-if="cell.targetLabel" class="text-[8px] leading-none opacity-70 sm:text-[10px]">{{ cell.targetLabel }}</span>
       <span v-if="cell.pawns.length" class="pointer-events-none absolute inset-x-0 bottom-[-12%] h-[135%]">
         <span

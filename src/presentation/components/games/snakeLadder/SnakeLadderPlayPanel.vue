@@ -4,7 +4,9 @@ import { useSnakeLadderStore } from "@application/stores/snakeLadderStore";
 import type { TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
 import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
 import GameModal from "@presentation/components/games/GameModal.vue";
+import BoardIcon from "./BoardIcon.vue";
 import PlayerPawn from "./PlayerPawn.vue";
+import type { BoardIconKind } from "./boardIcons";
 import SnakeLadderBoardGrid from "./SnakeLadderBoardGrid.vue";
 import type { BoardToken } from "./boardToken";
 
@@ -19,6 +21,16 @@ const tokens = computed<BoardToken[]>(() =>
   })),
 );
 
+const statusIcon = computed<BoardIconKind | null>(() =>
+  !store.isAnimating && store.lastTurn?.jump ? store.lastTurn.jump.kind : null,
+);
+
+const winnerMessage = computed(() =>
+  store.winner
+    ? `${store.winner.name} به خانه ۱۰۰ رسید. یک رابطه‌ی جنسی با توجه به خواسته‌های ${store.winner.name} داشته باشید.`
+    : "",
+);
+
 const statusText = computed(() => {
   if (store.isAnimating && store.currentPlayer && store.rolledDice !== null) {
     return `${store.currentPlayer.name}: تاس ${store.rolledDice} 🎲 …`;
@@ -30,8 +42,8 @@ function describeTurn(turn: TurnResult): string {
   const base = `${turn.playerName}: تاس ${turn.dice} → خانه ${turn.landedCell}`;
   if (!turn.jump) return base;
   return turn.jump.kind === "snake"
-    ? `${base} — 🐍 مار! برگشت به خانه ${turn.jump.to}`
-    : `${base} — 🪜 نردبان! رفت به خانه ${turn.jump.to}`;
+    ? `${base} — مار! برگشت به خانه ${turn.jump.to}`
+    : `${base} — نردبان! رفت به خانه ${turn.jump.to}`;
 }
 </script>
 
@@ -59,7 +71,10 @@ function describeTurn(turn: TurnResult): string {
         {{ store.isAnimating ? "در حال حرکت…" : "🎲 انداختن تاس" }}
       </button>
 
-      <p v-if="statusText" class="text-sm text-slate-600 dark:text-slate-300" aria-live="polite">{{ statusText }}</p>
+      <p v-if="statusText" class="flex items-start gap-1.5 text-sm text-slate-600 dark:text-slate-300" aria-live="polite">
+        <BoardIcon v-if="statusIcon" :kind="statusIcon" class="mt-1 h-4 w-4 shrink-0" />
+        <span>{{ statusText }}</span>
+      </p>
     </section>
 
     <SnakeLadderBoardGrid :board="store.board" :tokens="tokens" />
@@ -82,7 +97,7 @@ function describeTurn(turn: TurnResult): string {
 
     <GameModal
       v-if="store.pendingChallenge"
-      :title="`🔥 چالش ${store.pendingChallenge.playerName}`"
+      :title="`چالش ${store.pendingChallenge.playerName}`"
       :message="store.pendingChallenge.challengeText ?? ''"
       primary-label="انجام شد"
       secondary-label="رد کردن"
@@ -93,7 +108,7 @@ function describeTurn(turn: TurnResult): string {
     <GameModal
       v-if="store.winner"
       :title="`🏆 ${store.winner.name} برنده شد`"
-      message="به خانه ۱۰۰ رسید. برنده‌ی واقعی هر دوی شما هستید؛ بازی دوباره؟"
+      :message="winnerMessage"
       primary-label="بازی دوباره"
       secondary-label="بازگشت به تنظیمات"
       @primary="store.startGame()"

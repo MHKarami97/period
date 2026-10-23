@@ -1,12 +1,20 @@
 import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 import { SnakeLadderBoard } from "@domain/games/snakeLadder/SnakeLadderBoard";
-import { SnakeLadderBoardGenerator } from "@domain/games/snakeLadder/SnakeLadderBoardGenerator";
+import {
+  DEFAULT_GENERATION_OPTIONS,
+  normalizeGenerationOptions,
+  SnakeLadderBoardGenerator,
+  type BoardGenerationOptions,
+} from "@domain/games/snakeLadder/SnakeLadderBoardGenerator";
 import { PlayerRole, SnakeLadderGame, type PlayerState, type TurnResult } from "@domain/games/snakeLadder/SnakeLadderGame";
 import { LocalStorageSnakeLadderSettingsRepository } from "@infrastructure/repositories/LocalStorageSnakeLadderSettingsRepository";
+import { createSnakeLadderGenerationOptionsRepository } from "@infrastructure/repositories/snakeLadderGenerationOptionsRepository";
+import { useCouplePlayersStore } from "./couplePlayersStore";
 import { MathRandomSource } from "@infrastructure/random/MathRandomSource";
 
 const settingsRepository = new LocalStorageSnakeLadderSettingsRepository();
+const generationOptionsRepository = createSnakeLadderGenerationOptionsRepository();
 const randomSource = new MathRandomSource();
 const boardGenerator = new SnakeLadderBoardGenerator(randomSource);
 
@@ -28,14 +36,28 @@ function sleep(milliseconds: number): Promise<void> {
  * same reason documented in cycleStore: domain objects are immutable class
  * instances with private fields and must not be deep-proxied by Vue.
  *
+ * Player names live in couplePlayersStore (shared with the other two-player
+ * games, persisted on every keystroke); generation counts are persisted on
+ * every change. The board layout itself is saved only on request.
+ *
  * The domain resolves a whole turn instantly; this store only replays it as a
  * cell-by-cell walk (`pawnPositions`) and reveals the outcome (snake/ladder
  * text, challenge, winner) once the pawn has arrived.
  */
 export const useSnakeLadderStore = defineStore("snakeLadder", () => {
+  const couple = useCouplePlayersStore();
   const board = shallowRef<SnakeLadderBoard>(SnakeLadderBoard.empty());
-  const womanName = ref("");
-  const manName = ref("");
+  const generationOptions = shallowRef<BoardGenerationOptions>(
+    generationOptionsRepository.load() ?? DEFAULT_GENERATION_OPTIONS,
+  );
+  const womanName = computed({
+    get: () => couple.womanName,
+    set: (name: string) => couple.setWomanName(name),
+  });
+  const manName = computed({
+    get: () => couple.manName,
+    set: (name: string) => couple.setManName(name),
+  });
   const hasSavedSettings = ref(false);
   const isInitialized = ref(false);
 
@@ -73,17 +95,31 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
     const saved = settingsRepository.load();
     if (saved) {
       board.value = saved.board;
-      womanName.value = saved.womanName;
-      manName.value = saved.manName;
+      adoptLegacyNames(saved.womanName, saved.manName);
     } else {
-      board.value = boardGenerator.generate();
+      board.value = boardGenerator.generate(generationOptions.value);
     }
     hasSavedSettings.value = saved !== null;
     isInitialized.value = true;
   }
 
+  /** Names saved by older versions inside the game settings are moved to the shared store once. */
+  function adoptLegacyNames(legacyWoman: string, legacyMan: string): void {
+    if (womanName.value.trim().length === 0 && legacyWoman.length > 0) {
+      womanName.value = legacyWoman;
+    }
+    if (manName.value.trim().length === 0 && legacyMan.length > 0) {
+      manName.value = legacyMan;
+    }
+  }
+
+  function setGenerationOption(key: keyof BoardGenerationOptions, value: number): void {
+    generationOptions.value = normalizeGenerationOptions({ ...generationOptions.value, [key]: value });
+    generationOptionsRepository.save(generationOptions.value);
+  }
+
   function regenerateBoard(): void {
-    board.value = boardGenerator.generate();
+    board.value = boardGenerator.generate(generationOptions.value);
   }
 
   function setChallenge(cell: number, text: string): void {
@@ -115,8 +151,6 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
       return false;
     }
     board.value = saved.board;
-    womanName.value = saved.womanName;
-    manName.value = saved.manName;
     return true;
   }
 
@@ -200,6 +234,7 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
 
   return {
     board,
+    generationOptions,
     womanName,
     manName,
     hasSavedSettings,
@@ -216,6 +251,7 @@ export const useSnakeLadderStore = defineStore("snakeLadder", () => {
     canStart,
     canRoll,
     initialize,
+    setGenerationOption,
     regenerateBoard,
     setChallenge,
     setSnake,

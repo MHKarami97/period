@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import { useAccessStore } from "@application/stores/accessStore";
 import { usePositionsStore } from "@application/stores/positionsStore";
 import type { Position } from "@domain/positions/Position";
@@ -7,6 +7,7 @@ import { useInfiniteScroll } from "@presentation/composables/useInfiniteScroll";
 import PositionCard from "@presentation/components/positions/PositionCard.vue";
 import PositionDetailDialog from "@presentation/components/positions/PositionDetailDialog.vue";
 import PositionFilterPanel from "@presentation/components/positions/PositionFilterPanel.vue";
+import PositionRandomSettingsPanel from "@presentation/components/positions/PositionRandomSettingsPanel.vue";
 import AccessGate from "@presentation/components/shared/AccessGate.vue";
 
 const SEARCH_DEBOUNCE_MS = 200;
@@ -16,6 +17,9 @@ const store = usePositionsStore();
 
 const searchText = ref(store.query);
 const isFilterOpen = ref(false);
+const isRandomSettingsOpen = ref(false);
+// The auto-advance timer only runs for positions reached through the random button.
+const isRandomSession = ref(false);
 const selectedPosition = shallowRef<Position | null>(null);
 let searchTimeoutId: number | null = null;
 
@@ -34,13 +38,27 @@ watch(searchText, (text) => {
 
 const { sentinel } = useInfiniteScroll(() => store.loadMore(), () => store.visible.length);
 
+const autoAdvanceSeconds = computed(() => (isRandomSession.value && store.autoAdvance.enabled ? store.autoAdvance.seconds : null));
+
 function openRandomPosition(): void {
   const picked = store.pickRandom(selectedPosition.value?.id ?? null);
-  if (picked) selectedPosition.value = picked;
+  if (!picked) return;
+  isRandomSession.value = true;
+  selectedPosition.value = picked;
+}
+
+function openPosition(position: Position): void {
+  isRandomSession.value = false;
+  selectedPosition.value = position;
+}
+
+function closePosition(): void {
+  isRandomSession.value = false;
+  selectedPosition.value = null;
 }
 
 function relock(): void {
-  selectedPosition.value = null;
+  closePosition();
   accessStore.lock();
 }
 
@@ -95,14 +113,26 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="rounded-lg bg-rose-500/90 px-3 py-2 text-sm font-medium text-white transition hover:bg-rose-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="store.results.length === 0"
+              :disabled="store.randomCandidates.length === 0"
               @click="openRandomPosition"
             >
               🎲 پوزیشن تصادفی
             </button>
+            <button
+              type="button"
+              class="rounded-lg px-3 py-2 text-sm transition"
+              :class="isRandomSettingsOpen || store.randomExclusions.count > 0 || store.autoAdvance.enabled ? 'bg-rose-500/10 text-rose-600 ring-1 ring-rose-400 dark:bg-rose-500/20 dark:text-rose-300' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              :aria-expanded="isRandomSettingsOpen"
+              @click="isRandomSettingsOpen = !isRandomSettingsOpen"
+            >
+              ⚙️ تنظیمات تصادفی<span v-if="store.randomExclusions.count > 0"> ({{ store.randomExclusions.count }} مورد حذف)</span><span v-if="store.autoAdvance.enabled"> · ⏱ {{ store.autoAdvance.seconds }}ث</span>
+            </button>
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>{{ store.results.length }} مورد از {{ store.totalCount }}</span>
+            <span>
+              {{ store.results.length }} مورد از {{ store.totalCount }}
+              <template v-if="store.randomCandidates.length !== store.results.length"> · {{ store.randomCandidates.length }} مورد در انتخاب تصادفی</template>
+            </span>
             <button v-if="store.filter.activeCount > 0" type="button" class="text-rose-500 hover:underline" @click="store.clearFilters()">
               پاک کردن فیلترها
             </button>
@@ -110,11 +140,12 @@ onBeforeUnmount(() => {
         </div>
 
         <PositionFilterPanel v-if="isFilterOpen" />
+        <PositionRandomSettingsPanel v-if="isRandomSettingsOpen" />
 
         <p v-if="store.results.length === 0" class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">موردی پیدا نشد.</p>
 
         <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          <PositionCard v-for="position in store.visible" :key="position.id" :position="position" @open="selectedPosition = $event" />
+          <PositionCard v-for="position in store.visible" :key="position.id" :position="position" @open="openPosition" />
         </div>
 
         <div v-if="store.hasMore" ref="sentinel" class="py-6 text-center text-xs text-slate-400" aria-hidden="true">در حال بارگذاری بیشتر…</div>
@@ -125,8 +156,9 @@ onBeforeUnmount(() => {
 
     <PositionDetailDialog
       :position="selectedPosition"
-      :can-pick-random="store.results.length > 0"
-      @close="selectedPosition = null"
+      :can-pick-random="store.randomCandidates.length > 0"
+      :auto-advance-seconds="autoAdvanceSeconds"
+      @close="closePosition"
       @random="openRandomPosition"
     />
   </div>

@@ -4,9 +4,13 @@ import type { FacetKey } from "@domain/positions/facets";
 import { InvalidAccessPasswordError } from "@domain/positions/errors";
 import type { Position } from "@domain/positions/Position";
 import { PositionCatalog } from "@domain/positions/PositionCatalog";
+import { AutoAdvanceSettings } from "@domain/positions/AutoAdvanceSettings";
 import { PositionFilter } from "@domain/positions/PositionFilter";
+import { RandomExclusions } from "@domain/positions/RandomExclusions";
 import { MathRandomSource } from "@infrastructure/random/MathRandomSource";
 import { EncryptedPositionsSource } from "@infrastructure/positions/EncryptedPositionsSource";
+import { createPositionAutoAdvanceRepository } from "@infrastructure/repositories/positionAutoAdvanceRepository";
+import { createPositionRandomSettingsRepository } from "@infrastructure/repositories/positionRandomSettingsRepository";
 import { useAccessStore } from "./accessStore";
 
 export const PAGE_SIZE = 20;
@@ -16,6 +20,8 @@ export type LoadErrorKind = "password" | "data";
 
 const source = new EncryptedPositionsSource();
 const randomSource = new MathRandomSource();
+const randomSettingsRepository = createPositionRandomSettingsRepository();
+const autoAdvanceRepository = createPositionAutoAdvanceRepository();
 
 /**
  * positionsStore - Application Service for the positions section: decrypts
@@ -32,9 +38,15 @@ export const usePositionsStore = defineStore("positions", () => {
   const query = ref("");
   const filter = shallowRef<PositionFilter>(PositionFilter.empty());
   const visibleCount = ref(PAGE_SIZE);
+  // Preferences, not session data: they survive locking and reloads.
+  const randomExclusions = shallowRef<RandomExclusions>(randomSettingsRepository.load() ?? RandomExclusions.none());
+  const autoAdvance = shallowRef<AutoAdvanceSettings>(autoAdvanceRepository.load() ?? AutoAdvanceSettings.disabled());
 
   const results = computed<readonly Position[]>(() =>
     catalog.value ? catalog.value.query({ text: query.value, filter: filter.value }) : [],
+  );
+  const randomCandidates = computed<readonly Position[]>(() =>
+    randomExclusions.value.count === 0 ? results.value : results.value.filter((position) => randomExclusions.value.allows(position)),
   );
   const visible = computed(() => results.value.slice(0, visibleCount.value));
   const hasMore = computed(() => visibleCount.value < results.value.length);
@@ -92,9 +104,32 @@ export const usePositionsStore = defineStore("positions", () => {
     }
   }
 
-  /** Random pick among the CURRENT results (respects search and filters), never the same item twice in a row. */
+  function toggleRandomExclusion(key: FacetKey, value: string): void {
+    randomExclusions.value = randomExclusions.value.toggle(key, value);
+    randomSettingsRepository.save(randomExclusions.value);
+  }
+
+  function clearRandomExclusions(): void {
+    randomExclusions.value = RandomExclusions.none();
+    randomSettingsRepository.clear();
+  }
+
+  function setAutoAdvanceEnabled(enabled: boolean): void {
+    autoAdvance.value = autoAdvance.value.withEnabled(enabled);
+    autoAdvanceRepository.save(autoAdvance.value);
+  }
+
+  function setAutoAdvanceSeconds(seconds: number): void {
+    autoAdvance.value = autoAdvance.value.withSeconds(seconds);
+    autoAdvanceRepository.save(autoAdvance.value);
+  }
+
+  /**
+   * Random pick among the CURRENT results (respects search and filters) minus
+   * the values excluded in the random settings, never the same item twice in a row.
+   */
   function pickRandom(excludeId: string | null): Position | null {
-    return PositionCatalog.pickRandom(results.value, randomSource, excludeId);
+    return PositionCatalog.pickRandom(randomCandidates.value, randomSource, excludeId);
   }
 
   function resolveImage(position: Position): Promise<string | null> {
@@ -116,7 +151,10 @@ export const usePositionsStore = defineStore("positions", () => {
     query,
     filter,
     visibleCount,
+    randomExclusions,
+    autoAdvance,
     results,
+    randomCandidates,
     visible,
     hasMore,
     facetGroups,
@@ -127,6 +165,10 @@ export const usePositionsStore = defineStore("positions", () => {
     setQuery,
     toggleFilter,
     clearFilters,
+    toggleRandomExclusion,
+    clearRandomExclusions,
+    setAutoAdvanceEnabled,
+    setAutoAdvanceSeconds,
     loadMore,
     pickRandom,
     resolveImage,

@@ -11,8 +11,32 @@ export interface BoardGenerationOptions {
 export const DEFAULT_GENERATION_OPTIONS: BoardGenerationOptions = {
   snakeCount: 8,
   ladderCount: 8,
-  challengeCount: 22,
+  challengeCount: 30,
 };
+
+/**
+ * Upper bounds keep a board playable and always placeable: 12 + 12 jumps use
+ * at most 48 of the 98 usable cells, and 60 challenges never exceed the size
+ * of the built-in challenge pool (so a generated board has no repeated text).
+ */
+export const GENERATION_LIMITS: Readonly<Record<keyof BoardGenerationOptions, { min: number; max: number }>> = {
+  snakeCount: { min: 0, max: 12 },
+  ladderCount: { min: 0, max: 12 },
+  challengeCount: { min: 0, max: 60 },
+};
+
+/** Rounds and clamps every field; missing or non-numeric fields fall back to the defaults. */
+export function normalizeGenerationOptions(raw: Partial<Record<keyof BoardGenerationOptions, unknown>>): BoardGenerationOptions {
+  const read = (key: keyof BoardGenerationOptions): number => {
+    const value = raw[key];
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return DEFAULT_GENERATION_OPTIONS[key];
+    }
+    const { min, max } = GENERATION_LIMITS[key];
+    return Math.min(max, Math.max(min, Math.round(value)));
+  };
+  return { snakeCount: read("snakeCount"), ladderCount: read("ladderCount"), challengeCount: read("challengeCount") };
+}
 
 const MIN_JUMP_LENGTH = 8;
 const MAX_JUMP_LENGTH = 40;
@@ -32,7 +56,8 @@ export class SnakeLadderBoardGenerator {
     private readonly challengePool: readonly string[] = DEFAULT_CHALLENGES,
   ) {}
 
-  public generate(options: BoardGenerationOptions = DEFAULT_GENERATION_OPTIONS): SnakeLadderBoard {
+  public generate(requested: BoardGenerationOptions = DEFAULT_GENERATION_OPTIONS): SnakeLadderBoard {
+    const options = normalizeGenerationOptions(requested);
     const reserved = new Set<number>([FIRST_CELL, BOARD_SIZE]);
     const ladders: Record<number, number> = {};
     const snakes: Record<number, number> = {};

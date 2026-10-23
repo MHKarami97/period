@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
 import type { SlotStatus } from "@domain/games/scratchCards/ScratchSheet";
+import { ScratchSurface } from "./ScratchSurface";
 
-const BRUSH_RADIUS_CSS_PX = 16;
+const BRUSH_RADIUS_CSS_PX = 20;
 const REVEAL_THRESHOLD = 0.5;
 const CHECK_INTERVAL_MS = 120;
-const SAMPLE_GRID_SIZE = 10;
 
 defineProps<{ text: string; categoryLabel: string; status: SlotStatus }>();
 
@@ -15,108 +15,82 @@ const emit = defineEmits<{
 }>();
 
 const canvasElement = ref<HTMLCanvasElement | null>(null);
-let context: CanvasRenderingContext2D | null = null;
+let surface: ScratchSurface | null = null;
+let resizeObserver: ResizeObserver | null = null;
 let isScratching = false;
-let lastX = 0;
-let lastY = 0;
+let hasScratched = false;
+let hasRevealed = false;
 let lastCheckAt = 0;
-let pixelRatio = 1;
 
-/** Paints the opaque "silver" cover; scratching then erases it with destination-out. */
-function prepareCanvas(): void {
-  const canvas = canvasElement.value;
+function detach(): void {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  surface = null;
+}
+
+/**
+ * Runs every time a <canvas> is created (the element lives behind v-if, so it
+ * can be re-created while this component instance stays mounted). The
+ * observer repaints the cover whenever the element gets its real size.
+ */
+function attach(canvas: HTMLCanvasElement | null): void {
+  detach();
+  isScratching = false;
+  hasScratched = false;
+  hasRevealed = false;
   if (!canvas) return;
 
-  pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio));
-  canvas.height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio));
-  context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) return;
+  surface = ScratchSurface.create(canvas, BRUSH_RADIUS_CSS_PX);
+  if (!surface) return;
 
-  const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, "#94a3b8");
-  gradient.addColorStop(1, "#64748b");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  context.fillStyle = "#e2e8f0";
-  context.font = `${16 * pixelRatio}px Vazirmatn, sans-serif`;
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillText("اینجا را بکش ✨", canvas.width / 2, canvas.height / 2);
-
-  context.globalCompositeOperation = "destination-out";
-  context.lineCap = "round";
-  context.lineJoin = "round";
-  context.lineWidth = BRUSH_RADIUS_CSS_PX * 2 * pixelRatio;
-}
-
-function positionOf(event: PointerEvent): { x: number; y: number } {
-  const canvas = canvasElement.value as HTMLCanvasElement;
-  const rect = canvas.getBoundingClientRect();
-  return {
-    x: (event.clientX - rect.left) * (canvas.width / rect.width),
-    y: (event.clientY - rect.top) * (canvas.height / rect.height),
-  };
-}
-
-/** Samples a coarse grid of pixels (cheap) instead of reading the whole canvas. */
-function clearedFraction(): number {
-  const canvas = canvasElement.value;
-  if (!canvas || !context) return 0;
-
-  let cleared = 0;
-  for (let row = 0; row < SAMPLE_GRID_SIZE; row += 1) {
-    for (let column = 0; column < SAMPLE_GRID_SIZE; column += 1) {
-      const x = Math.floor(((column + 0.5) / SAMPLE_GRID_SIZE) * canvas.width);
-      const y = Math.floor(((row + 0.5) / SAMPLE_GRID_SIZE) * canvas.height);
-      if (context.getImageData(x, y, 1, 1).data[3] === 0) cleared += 1;
-    }
-  }
-  return cleared / (SAMPLE_GRID_SIZE * SAMPLE_GRID_SIZE);
+  resizeObserver = new ResizeObserver(() => {
+    if (!hasScratched) surface?.paint();
+  });
+  resizeObserver.observe(canvas);
+  surface.paint();
 }
 
 function checkProgress(force: boolean): void {
+  if (!surface || hasRevealed) return;
   const now = performance.now();
   if (!force && now - lastCheckAt < CHECK_INTERVAL_MS) return;
   lastCheckAt = now;
-  if (clearedFraction() >= REVEAL_THRESHOLD) {
+  if (surface.clearedFraction() >= REVEAL_THRESHOLD) {
+    hasRevealed = true;
     isScratching = false;
     emit("reveal");
   }
 }
 
 function onPointerDown(event: PointerEvent): void {
-  if (!context) return;
+  if (!surface || (event.pointerType === "mouse" && event.button !== 0)) return;
+  event.preventDefault();
   isScratching = true;
-  canvasElement.value?.setPointerCapture(event.pointerId);
-  const { x, y } = positionOf(event);
-  context.beginPath();
-  context.arc(x, y, BRUSH_RADIUS_CSS_PX * pixelRatio, 0, Math.PI * 2);
-  context.fill();
-  lastX = x;
-  lastY = y;
+  hasScratched = true;
+  try {
+    canvasElement.value?.setPointerCapture(event.pointerId);
+  } catch {
+    // Capture is an optimisation; scratching still works without it.
+  }
+  surface.beginStroke(event);
 }
 
 function onPointerMove(event: PointerEvent): void {
-  if (!isScratching || !context) return;
-  const { x, y } = positionOf(event);
-  context.beginPath();
-  context.moveTo(lastX, lastY);
-  context.lineTo(x, y);
-  context.stroke();
-  lastX = x;
-  lastY = y;
+  if (!isScratching || !surface) return;
+  event.preventDefault();
+  surface.continueStroke(event);
   checkProgress(false);
 }
 
 function onPointerEnd(): void {
   if (!isScratching) return;
   isScratching = false;
+  surface?.endStroke();
   checkProgress(true);
 }
 
-onMounted(prepareCanvas);
+watch(canvasElement, attach, { flush: "post" });
+onBeforeUnmount(detach);
 </script>
 
 <template>
@@ -133,12 +107,15 @@ onMounted(prepareCanvas);
       <canvas
         v-if="status === 'hidden'"
         ref="canvasElement"
-        class="absolute inset-0 h-full w-full cursor-pointer touch-none"
+        class="absolute inset-0 h-full w-full cursor-pointer"
+        style="touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none"
         aria-hidden="true"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"
         @pointerup="onPointerEnd"
         @pointercancel="onPointerEnd"
+        @lostpointercapture="onPointerEnd"
+        @contextmenu.prevent
       />
     </div>
 
