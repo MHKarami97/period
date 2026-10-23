@@ -63,4 +63,12 @@ export const GAME_CATALOG: readonly GameDefinition[] = [
     routeName: "game-scratch-cards",
     loadView: () => import("@presentation/views/games/ScratchCardsView.vue"),
   },
+  {
+    id: "positions",
+    title: "پوزیشن‌ها",
+    description: "کاتالوگ رمزگذاری‌شده با جستجو و فیلتر؛ انتخاب تصادفی با تنظیمات حذف و تایمر خودکار.",
+    icon: "📖",
+    routeName: "positions",
+    loadView: () => import("@presentation/views/PositionsView.vue"),
+  },
 ];

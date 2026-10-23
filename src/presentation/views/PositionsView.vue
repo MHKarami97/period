@@ -6,6 +6,7 @@ import type { Position } from "@domain/positions/Position";
 import { useInfiniteScroll } from "@presentation/composables/useInfiniteScroll";
 import PositionCard from "@presentation/components/positions/PositionCard.vue";
 import PositionDetailDialog from "@presentation/components/positions/PositionDetailDialog.vue";
+import GamePageHeader from "@presentation/components/games/GamePageHeader.vue";
 import PositionFilterPanel from "@presentation/components/positions/PositionFilterPanel.vue";
 import PositionRandomSettingsPanel from "@presentation/components/positions/PositionRandomSettingsPanel.vue";
 import AccessGate from "@presentation/components/shared/AccessGate.vue";
@@ -69,7 +70,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
-    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">پوزیشن‌ها</h1>
+    <GamePageHeader title="📖 پوزیشن‌ها" />
 
     <AccessGate v-if="!accessStore.isUnlocked" message="برای دیدن پوزیشن‌ها، رمز را وارد کنید." />
 
@@ -125,7 +126,7 @@ onBeforeUnmount(() => {
               :aria-expanded="isRandomSettingsOpen"
               @click="isRandomSettingsOpen = !isRandomSettingsOpen"
             >
-              ⚙️ تنظیمات تصادفی<span v-if="store.randomExclusions.count > 0"> ({{ store.randomExclusions.count }} مورد حذف)</span><span v-if="store.autoAdvance.enabled"> · ⏱ {{ store.autoAdvance.seconds }}ث</span>
+              ⚙️ تنظیمات تصادفی
             </button>
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
