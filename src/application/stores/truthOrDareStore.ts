@@ -22,6 +22,7 @@ export const useTruthOrDareStore = defineStore("truthOrDare", () => {
   const saved = repository.load();
   const intensity = ref<CardIntensity>(saved?.intensity ?? CardIntensity.Medium);
   const customCards = shallowRef<TruthOrDareCard[]>(saved?.customCards ?? []);
+  const seenCardIds = shallowRef<ReadonlySet<string>>(new Set(saved?.seenCardIds ?? []));
   const game = shallowRef<TruthOrDareGame | null>(null);
 
   const isPlaying = computed(() => game.value !== null);
@@ -30,8 +31,20 @@ export const useTruthOrDareStore = defineStore("truthOrDare", () => {
     () => allCards.value.filter((card) => INTENSITY_RANK[card.intensity] <= INTENSITY_RANK[intensity.value]).length,
   );
 
+  const remainingTruthCount = computed(() =>
+    game.value ? game.value.getRemainingCount(CardType.Truth) : allCards.value.filter((c) => c.type === CardType.Truth && INTENSITY_RANK[c.intensity] <= INTENSITY_RANK[intensity.value] && !seenCardIds.value.has(c.id)).length,
+  );
+
+  const remainingDareCount = computed(() =>
+    game.value ? game.value.getRemainingCount(CardType.Dare) : allCards.value.filter((c) => c.type === CardType.Dare && INTENSITY_RANK[c.intensity] <= INTENSITY_RANK[intensity.value] && !seenCardIds.value.has(c.id)).length,
+  );
+
   function persist(): void {
-    repository.save({ intensity: intensity.value, customCards: customCards.value });
+    repository.save({
+      intensity: intensity.value,
+      customCards: customCards.value,
+      seenCardIds: [...seenCardIds.value],
+    });
   }
 
   function setIntensity(next: CardIntensity): void {
@@ -65,15 +78,29 @@ export const useTruthOrDareStore = defineStore("truthOrDare", () => {
       cards: allCards.value,
       random: randomSource,
       firstTurnIndex: randomSource.nextInt(0, 1) === 0 ? 0 : 1,
+      seenCardIds: seenCardIds.value,
     });
+    seenCardIds.value = game.value.seenCardIds;
+    persist();
   }
 
   function draw(type: CardType): void {
-    game.value = game.value?.draw(type, randomSource) ?? null;
+    if (!game.value) return;
+    game.value = game.value.draw(type, randomSource);
+    seenCardIds.value = game.value.seenCardIds;
+    persist();
   }
 
   function finishTurn(): void {
     game.value = game.value?.finishTurn() ?? null;
+  }
+
+  function resetSeenCards(): void {
+    seenCardIds.value = new Set();
+    persist();
+    if (isPlaying.value) {
+      startGame();
+    }
   }
 
   function quitGame(): void {
@@ -83,15 +110,19 @@ export const useTruthOrDareStore = defineStore("truthOrDare", () => {
   return {
     intensity,
     customCards,
+    seenCardIds,
     game,
     isPlaying,
     activeCardCount,
+    remainingTruthCount,
+    remainingDareCount,
     setIntensity,
     addCustomCard,
     removeCustomCard,
     startGame,
     draw,
     finishTurn,
+    resetSeenCards,
     quitGame,
   };
 });

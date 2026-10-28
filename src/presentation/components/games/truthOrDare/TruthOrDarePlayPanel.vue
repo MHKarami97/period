@@ -16,13 +16,22 @@ const isQuitConfirmOpen = ref(false);
       <template v-if="!store.game.drawnCard">
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">یکی را انتخاب کن:</p>
         <div class="grid grid-cols-2 gap-3">
-          <button type="button" class="rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" @click="store.draw(CardType.Truth)">🗣 حقیقت</button>
-          <button type="button" class="rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" @click="store.draw(CardType.Dare)">🔥 جرئت</button>
+          <button type="button" class="flex flex-col items-center justify-center gap-1 rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" @click="store.draw(CardType.Truth)">
+            <span>🗣 حقیقت</span>
+            <span class="text-xs opacity-80">{{ store.remainingTruthCount }} باقیمانده</span>
+          </button>
+          <button type="button" class="flex flex-col items-center justify-center gap-1 rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" @click="store.draw(CardType.Dare)">
+            <span>🔥 جرئت</span>
+            <span class="text-xs opacity-80">{{ store.remainingDareCount }} باقیمانده</span>
+          </button>
         </div>
       </template>
 
       <template v-else>
         <div class="flex flex-col gap-3 rounded-2xl bg-amber-100/70 p-5 text-center dark:bg-amber-500/15">
+          <span v-if="store.game.wasReset" class="text-xs font-medium text-teal-600 dark:text-teal-400">
+            🔄 تمام کارت‌های این بخش تمام شده بود؛ دور جدید کارت‌ها شروع شد!
+          </span>
           <span class="text-xs text-amber-700 dark:text-amber-300">
             {{ CARD_TYPE_LABELS_FA[store.game.drawnCard.type] }} · {{ INTENSITY_LABELS_FA[store.game.drawnCard.intensity] }}
           </span>

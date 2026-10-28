@@ -47,11 +47,14 @@ function tryAdd(categoryValue: string, text: string): string | null {
           {{ CONVERSATION_CATEGORY_LABELS_FA[category] }}
         </button>
       </div>
-      <p class="text-xs text-slate-500 dark:text-slate-400">{{ store.activeCardCount }} کارت فعال است. با تغییر دسته‌ها، دسته‌ی کارت‌ها از نو مخلوط می‌شود.</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ store.activeCardCount }} کارت فعال است ({{ store.session.remainingCount }} کارت باقیمانده در این دور).</p>
     </section>
 
     <section class="flex flex-col gap-4 p-5 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <div v-if="store.session.currentCard" class="flex flex-col gap-3 rounded-2xl bg-amber-100/70 p-6 text-center dark:bg-amber-500/15">
+        <span v-if="store.session.wasReset" class="text-xs font-medium text-teal-600 dark:text-teal-400">
+          🔄 تمام کارت‌ها یک‌بار نمایش داده شدند؛ دور جدید شروع شد!
+        </span>
         <span class="text-xs text-amber-700 dark:text-amber-300">
           {{ CONVERSATION_CATEGORY_LABELS_FA[store.session.currentCard.category] }} · کارت {{ store.session.drawnNumber }}
         </span>
@@ -59,7 +62,7 @@ function tryAdd(categoryValue: string, text: string): string | null {
       </div>
       <p v-else class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">برای شروع، «کارت بعدی» را بزنید.</p>
 
-      <button type="button" class="rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" :disabled="!store.session.hasCards" @click="store.drawNext()">کارت بعدی</button>
+      <button type="button" class="rounded-xl bg-rose-500/90 px-4 py-3 font-medium text-white transition hover:bg-rose-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50" :disabled="!store.session.hasCards" @click="store.drawNext()">کارت بعدی ({{ store.session.remainingCount }} باقیمانده)</button>
       <p class="text-center text-xs text-slate-400 dark:text-slate-500">هر دو جواب بدهید؛ نوبتی گوش بدهید و قضاوت نکنید. رد کردن هر کارت آزاد است.</p>
     </section>
 

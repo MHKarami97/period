@@ -15,15 +15,18 @@ const KEY_PREFIX = "period-tracker:games";
 export interface TruthOrDareSettings {
   intensity: CardIntensity;
   customCards: TruthOrDareCard[];
+  seenCardIds?: string[];
 }
 
 export interface TwoQuestionSettings {
   durationMinutes: number;
+  seenQuestionTemplates?: string[];
 }
 
 export interface ConversationSettings {
   categories: ConversationCategory[];
   customCards: ConversationCard[];
+  seenCardIds?: string[];
 }
 
 export interface ScratchCardsSettings {
@@ -62,13 +65,16 @@ export function createTruthOrDareSettingsRepository(): IGameSettingsRepository<T
   return new LocalStorageJsonRepository<TruthOrDareSettings>(
     `${KEY_PREFIX}:truth-or-dare`,
     (raw) => {
-      const stored = raw as Partial<{ intensity: CardIntensity; customCards: unknown }>;
+      const stored = raw as Partial<{ intensity: CardIntensity; customCards: unknown; seenCardIds: unknown }>;
       const intensity = Object.values(CardIntensity).includes(stored.intensity as CardIntensity)
         ? (stored.intensity as CardIntensity)
         : CardIntensity.Medium;
       return {
         intensity,
         customCards: pickCards(stored.customCards, (item) => TruthOrDareCardFactory.create(item as TruthOrDareCard)),
+        seenCardIds: Array.isArray(stored.seenCardIds)
+          ? stored.seenCardIds.filter((id): id is string => typeof id === "string")
+          : [],
       };
     },
     (settings) => settings,
@@ -79,9 +85,13 @@ export function createTwoQuestionSettingsRepository(): IGameSettingsRepository<T
   return new LocalStorageJsonRepository<TwoQuestionSettings>(
     `${KEY_PREFIX}:two-questions`,
     (raw) => {
-      const minutes = (raw as Partial<TwoQuestionSettings>).durationMinutes;
+      const stored = raw as Partial<{ durationMinutes: unknown; seenQuestionTemplates: unknown }>;
+      const minutes = stored.durationMinutes;
       return {
         durationMinutes: TwoQuestionSession.isValidDuration(minutes as number) ? (minutes as number) : DEFAULT_DURATION_MINUTES,
+        seenQuestionTemplates: Array.isArray(stored.seenQuestionTemplates)
+          ? stored.seenQuestionTemplates.filter((item): item is string => typeof item === "string")
+          : [],
       };
     },
     (settings) => settings,
@@ -98,6 +108,9 @@ export function createConversationSettingsRepository(): IGameSettingsRepository<
       return {
         categories: categories.length > 0 ? categories : allCategories,
         customCards: pickCards(stored.customCards, (item) => ConversationCardFactory.create(item as ConversationCard)),
+        seenCardIds: Array.isArray(stored.seenCardIds)
+          ? stored.seenCardIds.filter((id): id is string => typeof id === "string")
+          : [],
       };
     },
     (settings) => settings,

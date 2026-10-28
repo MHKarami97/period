@@ -44,6 +44,15 @@ export async function deriveKeyFromPrf(prfOutput: ArrayBuffer): Promise<CryptoKe
   );
 }
 
+/** Generates a non-extractable AES-GCM key for device-bound biometric protection. */
+export function generateBiometricDeviceKey(): Promise<CryptoKey> {
+  return crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
 /** The data key is non-extractable: JavaScript can use it but never read its bytes back. */
 export function importDataKey(keyBytes: Uint8Array): Promise<CryptoKey> {
   return crypto.subtle.importKey("raw", asBuffer(keyBytes), { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);

@@ -1,3 +1,4 @@
+import { BiometricKeyStorage } from "../security/BiometricKeyStorage";
 import { vaultSession } from "../security/VaultSession";
 import { DatabaseResetService } from "./DatabaseResetService";
 
@@ -11,6 +12,7 @@ import { DatabaseResetService } from "./DatabaseResetService";
 export class FullWipeService {
   public static async wipeEverything(): Promise<void> {
     await DatabaseResetService.resetAll();
+    await BiometricKeyStorage.clear();
     vaultSession.clear();
     localStorage.clear();
     sessionStorage.clear();

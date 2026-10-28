@@ -40,9 +40,9 @@ const DIALOGS: Readonly<Record<DialogMode, { title: string; message: string; con
     ],
   },
   passkey: {
-    title: "فعال‌سازی باز کردن با بایومتریک",
-    message: "برای تأیید، رمز فعلی را وارد کنید. بعد از آن، سیستم دو بار اثر انگشت یا چهره (یا قفل دستگاه) را می‌خواهد.",
-    confirmLabel: "ادامه",
+    title: "فعال‌سازی ورود با حسگر اثرانگشت",
+    message: "رمز فعلی برنامه را وارد کنید و سپس برای تأیید، انگشت خود را روی حسگر اثرانگشت قرار دهید.",
+    confirmLabel: "تأیید و فعال‌سازی اثرانگشت",
     danger: false,
     fields: [{ key: "current", label: "رمز فعلی", role: "current" }],
   },
@@ -147,17 +147,73 @@ onMounted(async () => {
         <button type="button" class="rounded-lg bg-rose-500/10 px-3 py-2 text-xs text-rose-600 hover:bg-rose-500/20 dark:text-rose-300" @click="openDialog('disable')">غیرفعال‌سازی قفل</button>
       </div>
 
-      <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
-        <p class="text-sm text-slate-900 dark:text-slate-100">🔑 باز کردن با بایومتریک (WebAuthn)</p>
+      <div class="rounded-xl border border-slate-200/70 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+                <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+                <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+                <path d="M2 12a10 10 0 0 1 18-6" />
+                <path d="M2 16h.01" />
+                <path d="M21.8 16c.2-2 .131-5.354 0-6" />
+                <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" />
+                <path d="M8.65 22c.21-.66.45-1.32.57-2" />
+                <path d="M9 6.8a6 6 0 0 1 9 5.2v2" />
+              </svg>
+            </span>
+            <div>
+              <p class="text-sm font-medium text-slate-900 dark:text-slate-100">ورود با حسگر اثرانگشت</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">باز کردن سریع قفل با حسگر دستگاه بدون نیاز به وارد کردن هر باره‌ی رمز</p>
+            </div>
+          </div>
+          <span
+            v-if="lockStore.hasPasskey"
+            class="rounded-full bg-teal-500/10 px-2.5 py-0.5 text-xs font-medium text-teal-600 dark:bg-teal-500/20 dark:text-teal-300"
+          >
+            فعال
+          </span>
+        </div>
+
         <template v-if="lockStore.hasPasskey">
-          <p class="mt-1 text-xs text-teal-600 dark:text-teal-300">فعال است.</p>
-          <button type="button" class="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200" @click="lockStore.disablePasskey()">غیرفعال‌سازی</button>
+          <p class="mt-2.5 text-xs leading-5 text-slate-600 dark:text-slate-300">
+            حسگر اثرانگشت برای این دستگاه فعال است. در صفحه قفل می‌توانید مستقیماً با لمس حسگر اثرانگشت وارد شوید.
+          </p>
+          <button
+            type="button"
+            class="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-500/20 dark:text-rose-300"
+            @click="lockStore.disablePasskey()"
+          >
+            غیرفعال‌سازی اثرانگشت
+          </button>
         </template>
         <template v-else-if="isPasskeySupported">
-          <p class="mt-1 text-xs leading-6 text-slate-500 dark:text-slate-400">نیاز به سیستم و دستگاهی دارد که افزونه‌ی PRF را پشتیبانی کند؛ اگر نکند، فعال‌سازی با پیام خطا متوقف می‌شود و رمز همچنان کار می‌کند.</p>
-          <button type="button" class="mt-2 rounded-lg bg-teal-500/90 px-3 py-2 text-xs font-medium text-white hover:bg-teal-500" @click="openDialog('passkey')">فعال‌سازی</button>
+          <p class="mt-2.5 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            با فعال کردن این بخش، می‌توانید با حسگر اثرانگشت گوشی یا سیستم خود سریعاً قفل ماهک را باز کنید.
+          </p>
+          <button
+            type="button"
+            class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-teal-500/90 px-3.5 py-2 text-xs font-medium text-white hover:bg-teal-500"
+            @click="openDialog('passkey')"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+              <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+              <path d="M2 12a10 10 0 0 1 18-6" />
+              <path d="M2 16h.01" />
+              <path d="M21.8 16c.2-2 .131-5.354 0-6" />
+              <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" />
+              <path d="M8.65 22c.21-.66.45-1.32.57-2" />
+              <path d="M9 6.8a6 6 0 0 1 9 5.2v2" />
+            </svg>
+            <span>فعال‌سازی حسگر اثرانگشت</span>
+          </button>
         </template>
-        <p v-else class="mt-1 text-xs text-slate-500 dark:text-slate-400">این دستگاه یا سیستم بایومتریک (احراز هویت پلتفرم) ندارد.</p>
+        <p v-else class="mt-2.5 text-xs text-slate-500 dark:text-slate-400">
+          حسگر اثرانگشت در این دستگاه یا مرورگر در دسترس نیست یا پشتیبانی نمی‌شود.
+        </p>
       </div>
     </template>
 

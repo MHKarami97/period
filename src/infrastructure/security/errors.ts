@@ -15,7 +15,7 @@ export class VaultLockedError extends Error {
 }
 
 export class PasskeyUnsupportedError extends Error {
-  public constructor(message = "این دستگاه یا سیستم از باز کردن قفل با بایومتریک (WebAuthn PRF) پشتیبانی نمی‌کند.") {
+  public constructor(message = "این دستگاه یا مرورگر از حسگر اثرانگشت پشتیبانی نمی‌کند.") {
     super(message);
     this.name = "PasskeyUnsupportedError";
   }

@@ -34,6 +34,25 @@ describe("ConversationSession", () => {
     expect([...seen].every((id) => id.includes("family"))).toBe(true);
   });
 
+  it("resets automatically when all eligible cards have been seen", () => {
+    const random = new SeededRandom(5);
+    const familyCards = DEFAULT_CONVERSATION_CARDS.filter((c) => c.category === ConversationCategory.Family);
+    const total = familyCards.length;
+
+    let session = ConversationSession.start(familyCards, [ConversationCategory.Family], random);
+    const seen = new Set<string>();
+    for (let i = 0; i < total; i += 1) {
+      session = session.draw(random);
+      seen.add(session.currentCard!.id);
+    }
+    expect(seen.size).toBe(total);
+
+    // Drawing one more triggers auto-reset
+    session = session.draw(random);
+    expect(session.wasReset).toBe(true);
+    expect(familyCards.map((c) => c.id)).toContain(session.currentCard!.id);
+  });
+
   it("refuses to draw when no card matches", () => {
     const session = ConversationSession.start([], [ConversationCategory.Couple], new SeededRandom(1));
     expect(session.hasCards).toBe(false);

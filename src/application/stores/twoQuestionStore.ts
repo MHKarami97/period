@@ -11,18 +11,27 @@ const repository = createTwoQuestionSettingsRepository();
 const randomSource = new MathRandomSource();
 
 export const useTwoQuestionStore = defineStore("twoQuestion", () => {
-  const durationMinutes = ref(repository.load()?.durationMinutes ?? DEFAULT_DURATION_MINUTES);
+  const saved = repository.load();
+  const durationMinutes = ref(saved?.durationMinutes ?? DEFAULT_DURATION_MINUTES);
+  const seenQuestionTemplates = shallowRef<ReadonlySet<string>>(new Set(saved?.seenQuestionTemplates ?? []));
   const session = shallowRef<TwoQuestionSession | null>(null);
   const phase = ref<StepPhase>("question");
 
   const isPlaying = computed(() => session.value !== null);
+
+  function persist(): void {
+    repository.save({
+      durationMinutes: durationMinutes.value,
+      seenQuestionTemplates: [...seenQuestionTemplates.value],
+    });
+  }
 
   function setDuration(minutes: number): void {
     if (!TwoQuestionSession.isValidDuration(minutes)) {
       return;
     }
     durationMinutes.value = minutes;
-    repository.save({ durationMinutes: minutes });
+    persist();
   }
 
   function startSession(): void {
@@ -30,14 +39,23 @@ export const useTwoQuestionStore = defineStore("twoQuestion", () => {
     if (!players.areNamesComplete) {
       throw new Error("Both player names are required.");
     }
-    session.value = TwoQuestionSession.start({
+    const nextSession = TwoQuestionSession.start({
       womanName: players.womanName,
       manName: players.manName,
       durationMinutes: durationMinutes.value,
       firstAskerIndex: randomSource.nextInt(0, 1) === 0 ? 0 : 1,
       random: randomSource,
+      seenTemplates: seenQuestionTemplates.value,
     });
+    session.value = nextSession;
+    seenQuestionTemplates.value = nextSession.seenTemplates;
+    persist();
     phase.value = "question";
+  }
+
+  function resetSeenQuestions(): void {
+    seenQuestionTemplates.value = new Set();
+    persist();
   }
 
   function beginTouch(): void {
@@ -54,5 +72,17 @@ export const useTwoQuestionStore = defineStore("twoQuestion", () => {
     phase.value = "question";
   }
 
-  return { durationMinutes, session, phase, isPlaying, setDuration, startSession, beginTouch, nextStep, quit };
+  return {
+    durationMinutes,
+    seenQuestionTemplates,
+    session,
+    phase,
+    isPlaying,
+    setDuration,
+    startSession,
+    resetSeenQuestions,
+    beginTouch,
+    nextStep,
+    quit,
+  };
 });

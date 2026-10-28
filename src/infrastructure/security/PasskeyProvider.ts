@@ -3,15 +3,15 @@ import { fromBase64, toBase64 } from "./encoding";
 
 export interface PasskeyEnrollment {
   readonly credentialId: string;
-  readonly prfOutput: ArrayBuffer;
+  readonly prfOutput?: ArrayBuffer;
 }
 
-/** Port for a passkey that can return a stable secret (WebAuthn PRF extension). */
+/** Port for a platform passkey (fingerprint / biometric authenticator). */
 export interface IPasskeyProvider {
   isSupported(): Promise<boolean>;
-  /** Creates a platform passkey and proves it can evaluate the PRF for `prfSalt`. */
-  enroll(prfSalt: Uint8Array): Promise<PasskeyEnrollment>;
-  authenticate(credentialId: string, prfSalt: Uint8Array): Promise<ArrayBuffer>;
+  /** Creates a platform passkey (fingerprint/biometric) and derives PRF secret if supported. */
+  enroll(prfSalt?: Uint8Array): Promise<PasskeyEnrollment>;
+  authenticate(credentialId: string, prfSalt?: Uint8Array): Promise<ArrayBuffer | null>;
 }
 
 interface PrfClientResults {
@@ -29,10 +29,9 @@ function prfExtension(prfSalt?: Uint8Array): AuthenticationExtensionsClientInput
 }
 
 /**
- * Adapter over the WebAuthn PRF extension (see MDN "Web Authentication extensions").
- * The authenticator derives the secret only after user verification (biometrics / device PIN);
- * the signature is not verified because nothing is authenticated against a server - the
- * secret itself is what unwraps the data key.
+ * Adapter over WebAuthn platform authenticator (fingerprint / biometrics / Windows Hello / Touch ID).
+ * If hardware PRF extension is present, PRF output is returned; otherwise standard platform
+ * user verification is performed and device-bound storage is used by the vault.
  */
 export class WebAuthnPasskeyProvider implements IPasskeyProvider {
   public async isSupported(): Promise<boolean> {
@@ -44,44 +43,51 @@ export class WebAuthnPasskeyProvider implements IPasskeyProvider {
     }
   }
 
-  public async enroll(prfSalt: Uint8Array): Promise<PasskeyEnrollment> {
-    if (!(await this.isSupported())) throw new PasskeyUnsupportedError();
+  public async enroll(prfSalt?: Uint8Array): Promise<PasskeyEnrollment> {
+    if (!(await this.isSupported())) {
+      throw new PasskeyUnsupportedError("این دستگاه از حسگر اثرانگشت پشتیبانی نمی‌کند.");
+    }
 
     const created = await navigator.credentials.create({
       publicKey: {
         challenge: crypto.getRandomValues(new Uint8Array(32)),
         rp: { name: "ماهک" },
-        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "mahak-user", displayName: "ماهک" },
+        user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "mahak-user", displayName: "کاربر ماهک" },
         pubKeyCredParams: [
           { type: "public-key", alg: COSE_ES256 },
           { type: "public-key", alg: COSE_RS256 },
         ],
         authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "preferred", userVerification: "required" },
         timeout: TIMEOUT_MS,
-        extensions: prfExtension(),
+        extensions: prfSalt ? prfExtension(prfSalt) : undefined,
       },
     });
-    if (!(created instanceof PublicKeyCredential)) throw new PasskeyUnsupportedError();
+    if (!(created instanceof PublicKeyCredential)) {
+      throw new PasskeyUnsupportedError("ایجاد دسترسی اثرانگشت با خطا مواجه شد.");
+    }
 
-    // Support is only certain once the PRF returns a value, so evaluate it right away.
     const credentialId = toBase64(new Uint8Array(created.rawId));
-    const prfOutput = await this.authenticate(credentialId, prfSalt);
+    const prfResults = (created.getClientExtensionResults() as PrfClientResults)?.prf;
+    const prfOutput = prfResults?.results?.first;
+
     return { credentialId, prfOutput };
   }
 
-  public async authenticate(credentialId: string, prfSalt: Uint8Array): Promise<ArrayBuffer> {
+  public async authenticate(credentialId: string, prfSalt?: Uint8Array): Promise<ArrayBuffer | null> {
     const assertion = await navigator.credentials.get({
       publicKey: {
         challenge: crypto.getRandomValues(new Uint8Array(32)),
         allowCredentials: [{ type: "public-key", id: fromBase64(credentialId) as BufferSource }],
         userVerification: "required",
         timeout: TIMEOUT_MS,
-        extensions: prfExtension(prfSalt),
+        extensions: prfSalt ? prfExtension(prfSalt) : undefined,
       },
     });
-    if (!(assertion instanceof PublicKeyCredential)) throw new PasskeyUnsupportedError();
-    const output = (assertion.getClientExtensionResults() as PrfClientResults).prf?.results?.first;
-    if (!output) throw new PasskeyUnsupportedError();
-    return output;
+    if (!(assertion instanceof PublicKeyCredential)) {
+      throw new PasskeyUnsupportedError("تأیید حسگر اثرانگشت لغو شد یا با خطا مواجه شد.");
+    }
+    const output = (assertion.getClientExtensionResults() as PrfClientResults)?.prf?.results?.first;
+    return output ?? null;
   }
 }
+

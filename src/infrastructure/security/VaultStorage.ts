@@ -2,7 +2,7 @@ import type { WrappedKey } from "./VaultCrypto";
 
 export interface PasskeyWrap {
   readonly credentialId: string;
-  readonly prfSalt: string;
+  readonly prfSalt?: string;
   readonly wrap: WrappedKey;
 }
 

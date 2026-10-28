@@ -36,6 +36,8 @@ export class TwoQuestionSession {
     private readonly durationMinutes: number,
     private readonly stepIndex: number,
     private readonly questionTemplates: readonly string[],
+    private readonly seen: ReadonlySet<string> = new Set(),
+    private readonly resetOccurred: boolean = false,
   ) {}
 
   public static isValidDuration(minutes: number): boolean {
@@ -48,6 +50,7 @@ export class TwoQuestionSession {
     durationMinutes: number;
     firstAskerIndex?: 0 | 1;
     random?: IRandomSource;
+    seenTemplates?: ReadonlySet<string> | readonly string[];
   }): TwoQuestionSession {
     const names: [string, string] = [input.womanName.trim(), input.manName.trim()];
     if (names.some((name) => name.length === 0 || name.length > MAX_NAME_LENGTH)) {
@@ -56,12 +59,15 @@ export class TwoQuestionSession {
     if (!TwoQuestionSession.isValidDuration(input.durationMinutes)) {
       throw new RangeError(`Duration must be between ${MIN_DURATION_MINUTES} and ${MAX_DURATION_MINUTES} minutes.`);
     }
+    const { templates, nextSeen, wasReset } = TwoQuestionSession.pickTemplates(input.random, input.seenTemplates);
     return new TwoQuestionSession(
       names,
       input.firstAskerIndex ?? 0,
       input.durationMinutes,
       0,
-      TwoQuestionSession.pickTemplates(input.random),
+      templates,
+      nextSeen,
+      wasReset,
     );
   }
 
@@ -85,6 +91,14 @@ export class TwoQuestionSession {
     return this.isFinished ? null : this.buildStep(this.stepIndex);
   }
 
+  public get seenTemplates(): ReadonlySet<string> {
+    return this.seen;
+  }
+
+  public get wasReset(): boolean {
+    return this.resetOccurred;
+  }
+
   public advance(): TwoQuestionSession {
     if (this.isFinished) {
       return this;
@@ -95,6 +109,8 @@ export class TwoQuestionSession {
       this.durationMinutes,
       this.stepIndex + 1,
       this.questionTemplates,
+      this.seen,
+      this.resetOccurred,
     );
   }
 
@@ -122,15 +138,33 @@ export class TwoQuestionSession {
     };
   }
 
-  /** One template per step: WARM questions in round 1, HOT in round 2; never the same text twice. */
-  private static pickTemplates(random?: IRandomSource): string[] {
+  /** One template per step: WARM questions in round 1, HOT in round 2; never repeats until full pool is exhausted. */
+  public static pickTemplates(
+    random?: IRandomSource,
+    seenInput?: ReadonlySet<string> | readonly string[],
+  ): { templates: string[]; nextSeen: Set<string>; wasReset: boolean } {
+    const seen = new Set(seenInput ?? []);
+    let wasReset = false;
     const tiers: QuestionTier[] = ["WARM", "HOT"];
     const kinds: QuestionKind[] = ["TOUCH_YOU", "TOUCH_ME"];
-    return tiers.flatMap((tier) =>
-      kinds.map((kind) => {
+
+    const templates: string[] = [];
+    for (const tier of tiers) {
+      for (const kind of kinds) {
         const pool = QUESTION_BANK[kind][tier];
-        return pool[random ? random.nextInt(0, pool.length - 1) : 0];
-      }),
-    );
+        let unseen: readonly string[] = pool.filter((q) => !seen.has(q));
+        if (unseen.length === 0) {
+          for (const q of pool) {
+            seen.delete(q);
+          }
+          unseen = pool;
+          wasReset = true;
+        }
+        const picked = unseen[random ? random.nextInt(0, unseen.length - 1) : 0];
+        seen.add(picked);
+        templates.push(picked);
+      }
+    }
+    return { templates, nextSeen: seen, wasReset };
   }
 }

@@ -6,12 +6,14 @@ import {
   DEFAULT_PBKDF2_ITERATIONS,
   deriveKeyFromPrf,
   deriveKeyFromSecret,
+  generateBiometricDeviceKey,
   generateDataKeyBytes,
   importDataKey,
   randomBytes,
   unwrapBytes,
   wrapBytes,
 } from "./VaultCrypto";
+import { BiometricKeyStorage } from "./BiometricKeyStorage";
 import { LocalStorageVaultStorage, type IVaultStorage, type VaultRecord } from "./VaultStorage";
 import { vaultSession, type VaultSession } from "./VaultSession";
 
@@ -78,9 +80,20 @@ export class VaultService {
 
   public async unlockWithPasskey(): Promise<void> {
     const passkey = this.requireRecord().passkey;
-    if (!passkey) throw new PasskeyUnsupportedError("بایومتریک برای این برنامه فعال نشده است.");
-    const output = await this.passkeys.authenticate(passkey.credentialId, fromBase64(passkey.prfSalt));
-    const dataKey = await this.unwrapOrThrow(await deriveKeyFromPrf(output), passkey.wrap);
+    if (!passkey) throw new PasskeyUnsupportedError("حسگر اثرانگشت برای این برنامه فعال نشده است.");
+    const prfSalt = passkey.prfSalt ? fromBase64(passkey.prfSalt) : undefined;
+    const output = await this.passkeys.authenticate(passkey.credentialId, prfSalt);
+    let kek: CryptoKey;
+    if (output) {
+      kek = await deriveKeyFromPrf(output);
+    } else {
+      const bioKey = await BiometricKeyStorage.loadKey(passkey.credentialId);
+      if (!bioKey) {
+        throw new PasskeyUnsupportedError("اطلاعات حسگر اثرانگشت روی این دستگاه یافت نشد. لطفاً با رمز وارد شوید.");
+      }
+      kek = bioKey;
+    }
+    const dataKey = await this.unwrapOrThrow(kek, passkey.wrap);
     this.session.set(await importDataKey(dataKey));
     dataKey.fill(0);
   }
@@ -107,16 +120,28 @@ export class VaultService {
     const dataKey = await this.unwrapWithSecret(secret);
     const prfSalt = randomBytes(PRF_SALT_BYTES);
     const enrollment = await this.passkeys.enroll(prfSalt);
-    const kek = await deriveKeyFromPrf(enrollment.prfOutput);
-    this.storage.save({
-      ...record,
-      passkey: { credentialId: enrollment.credentialId, prfSalt: toBase64(prfSalt), wrap: await wrapBytes(kek, dataKey) },
-    });
+    if (enrollment.prfOutput) {
+      const kek = await deriveKeyFromPrf(enrollment.prfOutput);
+      this.storage.save({
+        ...record,
+        passkey: { credentialId: enrollment.credentialId, prfSalt: toBase64(prfSalt), wrap: await wrapBytes(kek, dataKey) },
+      });
+    } else {
+      const bioKey = await generateBiometricDeviceKey();
+      await BiometricKeyStorage.saveKey(enrollment.credentialId, bioKey);
+      this.storage.save({
+        ...record,
+        passkey: { credentialId: enrollment.credentialId, wrap: await wrapBytes(bioKey, dataKey) },
+      });
+    }
     dataKey.fill(0);
   }
 
   public removePasskey(): void {
     const record = this.requireRecord();
+    if (record.passkey) {
+      void BiometricKeyStorage.deleteKey(record.passkey.credentialId);
+    }
     const { passkey: _removed, ...rest } = record;
     this.storage.save(rest);
   }
@@ -127,6 +152,10 @@ export class VaultService {
 
   /** Forgets the vault entirely. Only call after the data has been decrypted back to plain text. */
   public destroy(): void {
+    const record = this.storage.load();
+    if (record?.passkey) {
+      void BiometricKeyStorage.deleteKey(record.passkey.credentialId);
+    }
     this.session.clear();
     this.storage.clear();
   }

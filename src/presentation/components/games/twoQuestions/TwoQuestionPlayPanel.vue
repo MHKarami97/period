@@ -40,6 +40,10 @@ function restart(): void {
         مرحله {{ store.session.stepNumber }} از {{ store.session.totalSteps }}
       </p>
 
+      <div v-if="store.session.wasReset" class="rounded-xl bg-teal-500/10 p-2 text-center text-xs font-medium text-teal-600 dark:bg-teal-500/20 dark:text-teal-300">
+        🔄 تمام سوالات یک‌بار نمایش داده شدند؛ دور جدید سوالات شروع شد!
+      </div>
+
       <template v-if="store.phase === 'question'">
         <p class="text-center text-base leading-8 text-slate-900 dark:text-slate-100">{{ store.session.currentStep.questionText }}</p>
         <p class="text-center text-xs text-slate-500 dark:text-slate-400">اول با هم صحبت کنید، بعد تایمر را شروع کنید.</p>

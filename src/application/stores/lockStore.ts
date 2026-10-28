@@ -22,7 +22,7 @@ function loadAutoLockMinutes(): number {
 }
 
 function messageOf(error: unknown, fallback: string): string {
-  if (error instanceof DOMException && error.name === "NotAllowedError") return "عملیات لغو شد یا زمان آن تمام شد.";
+  if (error instanceof DOMException && error.name === "NotAllowedError") return "عملیات با حسگر اثرانگشت لغو شد یا زمان آن به پایان رسید.";
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
@@ -98,7 +98,7 @@ export const useLockStore = defineStore("lock", () => {
     const done = await run(async () => {
       await vaultService.unlockWithPasskey();
       return true;
-    }, "باز کردن قفل با بایومتریک ناموفق بود.");
+    }, "باز کردن قفل با حسگر اثرانگشت ناموفق بود.");
     if (done) markUnlocked();
     return done === true;
   }
@@ -160,7 +160,7 @@ export const useLockStore = defineStore("lock", () => {
       await vaultService.enrollPasskey(secret);
       hasPasskey.value = true;
       return true;
-    }, "فعال‌سازی بایومتریک ناموفق بود.");
+    }, "فعال‌سازی حسگر اثرانگشت ناموفق بود.");
     return done === true;
   }
 

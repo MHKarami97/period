@@ -97,6 +97,30 @@ describe("TruthOrDareGame", () => {
     expect(drawn.finishTurn().currentPlayerName).toBe("علی");
     expect(() => drawn.draw(CardType.Truth, random)).toThrow();
   });
+
+  it("does not repeat cards until all eligible cards are seen, then resets", () => {
+    const cards = [
+      TruthOrDareCardFactory.create({ id: "t1", type: CardType.Truth, intensity: CardIntensity.Soft, text: "t1" }),
+      TruthOrDareCardFactory.create({ id: "t2", type: CardType.Truth, intensity: CardIntensity.Soft, text: "t2" }),
+      TruthOrDareCardFactory.create({ id: "t3", type: CardType.Truth, intensity: CardIntensity.Soft, text: "t3" }),
+    ];
+    let game = TruthOrDareGame.start({ womanName: "a", manName: "b", intensity: CardIntensity.Soft, cards, random });
+    const drawnIds: string[] = [];
+
+    // First cycle of 3 cards
+    for (let i = 0; i < 3; i += 1) {
+      game = game.draw(CardType.Truth, random);
+      drawnIds.push(game.drawnCard!.id);
+      game = game.finishTurn();
+    }
+    expect(new Set(drawnIds).size).toBe(3);
+    expect(drawnIds.sort()).toEqual(["t1", "t2", "t3"]);
+
+    // Next draw triggers auto-reset and draws from the full pool again
+    game = game.draw(CardType.Truth, random);
+    expect(game.wasReset).toBe(true);
+    expect(["t1", "t2", "t3"]).toContain(game.drawnCard!.id);
+  });
 });
 
 describe("TwoQuestionSession", () => {
@@ -109,6 +133,22 @@ describe("TwoQuestionSession", () => {
     }
     expect(askers).toEqual(["سارا", "سارا", "علی", "علی"]);
     expect(session.currentStep).toBeNull();
+  });
+
+  it("does not repeat questions across sessions until pool is exhausted", () => {
+    let seen = new Set<string>();
+    // Run 5 sessions (20 questions total)
+    for (let i = 0; i < 5; i += 1) {
+      const session = TwoQuestionSession.start({
+        womanName: "سارا",
+        manName: "علی",
+        durationMinutes: 2,
+        seenTemplates: seen,
+      });
+      expect(session.seenTemplates.size).toBe(seen.size + 4);
+      seen = new Set(session.seenTemplates);
+    }
+    expect(seen.size).toBe(20);
   });
 
   it("makes the asker touch on the first question and the partner touch on the second", () => {

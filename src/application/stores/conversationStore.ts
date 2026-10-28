@@ -20,17 +20,22 @@ export const useConversationStore = defineStore("conversation", () => {
   const saved = repository.load();
   const categories = shallowRef<ConversationCategory[]>(saved?.categories ?? Object.values(ConversationCategory));
   const customCards = shallowRef<ConversationCard[]>(saved?.customCards ?? []);
+  const seenCardIds = shallowRef<ReadonlySet<string>>(new Set(saved?.seenCardIds ?? []));
 
   const allCards = computed(() => [...DEFAULT_CONVERSATION_CARDS, ...customCards.value]);
   const activeCardCount = computed(() => allCards.value.filter((card) => categories.value.includes(card.category)).length);
-  const session = shallowRef<ConversationSession>(ConversationSession.start(allCards.value, categories.value, randomSource));
+  const session = shallowRef<ConversationSession>(ConversationSession.start(allCards.value, categories.value, randomSource, seenCardIds.value));
 
   function rebuildSession(): void {
-    session.value = ConversationSession.start(allCards.value, categories.value, randomSource);
+    session.value = ConversationSession.start(allCards.value, categories.value, randomSource, seenCardIds.value);
   }
 
   function persist(): void {
-    repository.save({ categories: categories.value, customCards: customCards.value });
+    repository.save({
+      categories: categories.value,
+      customCards: customCards.value,
+      seenCardIds: [...seenCardIds.value],
+    });
   }
 
   function toggleCategory(category: ConversationCategory): void {
@@ -61,7 +66,26 @@ export const useConversationStore = defineStore("conversation", () => {
 
   function drawNext(): void {
     session.value = session.value.draw(randomSource);
+    seenCardIds.value = session.value.seenCardIds;
+    persist();
   }
 
-  return { categories, customCards, session, activeCardCount, toggleCategory, addCustomCard, removeCustomCard, drawNext };
+  function resetSeenCards(): void {
+    seenCardIds.value = new Set();
+    persist();
+    rebuildSession();
+  }
+
+  return {
+    categories,
+    customCards,
+    seenCardIds,
+    session,
+    activeCardCount,
+    toggleCategory,
+    addCustomCard,
+    removeCustomCard,
+    drawNext,
+    resetSeenCards,
+  };
 });

@@ -109,6 +109,39 @@ describe("VaultService", () => {
     await expect(vault.unlockWithPasskey()).rejects.toThrow();
   });
 
+  it("unlocks with standard device fingerprint without PRF extension", async () => {
+    class FakeDeviceFingerprint implements IPasskeyProvider {
+      public async isSupported(): Promise<boolean> {
+        return true;
+      }
+      public async enroll(): Promise<{ credentialId: string; prfOutput?: ArrayBuffer }> {
+        return { credentialId: "ZmluZ2VycHJpbnQ=" };
+      }
+      public async authenticate(): Promise<ArrayBuffer | null> {
+        return null;
+      }
+    }
+    const session = new VaultSession();
+    const storage = new MemoryVaultStorage();
+    const vault = new VaultService(storage, session, new FakeDeviceFingerprint(), TEST_ITERATIONS);
+
+    await vault.create(PIN);
+    const codec = new EncryptedPayloadCodec(session);
+    const payload = await codec.encode({ title: "یادداشت امن" });
+
+    await vault.enrollPasskey(PIN);
+    expect(vault.hasPasskey()).toBe(true);
+    vault.lock();
+    expect(vault.isUnlocked).toBe(false);
+
+    await vault.unlockWithPasskey();
+    expect(vault.isUnlocked).toBe(true);
+    expect(await codec.decode(payload)).toEqual({ title: "یادداشت امن" });
+
+    vault.removePasskey();
+    expect(vault.hasPasskey()).toBe(false);
+  });
+
   it("destroy forgets the vault", async () => {
     const { vault } = createVault();
     await vault.create(PIN);
