@@ -133,6 +133,69 @@ export class JsonBackupService {
     await JsonBackupService.importFromJson(await file.text(), password);
   }
 
+  public static async restoreCloudPayload(
+    payload: BackupPayload,
+    mode: "merge" | "replace"
+  ): Promise<{ restoredCount: number }> {
+    if (!Array.isArray(payload.cycles) || !Array.isArray(payload.symptoms)) {
+      throw new Error("فرمت فایل پشتیبان معتبر نیست.");
+    }
+    const profiles = Array.isArray(payload.profiles) ? payload.profiles : [];
+
+    const hamdelEntries = Array.isArray(payload.hamdelEntries)
+      ? await Promise.all(
+          payload.hamdelEntries.map(async (record) => ({
+            ...record,
+            payload: await hamdelPayloadCodec.encode(await hamdelPayloadCodec.decode(record.payload)),
+          })),
+        )
+      : null;
+
+    const hamdelPhotos = Array.isArray(payload.hamdelPhotos)
+      ? await Promise.all(
+          payload.hamdelPhotos.map(async ({ bytesBase64, ...rest }): Promise<HamdelPhotoRecord> => ({
+            ...rest,
+            bytes: await hamdelBytesCodec.encode(fromBase64(bytesBase64).buffer as ArrayBuffer),
+          })),
+        )
+      : null;
+
+    await appDatabase.transaction(
+      "rw",
+      [appDatabase.profiles, appDatabase.cycles, appDatabase.symptoms, appDatabase.hamdelEntries, appDatabase.hamdelPhotos],
+      async () => {
+        if (mode === "replace") {
+          await appDatabase.profiles.clear();
+          await appDatabase.cycles.clear();
+          await appDatabase.symptoms.clear();
+          if (profiles.length > 0) await appDatabase.profiles.bulkPut(profiles);
+          if (payload.cycles.length > 0) await appDatabase.cycles.bulkPut(payload.cycles);
+          if (payload.symptoms.length > 0) await appDatabase.symptoms.bulkPut(payload.symptoms);
+          if (hamdelEntries) {
+            await appDatabase.hamdelEntries.clear();
+            await appDatabase.hamdelEntries.bulkPut(hamdelEntries);
+          }
+          if (hamdelPhotos) {
+            await appDatabase.hamdelPhotos.clear();
+            await appDatabase.hamdelPhotos.bulkPut(hamdelPhotos);
+          }
+        } else {
+          if (profiles.length > 0) await appDatabase.profiles.bulkPut(profiles);
+          if (payload.cycles.length > 0) await appDatabase.cycles.bulkPut(payload.cycles);
+          if (payload.symptoms.length > 0) await appDatabase.symptoms.bulkPut(payload.symptoms);
+          if (hamdelEntries && hamdelEntries.length > 0) {
+            await appDatabase.hamdelEntries.bulkPut(hamdelEntries);
+          }
+          if (hamdelPhotos && hamdelPhotos.length > 0) {
+            await appDatabase.hamdelPhotos.bulkPut(hamdelPhotos);
+          }
+        }
+      },
+    );
+
+    return { restoredCount: payload.cycles.length + payload.symptoms.length };
+  }
+
   private static download(content: string, fileName: string): void {
     const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);

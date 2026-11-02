@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DataManagementPanel from "@presentation/components/settings/DataManagementPanel.vue";
+import CloudBackupCard from "@presentation/components/settings/CloudBackupCard.vue";
 import ThemeSwitcher from "@presentation/components/settings/ThemeSwitcher.vue";
 import DisplayNameForm from "@presentation/components/settings/DisplayNameForm.vue";
 import AboutSection from "@presentation/components/settings/AboutSection.vue";
@@ -20,6 +21,7 @@ import GamesAccessPanel from "@presentation/components/settings/GamesAccessPanel
     <div class="flex flex-col gap-4 lg:col-span-6">
       <SecurityPanel />
       <GamesAccessPanel />
+      <CloudBackupCard />
       <DataManagementPanel />
       <AboutSection />
     </div>

@@ -7,6 +7,9 @@ import { useThemeSync } from "@presentation/composables/useThemeSync";
 import AppLockScreen from "@presentation/components/lock/AppLockScreen.vue";
 import UpdatePrompt from "@presentation/components/shared/UpdatePrompt.vue";
 import ToastHost from "@presentation/components/shared/ToastHost.vue";
+import SyncFailedBar from "@presentation/components/common/SyncFailedBar.vue";
+import CloudConflictModal from "@presentation/components/cloud/CloudConflictModal.vue";
+import { useCloudSyncStore } from "@application/stores/cloudSyncStore";
 
 /**
  * Root shell: the router owns layout composition (onboarding vs. the full
@@ -18,14 +21,20 @@ import ToastHost from "@presentation/components/shared/ToastHost.vue";
 useThemeSync();
 useAutoLock();
 const lockStore = useLockStore();
+const cloudSyncStore = useCloudSyncStore();
 
 // Ask the browser not to evict our IndexedDB data under storage pressure (navigator.storage.persist).
-onMounted(() => void requestPersistentStorage());
+onMounted(() => {
+  void requestPersistentStorage();
+  void cloudSyncStore.start();
+});
 </script>
 
 <template>
   <AppLockScreen v-if="lockStore.isLocked" />
   <RouterView v-else />
+  <SyncFailedBar />
+  <CloudConflictModal />
   <UpdatePrompt />
   <ToastHost />
 </template>
