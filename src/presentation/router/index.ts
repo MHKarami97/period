@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAccessStore } from "@application/stores/accessStore";
 import { useAppModeStore } from "@application/stores/appModeStore";
 import { GAME_CATALOG } from "@presentation/games/gameCatalog";
+import { GameVisibilityPolicy } from "@domain/games/GameVisibilityPolicy";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -24,7 +25,7 @@ const router = createRouter({
           path: `games/${game.id}`,
           name: game.routeName,
           component: game.loadView,
-          meta: { requiresGameAccess: true },
+          meta: { requiresGameAccess: !GameVisibilityPolicy.isOpen(game.id) },
         })),
         { path: "hamdel", name: "hamdel", component: () => import("@presentation/views/HamdelView.vue") },
         { path: "hamdel/challenges", name: "hamdel-challenges", component: () => import("@presentation/views/HamdelChallengesView.vue") },

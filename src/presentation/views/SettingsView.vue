@@ -6,6 +6,7 @@ import AboutSection from "@presentation/components/settings/AboutSection.vue";
 import AccountActionsPanel from "@presentation/components/settings/AccountActionsPanel.vue";
 import TelegramReminderPanel from "@presentation/components/settings/TelegramReminderPanel.vue";
 import SecurityPanel from "@presentation/components/settings/SecurityPanel.vue";
+import GamesAccessPanel from "@presentation/components/settings/GamesAccessPanel.vue";
 </script>
 
 <template>
@@ -18,6 +19,7 @@ import SecurityPanel from "@presentation/components/settings/SecurityPanel.vue";
     </div>
     <div class="flex flex-col gap-4 lg:col-span-6">
       <SecurityPanel />
+      <GamesAccessPanel />
       <DataManagementPanel />
       <AboutSection />
     </div>
