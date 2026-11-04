@@ -73,13 +73,12 @@ defineProps<{
     class="h-5 w-5 shrink-0 transition-transform duration-200"
     aria-hidden="true"
   >
-    <!-- Open guidance book with compass / star of life -->
     <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
     <path d="M12 7l1.2 2.5L16 10l-2 2 .5 2.8-2.5-1.3-2.5 1.3.5-2.8-2-2 2.8-.5L12 7z" :fill="active ? 'currentColor' : 'none'" />
   </svg>
 
-  <!-- Guide (Menstrual Health Guide) Icon -->
+  <!-- Guide (Educational Reference & Help) Icon -->
   <svg
     v-else-if="name === 'guide'"
     viewBox="0 0 24 24"
@@ -91,8 +90,9 @@ defineProps<{
     class="h-5 w-5 shrink-0 transition-transform duration-200"
     aria-hidden="true"
   >
-    <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
-    <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
+    <path d="M12 6.25c-2.4-1.5-5.2-1.5-8 0V20c2.8-1.5 5.6-1.5 8 0 2.4-1.5 5.2-1.5 8 0V6.25c-2.8-1.5-5.6-1.5-8 0z" />
+    <path d="M12 6.25V20" />
+    <circle cx="12" cy="3" r="1.1" fill="currentColor" />
   </svg>
 
   <!-- Hamdel (Couple & Intimacy) Icon -->
@@ -107,7 +107,6 @@ defineProps<{
     class="h-5 w-5 shrink-0 transition-transform duration-200"
     aria-hidden="true"
   >
-    <!-- Twin connected hearts -->
     <path
       d="M16.5 3.5a4.5 4.5 0 00-3.5 1.7 4.5 4.5 0 00-8 2.3c0 4.8 6.5 9.5 8 10.5 1.5-1 8-5.7 8-10.5a4.5 4.5 0 00-4.5-4.5z"
       :fill="active ? 'currentColor' : 'none'"
@@ -135,7 +134,7 @@ defineProps<{
     <circle cx="16" cy="16" r="1.5" fill="currentColor" />
   </svg>
 
-  <!-- Settings Icon -->
+  <!-- Settings Icon (High Precision Modern Mechanical Gear) -->
   <svg
     v-else-if="name === 'settings'"
     viewBox="0 0 24 24"
@@ -144,10 +143,12 @@ defineProps<{
     :stroke-width="active ? 2.2 : 1.8"
     stroke-linecap="round"
     stroke-linejoin="round"
-    class="h-5 w-5 shrink-0 transition-transform duration-200"
+    class="h-5 w-5 shrink-0 transition-transform duration-300 group-hover:rotate-45"
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+    <circle cx="12" cy="12" r="3.2" :fill="active ? 'currentColor' : 'none'" :fill-opacity="active ? 0.2 : 0" />
+    <path
+      d="M12 2.25c.6 0 1.1.45 1.18 1.05l.2 1.54a7.96 7.96 0 011.9.79l1.32-.83a1.2 1.2 0 011.53.25l1.41 1.41a1.2 1.2 0 01.25 1.53l-.83 1.32c.32.6.59 1.24.79 1.9l1.54.2c.6.08 1.05.58 1.05 1.18v2c0 .6-.45 1.1-1.05 1.18l-1.54.2a7.96 7.96 0 01-.79 1.9l.83 1.32a1.2 1.2 0 01-.25 1.53l-1.41 1.41a1.2 1.2 0 01-1.53.25l-1.32-.83a7.96 7.96 0 01-1.9.79l-.2 1.54c-.08.6-.58 1.05-1.18 1.05h-2c-.6 0-1.1-.45-1.18-1.05l-.2-1.54a7.96 7.96 0 01-1.9-.79l-1.32.83a1.2 1.2 0 01-1.53-.25l-1.41-1.41a1.2 1.2 0 01-.25-1.53l.83-1.32a7.96 7.96 0 01-.79-1.9l-1.54-.2A1.2 1.2 0 012.25 14v-2c0-.6.45-1.1 1.05-1.18l1.54-.2a7.96 7.96 0 01.79-1.9l-.83-1.32a1.2 1.2 0 01.25-1.53l1.41-1.41a1.2 1.2 0 011.53-.25l1.32.83a7.96 7.96 0 011.9-.79l.2-1.54c.08-.6.58-1.05 1.18-1.05h2z"
+    />
   </svg>
 </template>
