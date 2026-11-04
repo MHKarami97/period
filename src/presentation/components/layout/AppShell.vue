@@ -150,33 +150,36 @@ watch(() => hamdelStore.entries, syncReminders);
     <main class="w-full p-4 pb-24 lg:pb-6">
       <!-- Mobile Top Bar: App Title and Top Action Buttons (Guide & Settings) -->
       <header class="mb-4 flex items-center justify-between lg:hidden" aria-label="سربرگ بالا">
-        <div class="flex items-center gap-2">
-          <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500 text-white shadow-xs dark:bg-teal-600">
+        <div class="flex items-center gap-2.5">
+          <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-teal-500 text-white shadow-xs dark:bg-teal-600">
             <svg class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" />
             </svg>
           </span>
-          <span class="text-sm font-bold text-slate-900 dark:text-slate-100">ماهک</span>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-slate-900 dark:text-slate-100">ماهک</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500">همراه سلامت</span>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <!-- Guide button (راهنما) placed right next to settings gear -->
+        <div class="flex items-center gap-2.5">
+          <!-- Guide button (راهنما) placed right next to settings gear with comfortable padding and size -->
           <RouterLink
             :to="GUIDE_ITEM.to"
             :aria-label="GUIDE_ITEM.label"
             :title="GUIDE_ITEM.label"
-            class="group flex h-9.5 w-9.5 items-center justify-center rounded-full bg-white text-slate-600 shadow-xs ring-1 ring-slate-200/90 transition hover:bg-slate-50 hover:text-teal-600 active:scale-95 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800 dark:hover:text-teal-400"
+            class="group flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200/90 transition hover:bg-slate-50 hover:text-teal-600 active:scale-95 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800 dark:hover:text-teal-400"
             :class="isRouteActive(GUIDE_ITEM.to.name) ? 'ring-2 ring-teal-500 text-teal-600 dark:ring-teal-400 dark:text-teal-300' : ''"
           >
             <NavIcon :name="GUIDE_ITEM.iconName" :active="isRouteActive(GUIDE_ITEM.to.name)" />
           </RouterLink>
 
-          <!-- Settings button (تنظیمات) -->
+          <!-- Settings button (تنظیمات) placed right next to guide -->
           <RouterLink
             :to="SETTINGS_ITEM.to"
             :aria-label="SETTINGS_ITEM.label"
             :title="SETTINGS_ITEM.label"
-            class="group flex h-9.5 w-9.5 items-center justify-center rounded-full bg-white text-slate-600 shadow-xs ring-1 ring-slate-200/90 transition hover:bg-slate-50 hover:text-teal-600 active:scale-95 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800 dark:hover:text-teal-400"
+            class="group flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200/90 transition hover:bg-slate-50 hover:text-teal-600 active:scale-95 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800 dark:hover:text-teal-400"
             :class="isRouteActive(SETTINGS_ITEM.to.name) ? 'ring-2 ring-teal-500 text-teal-600 dark:ring-teal-400 dark:text-teal-300' : ''"
           >
             <NavIcon :name="SETTINGS_ITEM.iconName" :active="isRouteActive(SETTINGS_ITEM.to.name)" />
@@ -187,7 +190,7 @@ watch(() => hamdelStore.entries, syncReminders);
       <RouterView />
     </main>
 
-    <!-- Mobile Bottom Navigation Bar (Now without guide, evenly spaced 6 items) -->
+    <!-- Mobile Bottom Navigation Bar -->
     <nav
       class="fixed inset-x-0 bottom-0 z-20 flex items-center justify-around gap-1 border-t border-slate-200/90 bg-white/95 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] backdrop-blur-md dark:border-slate-850 dark:bg-slate-950/95 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
       aria-label="ناوبری موبایل"
