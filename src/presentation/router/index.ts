@@ -20,6 +20,8 @@ const router = createRouter({
         { path: "dashboard", name: "dashboard", component: () => import("@presentation/views/DashboardView.vue") },
         { path: "calendar", name: "calendar", component: () => import("@presentation/views/CalendarView.vue") },
         { path: "symptoms", name: "symptoms", component: () => import("@presentation/views/SymptomsView.vue") },
+        { path: "hamyar", name: "hamyar", component: () => import("@presentation/views/HamyarView.vue") },
+        { path: "hamyar/:guideId", name: "hamyar-guide", component: () => import("@presentation/views/HamyarGuideView.vue") },
         { path: "games", name: "games", component: () => import("@presentation/views/GamesView.vue") },
         ...GAME_CATALOG.map((game) => ({
           path: `games/${game.id}`,
