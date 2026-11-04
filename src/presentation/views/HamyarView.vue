@@ -57,10 +57,6 @@ function clearSearch(): void {
             </p>
           </div>
         </div>
-
-        <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800 dark:bg-teal-950/70 dark:text-teal-300">
-          دسترسی آزاد و آفلاین
-        </span>
       </div>
     </div>
 
@@ -244,9 +240,6 @@ function clearSearch(): void {
         <h2 class="text-sm font-bold text-slate-700 dark:text-slate-300">
           راهنماهای در دسترس ({{ hamyarStore.visibleGuides.length }})
         </h2>
-        <span class="text-xs text-slate-400">
-          برای ورود روی هر کارت کلیک کنید
-        </span>
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -267,7 +260,7 @@ function clearSearch(): void {
               سیاست علمی و حفظ حریم خصوصی همیار
             </span>
             <p>
-              تمام این راهنماها بر پایه مرور شواهد بالینی و پژوهشی بین‌المللی گردآوری شده‌اند و بدون نیاز به اینترنت و بدون ارسال هیچ داده‌ای به سرور، روی دستگاه شما اجرا می‌شوند.
+              تمام این راهنماها بر پایه مرور شواهد بالینی و پژوهشی بین‌المللی گردآوری شده‌اند
             </p>
           </div>
         </div>

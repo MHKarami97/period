@@ -158,9 +158,6 @@ function getEvidenceBadgeClass(level: string): string {
                   </span>
                 </div>
                 <p>{{ claim.text }}</p>
-                <p v-if="claim.caveat" class="text-xs text-amber-700 dark:text-amber-400/90 bg-amber-500/10 rounded-md p-1.5 mt-0.5">
-                  ⚠️ ملاحظه: {{ claim.caveat }}
-                </p>
               </div>
             </div>
           </div>
