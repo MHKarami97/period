@@ -18,7 +18,6 @@ const guideData = ref<HamyarGuideData | null>(null);
 const localSearch = ref("");
 const selectedStageId = ref<number | "all">("all");
 const activeContentType = ref<HamyarContentType>("all");
-const showSources = ref(false);
 
 const contentTypeOptions: readonly { key: HamyarContentType; label: string; icon: string }[] = [
   { key: "all", label: "همه بخش‌ها", icon: "📑" },
@@ -76,16 +75,6 @@ const filteredStages = computed(() => {
     // 2. Content type & text search filter
     return HamyarSearchEngine.filterStage(stage, localSearch.value, activeContentType.value);
   });
-});
-
-const crossCuttingEntries = computed(() => {
-  if (!guideData.value?.cross_cutting_topics) return [];
-  return Object.entries(guideData.value.cross_cutting_topics);
-});
-
-const sourcesEntries = computed(() => {
-  if (!guideData.value?.sources) return [];
-  return Object.entries(guideData.value.sources);
 });
 </script>
 
