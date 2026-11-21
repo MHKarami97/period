@@ -48,7 +48,7 @@ export class CouplePlaySuggestionBuilder {
     const available = [
       CouplePlaySuggestionBuilder.game(input, rotation),
       CouplePlaySuggestionBuilder.question(input, rotation),
-      CouplePlaySuggestionBuilder.quickIdea(input, rotation),
+      CouplePlaySuggestionBuilder.quickIdea(rotation),
       CouplePlaySuggestionBuilder.outfit(input, rotation),
       CouplePlaySuggestionBuilder.meal(input, rotation),
     ].filter((item): item is DailySuggestion => item !== null);
@@ -69,7 +69,7 @@ export class CouplePlaySuggestionBuilder {
     return { id: `question:${card.id}`, icon: "💬", text: `این سؤال را از او بپرس: «${card.text}»`, to: { name: input.questionRouteName } };
   }
 
-  private static quickIdea(input: CouplePlayInput, rotation: DailyRotation): DailySuggestion | null {
+  private static quickIdea(rotation: DailyRotation): DailySuggestion | null {
     const idea = rotation.pick(QUICK_IDEAS, 3);
     return idea ? { id: `idea:${idea}`, icon: "✨", text: idea, to: { name: "games" } } : null;
   }
