@@ -77,36 +77,36 @@ function getEvidenceBadgeClass(level: string): string {
 
 <template>
   <div
-    class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all dark:bg-slate-900 dark:ring-slate-800"
+    class="overflow-hidden rounded-3xl bg-white shadow-xs ring-1 ring-slate-200/90 transition-all dark:bg-slate-900 dark:ring-slate-800"
     :id="`stage-${stage.id}`"
   >
     <!-- Header: Click to collapse / expand -->
     <button
       type="button"
-      class="flex w-full items-center justify-between gap-3 p-5 text-right transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
+      class="flex w-full items-center justify-between gap-2.5 p-3.5 sm:p-5 text-right transition hover:bg-slate-50/80 active:scale-[0.995] dark:hover:bg-slate-850/60"
       @click="isExpanded = !isExpanded"
     >
-      <div class="flex items-center gap-3">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-sm font-bold text-teal-700 ring-1 ring-teal-200 dark:bg-teal-950/50 dark:text-teal-300 dark:ring-teal-800">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-sm font-bold text-teal-700 ring-1 ring-teal-500/20 dark:bg-teal-500/20 dark:text-teal-300 dark:ring-teal-400/20 shadow-2xs">
           {{ stage.id }}
         </span>
-        <div class="flex flex-col gap-0.5">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">
+        <div class="flex flex-col gap-0.5 min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
               مرحله {{ stage.id }}
             </span>
-            <span v-if="stage.timeframe || stage.age_range" class="rounded bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <span v-if="stage.timeframe || stage.age_range" class="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               {{ stage.timeframe || stage.age_range }}
             </span>
           </div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate sm:whitespace-normal">
             {{ stage.title }}
           </h3>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 text-slate-400 dark:text-slate-500">
-        <span class="text-xs hidden sm:inline">{{ isExpanded ? "بستن" : "مشاهده جزئیات" }}</span>
+      <div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 shrink-0">
+        <span class="text-xs hidden md:inline">{{ isExpanded ? "بستن" : "مشاهده جزئیات" }}</span>
         <svg
           class="h-5 w-5 transform transition-transform duration-200"
           :class="{ 'rotate-180': isExpanded }"
@@ -119,43 +119,43 @@ function getEvidenceBadgeClass(level: string): string {
     </button>
 
     <!-- Expanded Body -->
-    <div v-show="isExpanded" class="border-t border-slate-100 p-5 pt-4 flex flex-col gap-5 dark:border-slate-800">
+    <div v-show="isExpanded" class="border-t border-slate-100 p-3.5 sm:p-5 pt-3 sm:pt-4 flex flex-col gap-5 dark:border-slate-800">
       <!-- Goal callout -->
-      <div v-if="stage.goal" class="rounded-2xl bg-teal-50/70 p-4 border-r-4 border-teal-500 dark:bg-teal-950/30 dark:border-teal-400">
+      <div v-if="stage.goal" class="rounded-2xl bg-teal-50/80 p-3.5 sm:p-4 border-r-4 border-teal-500 dark:bg-teal-950/30 dark:border-teal-400">
         <span class="text-xs font-bold text-teal-800 dark:text-teal-300 flex items-center gap-1.5 mb-1">
           <AppIcon name="target" size="xs" />
           <span>هدف این مرحله:</span>
         </span>
-        <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">
+        <p class="text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-200">
           {{ stage.goal }}
         </p>
       </div>
 
       <!-- 1. Knowledge & Evidence -->
       <div v-if="showKnowledge" class="flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
           <AppIcon name="book" size="sm" />
-          <span>دانستنی‌ها و شواهد علمی</span>
+          <span>دانستنی‌ها و مفاهیم علمی</span>
         </div>
 
         <div class="flex flex-col gap-3">
           <div
             v-for="topic in stage.knowledge"
             :key="topic.topic"
-            class="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50"
+            class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850/60 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs"
           >
-            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
+            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
               {{ topic.topic }}
             </h4>
             <div class="flex flex-col gap-3">
               <div
                 v-for="(claim, cIdx) in topic.claims"
                 :key="cIdx"
-                class="flex flex-col gap-1.5 text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-300 border-r-2 border-slate-300 pr-3 dark:border-slate-700"
+                class="flex flex-col gap-1.5 text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-300 border-r-2 border-teal-400/70 pr-3 dark:border-teal-500/70"
               >
                 <div v-if="claim.evidence_level" class="flex items-center gap-2 flex-wrap">
                   <span
-                    class="rounded-full px-2.5 py-0.5 text-[11px] font-medium border"
+                    class="rounded-full px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium border"
                     :class="getEvidenceBadgeClass(claim.evidence_level)"
                   >
                     {{ claim.evidence_level }}
@@ -171,26 +171,26 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 2. Practical Checklist -->
       <div v-if="showChecklist" class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+          <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
             <AppIcon name="check-circle" size="sm" />
             <span>چک‌لیست و اقدامات عملی</span>
           </div>
-          <span class="text-xs text-slate-400">برای ذخیره روی گزینه‌ها بزنید</span>
+          <span class="text-[11px] text-slate-400 dark:text-slate-500">برای ثبت علامت بزنید</span>
         </div>
 
         <div class="space-y-2">
           <label
             v-for="(item, idx) in stage.practical_checklist"
             :key="idx"
-            class="flex items-start gap-3 rounded-xl p-3 transition cursor-pointer"
+            class="flex items-start gap-2.5 sm:gap-3 rounded-2xl p-2.5 sm:p-3 transition cursor-pointer ring-1 ring-transparent"
             :class="hamyarStore.isChecklistCompleted(getChecklistKey(idx))
-              ? 'bg-teal-50/60 dark:bg-teal-950/30'
-              : 'bg-slate-50 hover:bg-slate-100/80 dark:bg-slate-800/40 dark:hover:bg-slate-800/70'"
+              ? 'bg-teal-50/60 ring-teal-200/60 dark:bg-teal-950/30 dark:ring-teal-900/60'
+              : 'bg-slate-50 hover:bg-slate-100/80 dark:bg-slate-850/50 dark:hover:bg-slate-800/80'"
           >
             <input
               type="checkbox"
               :checked="hamyarStore.isChecklistCompleted(getChecklistKey(idx))"
-              class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800"
+              class="mt-1 h-4 w-4 shrink-0 rounded-md border-slate-300 text-teal-600 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800"
               @change="hamyarStore.toggleChecklist(getChecklistKey(idx))"
             />
             <span
@@ -207,7 +207,7 @@ function getEvidenceBadgeClass(level: string): string {
 
       <!-- 3. Common Myths and Facts -->
       <div v-if="showMyths" class="flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
           <AppIcon name="lightbulb" size="sm" />
           <span>باورهای اشتباه رایج و حقایق علمی</span>
         </div>
@@ -216,21 +216,21 @@ function getEvidenceBadgeClass(level: string): string {
           <div
             v-for="(mythFact, mIdx) in stage.common_mistakes_and_myths"
             :key="mIdx"
-            class="flex flex-col gap-2 rounded-xl bg-slate-50 p-4 border border-slate-200/80 dark:bg-slate-800/50 dark:border-slate-700/60"
+            class="flex flex-col gap-2 rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 border border-slate-200/80 dark:bg-slate-850/60 dark:border-slate-800 shadow-2xs"
           >
             <!-- Myth -->
             <div class="flex items-start gap-2">
-              <span class="shrink-0 rounded-md bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+              <span class="shrink-0 rounded-md bg-rose-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-rose-700 dark:bg-rose-950/70 dark:text-rose-300">
                 باور نادرست
               </span>
-              <p class="text-xs sm:text-sm font-semibold text-rose-900 dark:text-rose-200">
+              <p class="text-xs sm:text-sm font-semibold text-rose-900 dark:text-rose-200 leading-6">
                 «{{ mythFact.myth }}»
               </p>
             </div>
 
             <!-- Fact -->
-            <div class="flex items-start gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-700/50">
-              <span class="shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+            <div class="flex items-start gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
+              <span class="shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
                 واقعیت علمی
               </span>
               <p class="text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-200">
@@ -243,12 +243,12 @@ function getEvidenceBadgeClass(level: string): string {
 
       <!-- 4. Red Flags / Warnings -->
       <div v-if="showRedFlags" class="flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-sm font-bold text-rose-600 dark:text-rose-400">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400">
           <AppIcon name="flag" size="sm" />
           <span>علائم هشدار و پرچم‌های قرمز</span>
         </div>
 
-        <div class="rounded-xl bg-rose-50/70 p-4 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/50">
+        <div class="rounded-2xl bg-rose-50/80 p-3.5 sm:p-4 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/50 shadow-2xs">
           <ul class="space-y-2">
             <li
               v-for="(flag, fIdx) in stage.red_flags"
@@ -264,12 +264,12 @@ function getEvidenceBadgeClass(level: string): string {
 
       <!-- 5. Questions for Professional / Doctor -->
       <div v-if="showQuestions" class="flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
           <AppIcon name="stethoscope" size="sm" />
           <span>پرسش‌هایی که خوب است از متخصص یا پزشک بپرسید</span>
         </div>
 
-        <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+        <div class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850/60 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs">
           <ul class="space-y-2">
             <li
               v-for="(q, qIdx) in [...(stage.questions_for_professional || []), ...(stage.questions_for_doctor || [])]"
@@ -285,7 +285,7 @@ function getEvidenceBadgeClass(level: string): string {
 
       <!-- 6. Quiz / Self-Assessment -->
       <div v-if="showQuiz && stage.quiz" class="flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
           <AppIcon name="note" size="sm" />
           <span>خودآزمایی و کوییز یادگیری</span>
         </div>
@@ -294,21 +294,21 @@ function getEvidenceBadgeClass(level: string): string {
           <div
             v-for="q in stage.quiz.questions"
             :key="q.n"
-            class="rounded-xl border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40"
+            class="rounded-2xl border border-slate-200/80 bg-slate-50/90 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-850/60 shadow-2xs"
           >
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-start gap-2">
-                <span class="rounded bg-teal-100 px-1.5 py-0.5 text-xs font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+              <div class="flex items-start gap-2 min-w-0">
+                <span class="shrink-0 rounded-lg bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
                   {{ q.n }}
                 </span>
-                <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-6">
                   {{ q.q }}
                 </p>
               </div>
 
               <button
                 type="button"
-                class="shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-teal-700 hover:bg-teal-100/70 dark:text-teal-300 dark:hover:bg-teal-950"
+                class="self-start sm:self-center shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100/70 dark:text-teal-300 dark:hover:bg-teal-950/80 transition active:scale-95"
                 @click="toggleAnswer(q.n)"
               >
                 {{ revealedAnswers[q.n] ? "مخفی کردن پاسخ" : "مشاهده پاسخ" }}
@@ -318,7 +318,7 @@ function getEvidenceBadgeClass(level: string): string {
             <!-- Answer revealed -->
             <div
               v-if="revealedAnswers[q.n]"
-              class="mt-3 rounded-lg bg-teal-50/80 p-3 text-xs sm:text-sm leading-6 text-teal-900 border border-teal-200/70 dark:bg-teal-950/40 dark:border-teal-800/60 dark:text-teal-200"
+              class="mt-3 rounded-xl bg-teal-50/90 p-3 text-xs sm:text-sm leading-6 text-teal-900 border border-teal-200/70 dark:bg-teal-950/40 dark:border-teal-800/60 dark:text-teal-200"
             >
               <span class="font-bold block mb-0.5">پاسخ علمی:</span>
               {{ stage.quiz.answers.find((a) => a.n === q.n)?.a || "پاسخ در متن شواهد آمده است." }}

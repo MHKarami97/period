@@ -68,19 +68,19 @@ function handleReRoll(): void {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-    <div class="flex max-h-[90vh] w-full max-w-lg flex-col rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3 sm:p-4 backdrop-blur-md">
+    <div class="flex max-h-[92vh] w-full max-w-lg flex-col rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
-        <div class="flex items-center gap-3">
-          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+      <div class="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5 dark:border-slate-800">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
             <AppIcon name="pencil" size="lg" />
           </span>
-          <div>
-            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
               تنظیم چالش: {{ day.dayName }} ({{ day.jalaliDateLabel }})
             </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
+            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
               تغییر، انتخاب از بانک یا ثبت روز آف و استراحت
             </p>
           </div>
@@ -88,7 +88,7 @@ function handleReRoll(): void {
 
         <button
           type="button"
-          class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800"
+          class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800 transition"
           @click="emit('close')"
         >
           <AppIcon name="x" size="sm" />
@@ -96,10 +96,10 @@ function handleReRoll(): void {
       </div>
 
       <!-- Tabs -->
-      <div class="flex items-center border-b border-slate-100 px-5 dark:border-slate-800 text-xs font-bold gap-1">
+      <div class="flex items-center border-b border-slate-100 px-4 sm:px-5 dark:border-slate-800 text-xs font-bold gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
-          class="py-3 px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
+          class="shrink-0 py-3 px-3 sm:px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
           :class="activeTab === 'edit'
             ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
             : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'"
@@ -110,7 +110,7 @@ function handleReRoll(): void {
         </button>
         <button
           type="button"
-          class="py-3 px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
+          class="shrink-0 py-3 px-3 sm:px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
           :class="activeTab === 'pick'
             ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
             : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'"
@@ -121,7 +121,7 @@ function handleReRoll(): void {
         </button>
         <button
           type="button"
-          class="py-3 px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
+          class="shrink-0 py-3 px-3 sm:px-3.5 border-b-2 transition inline-flex items-center gap-1.5"
           :class="activeTab === 'off'
             ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
             : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400'"
@@ -133,7 +133,7 @@ function handleReRoll(): void {
       </div>
 
       <!-- Body -->
-      <div class="flex-1 overflow-y-auto p-5 text-xs sm:text-sm">
+      <div class="flex-1 overflow-y-auto p-4 sm:p-5 text-xs sm:text-sm">
         <!-- Tab 1: Edit custom title -->
         <div v-if="activeTab === 'edit'" class="space-y-4">
           <div>
@@ -143,7 +143,7 @@ function handleReRoll(): void {
             <input
               v-model="editedTitle"
               type="text"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-750 dark:bg-slate-850 dark:text-slate-100"
             />
           </div>
 
@@ -154,14 +154,14 @@ function handleReRoll(): void {
             <textarea
               v-model="editedDescription"
               rows="3"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-750 dark:bg-slate-850 dark:text-slate-100"
             ></textarea>
           </div>
 
-          <div class="pt-2 flex items-center justify-between">
+          <div class="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:underline dark:text-indigo-400 font-bold active:scale-95 transition"
+              class="inline-flex items-center justify-center gap-1.5 text-xs text-indigo-600 hover:underline dark:text-indigo-400 font-bold active:scale-95 transition py-2"
               @click="handleReRoll"
             >
               <AppIcon name="rotate" size="xs" />
@@ -170,7 +170,7 @@ function handleReRoll(): void {
 
             <button
               type="button"
-              class="rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 active:scale-95 transition shadow-sm"
+              class="rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 active:scale-95 transition shadow-sm text-center"
               @click="handleSaveEdit"
             >
               ذخیره تغییرات
@@ -184,7 +184,7 @@ function handleReRoll(): void {
             برای جایگزینی چالش این روز، یکی از موارد زیر را انتخاب کنید:
           </p>
 
-          <div class="max-h-64 overflow-y-auto space-y-2 pe-1">
+          <div class="max-h-60 sm:max-h-64 overflow-y-auto space-y-2 pe-1">
             <button
               v-for="item in store.allChallenges"
               :key="item.id"
@@ -192,10 +192,10 @@ function handleReRoll(): void {
               class="w-full text-right rounded-2xl p-3 transition flex items-center justify-between border active:scale-[0.99]"
               :class="day.challengeTitle === item.title
                 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 dark:border-indigo-600 shadow-2xs'
-                : 'border-slate-100 bg-slate-50/70 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/40'"
+                : 'border-slate-100 bg-slate-50/70 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-850/50 dark:hover:bg-slate-800'"
               @click="handlePickChallenge(item.id)"
             >
-              <div class="flex flex-col gap-0.5">
+              <div class="flex flex-col gap-0.5 min-w-0">
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
                   {{ item.title }}
                 </span>
@@ -203,7 +203,7 @@ function handleReRoll(): void {
                   {{ item.description }}
                 </span>
               </div>
-              <span v-if="item.category" class="text-[10px] text-slate-400 shrink-0 ms-2 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md">
+              <span v-if="item.category" class="text-[10px] text-slate-400 dark:text-slate-400 shrink-0 ms-2 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md">
                 {{ item.category }}
               </span>
             </button>
@@ -212,7 +212,7 @@ function handleReRoll(): void {
 
         <!-- Tab 3: Off Day -->
         <div v-else class="space-y-4">
-          <div class="rounded-2xl bg-sky-50/80 p-4 border border-sky-200 dark:bg-sky-950/30 dark:border-sky-800">
+          <div class="rounded-2xl bg-sky-50/80 p-3.5 sm:p-4 border border-sky-200 dark:bg-sky-950/30 dark:border-sky-800">
             <div class="flex items-center gap-1.5 text-xs font-bold text-sky-800 dark:text-sky-300 mb-1">
               <AppIcon name="beach" size="xs" />
               <span>ثبت روز استراحت / آف</span>
@@ -226,7 +226,7 @@ function handleReRoll(): void {
             <input
               v-model="isOff"
               type="checkbox"
-              class="h-4.5 w-4.5 rounded-lg text-sky-600 focus:ring-sky-500"
+              class="h-4.5 w-4.5 rounded-lg text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-800"
             />
             <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
               این روز به عنوان روز آف (استراحت) علامت بخورد
@@ -241,14 +241,14 @@ function handleReRoll(): void {
               v-model="offReason"
               type="text"
               placeholder="مثلاً: مهمانی خانه فامیل، شیفت کاری، مسافرت..."
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-900 focus:border-sky-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-900 focus:border-sky-500 focus:bg-white focus:outline-none dark:border-slate-750 dark:bg-slate-850 dark:text-slate-100"
             />
           </div>
 
           <div class="pt-2 flex justify-end">
             <button
               type="button"
-              class="rounded-2xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 active:scale-95 transition shadow-sm"
+              class="w-full sm:w-auto rounded-2xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 active:scale-95 transition shadow-sm text-center"
               @click="handleSaveOff"
             >
               ثبت وضعیت آف

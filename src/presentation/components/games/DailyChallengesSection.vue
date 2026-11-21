@@ -84,18 +84,18 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 </script>
 
 <template>
-  <section class="flex flex-col gap-6 rounded-3xl bg-gradient-to-b from-amber-500/5 via-white to-white p-5 shadow-sm ring-1 ring-amber-500/20 dark:from-amber-500/10 dark:via-slate-900 dark:to-slate-900 dark:ring-amber-500/20 sm:p-7">
+  <section class="flex flex-col gap-6 rounded-3xl bg-gradient-to-b from-amber-500/5 via-white to-white p-4 sm:p-7 shadow-xs ring-1 ring-amber-500/20 dark:from-amber-500/10 dark:via-slate-900 dark:to-slate-900 dark:ring-amber-500/25">
     <!-- Header: Section title and Bank button -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex items-center gap-3.5">
-        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:bg-amber-500/25 dark:text-amber-300 shadow-xs">
+      <div class="flex items-center gap-3">
+        <span class="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:bg-amber-500/25 dark:text-amber-300 shadow-2xs">
           <AppIcon name="target" size="lg" filled />
         </span>
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+        <div class="min-w-0">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
             برنامه و چالش‌های روزانه زوجین
           </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
             پیشنهاد چالش هر روز، برنامه‌ریزی هفتگی از شنبه و ثبت نتیجه دونفره
           </p>
         </div>
@@ -103,7 +103,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 
       <button
         type="button"
-        class="inline-flex items-center self-start sm:self-center gap-2 rounded-2xl bg-white px-3.5 py-2 text-xs font-bold text-amber-700 shadow-sm ring-1 ring-amber-200 hover:bg-amber-50 dark:bg-slate-800 dark:text-amber-300 dark:ring-amber-900/50 dark:hover:bg-slate-700 transition active:scale-95"
+        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-3.5 py-2.5 text-xs font-bold text-amber-700 shadow-xs ring-1 ring-amber-200 hover:bg-amber-50 dark:bg-slate-800 dark:text-amber-300 dark:ring-amber-900/50 dark:hover:bg-slate-750 transition active:scale-95 w-full sm:w-auto"
         @click="showPoolModal = true"
       >
         <AppIcon name="sparkles" size="xs" filled />
@@ -114,12 +114,13 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
     <!-- 1. TODAY'S HIGHLIGHT CARD -->
     <div
       v-if="todayPlan"
-      class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-orange-500/15 p-5 sm:p-6 ring-1 ring-amber-500/30 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-slate-900 dark:ring-amber-500/30 shadow-xs"
+      class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-orange-500/15 p-4 sm:p-6 ring-1 ring-amber-500/30 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-slate-900 dark:ring-amber-500/30 shadow-xs"
     >
       <div class="flex flex-col gap-4">
-        <div class="flex items-center justify-between flex-wrap gap-2.5">
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs dark:bg-amber-500">
+        <!-- Header row of today's card -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2 min-w-0">
+            <span class="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-2xs dark:bg-amber-500">
               <AppIcon name="calendar" size="xs" />
               <span>پیشنهاد امروز: {{ todayPlan.dayName }} ({{ todayPlan.jalaliDateLabel }})</span>
             </span>
@@ -132,7 +133,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
             </span>
           </div>
 
-          <div class="flex items-center gap-1.5 text-xs">
+          <div class="flex items-center gap-1.5 text-xs ms-auto sm:ms-0">
             <button
               type="button"
               class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-white/80 dark:text-slate-300 dark:hover:bg-slate-800 transition active:scale-95"
@@ -168,7 +169,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
         <!-- Result / Note if filled -->
         <div
           v-if="todayPlan.completionNote"
-          class="rounded-2xl bg-white/90 p-4 ring-1 ring-slate-200/80 dark:bg-slate-800/90 dark:ring-slate-700/80 shadow-2xs"
+          class="rounded-2xl bg-white/90 p-3.5 sm:p-4 ring-1 ring-slate-200/80 dark:bg-slate-850/90 dark:ring-slate-750/80 shadow-2xs"
         >
           <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">
             <AppIcon name="note" size="xs" />
@@ -180,10 +181,10 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
         </div>
 
         <!-- Quick Action buttons on today's card -->
-        <div class="flex items-center gap-2.5 pt-1 flex-wrap">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1 w-full">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 transition active:scale-95"
+            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 transition active:scale-95"
             @click="openResultModal(todayPlan)"
           >
             <AppIcon name="note" size="xs" />
@@ -192,11 +193,11 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200/90 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-700 transition active:scale-95 shadow-2xs"
+            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200/90 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-750 transition active:scale-95 shadow-2xs"
             @click="toggleDayOffQuick(todayPlan)"
           >
             <AppIcon name="beach" size="xs" />
-            <span>{{ todayPlan.isOff ? 'لغو روز آف' : 'ثبت به عنوان روز آف (مهمانی / استراحت)' }}</span>
+            <span>{{ todayPlan.isOff ? 'لغو روز آف' : 'روز آف (استراحت / مهمانی)' }}</span>
           </button>
         </div>
       </div>
@@ -204,14 +205,14 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 
     <!-- 2. WEEK SELECTOR & PROGRESS -->
     <div class="flex flex-col gap-3.5">
-      <div class="flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3 dark:border-slate-800 flex-wrap">
-        <div class="flex items-center gap-2">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3 dark:border-slate-800">
+        <div class="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-xs font-bold transition active:scale-95"
+            class="inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition active:scale-95"
             :class="store.isCurrentWeekSelected
               ? 'bg-amber-600 text-white shadow-sm dark:bg-amber-500'
-              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'"
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-750'"
             @click="selectCurrentWeek"
           >
             <AppIcon name="calendar" size="xs" />
@@ -220,10 +221,10 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-xs font-bold transition active:scale-95"
+            class="inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition active:scale-95"
             :class="store.isNextWeekSelected
               ? 'bg-amber-600 text-white shadow-sm dark:bg-amber-500'
-              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'"
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-750'"
             @click="selectNextWeek"
           >
             <AppIcon name="calendar-next" size="xs" />
@@ -231,10 +232,10 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
           </button>
 
           <!-- History tab selector -->
-          <div v-if="store.previousWeeksHistory.length > 0" class="relative inline-block">
+          <div v-if="store.previousWeeksHistory.length > 0" class="relative inline-block max-w-full">
             <select
               :value="store.isPastWeekSelected ? store.selectedWeekIso : ''"
-              class="rounded-2xl border border-slate-200 bg-slate-100 py-2 pe-3 ps-3 text-xs font-bold text-slate-700 hover:bg-slate-200 focus:outline-none dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 transition"
+              class="max-w-full rounded-2xl border border-slate-200 bg-slate-100 py-2 pe-3 ps-3 text-xs font-bold text-slate-700 hover:bg-slate-200 focus:outline-none dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 transition text-ellipsis"
               @change="(e) => store.selectWeek((e.target as HTMLSelectElement).value)"
             >
               <option value="" disabled :selected="!store.isPastWeekSelected">
@@ -255,11 +256,11 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
         <button
           v-if="store.canEditSelectedWeek"
           type="button"
-          class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline dark:text-amber-400"
+          class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline dark:text-amber-400 self-start sm:self-center transition active:scale-95"
           @click="generateNewPlanForSelectedWeek"
         >
           <AppIcon name="rotate" size="xs" />
-          <span>تولید برنامه تصادفی جدید برای کل این هفته</span>
+          <span>تولید برنامه تصادفی برای کل این هفته</span>
         </button>
       </div>
 
@@ -311,22 +312,22 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
       <div
         v-for="day in activePlan.days"
         :key="day.date"
-        class="flex flex-col justify-between rounded-3xl bg-white p-4.5 shadow-xs ring-1 transition-all duration-200 hover:shadow-md dark:bg-slate-900"
+        class="flex flex-col justify-between rounded-3xl bg-white p-4 sm:p-4.5 shadow-xs ring-1 transition-all duration-200 hover:shadow-md dark:bg-slate-900"
         :class="[
           day.date === store.today.toIsoString()
-            ? 'ring-2 ring-amber-500 dark:ring-amber-400 bg-amber-500/[0.03]'
+            ? 'ring-2 ring-amber-500 dark:ring-amber-400 bg-amber-500/[0.04] dark:bg-amber-500/[0.06]'
             : 'ring-slate-200/90 dark:ring-slate-800',
-          day.isOff ? 'opacity-90 bg-sky-50/20 dark:bg-sky-950/15' : ''
+          day.isOff ? 'ring-sky-200 dark:ring-sky-900/60 bg-sky-50/40 dark:bg-sky-950/25' : ''
         ]"
       >
         <div class="flex flex-col gap-2.5">
           <!-- Day Name & Date -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap min-w-0">
               <span class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
                 {{ day.dayName }}
               </span>
-              <span class="text-[11px] text-slate-400">
+              <span class="text-[11px] text-slate-400 dark:text-slate-500">
                 ({{ day.jalaliDateLabel }})
               </span>
               <span
@@ -338,7 +339,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
             </div>
 
             <span
-              class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border"
+              class="shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border"
               :class="getStatusBadge(day).class"
             >
               <AppIcon :name="getStatusBadge(day).iconName" size="xs" />
@@ -347,14 +348,14 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
           </div>
 
           <!-- Challenge Title & Description -->
-          <div class="pt-1">
+          <div class="pt-0.5">
             <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
               {{ day.challengeTitle }}
             </h4>
             <p v-if="day.challengeDescription" class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-5">
               {{ day.challengeDescription }}
             </p>
-            <div v-if="day.isOff && day.offReason" class="mt-1.5 inline-flex items-center gap-1 text-[11px] text-sky-700 dark:text-sky-300 bg-sky-50/60 dark:bg-sky-950/40 px-2 py-0.5 rounded-md">
+            <div v-if="day.isOff && day.offReason" class="mt-1.5 inline-flex items-center gap-1 text-[11px] text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-md">
               <AppIcon name="beach" size="xs" />
               <span>{{ day.offReason }}</span>
             </div>
@@ -363,7 +364,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
           <!-- Completion Note Preview -->
           <div
             v-if="day.completionNote"
-            class="rounded-2xl bg-slate-50 p-2.5 text-[11px] text-slate-700 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:text-slate-300 dark:ring-slate-700/60 shadow-2xs"
+            class="rounded-2xl bg-slate-50 p-2.5 text-[11px] text-slate-700 ring-1 ring-slate-200/60 dark:bg-slate-850/80 dark:text-slate-200 dark:ring-slate-750/70 shadow-2xs"
           >
             <div class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 mb-0.5">
               <AppIcon name="note" size="xs" />
