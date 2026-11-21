@@ -6,6 +6,7 @@ import { useAutoLock } from "@presentation/composables/useAutoLock";
 import { useThemeSync } from "@presentation/composables/useThemeSync";
 import AppLockScreen from "@presentation/components/lock/AppLockScreen.vue";
 import UpdatePrompt from "@presentation/components/shared/UpdatePrompt.vue";
+import WhatsNewDialog from "@presentation/components/shared/WhatsNewDialog.vue";
 import ToastHost from "@presentation/components/shared/ToastHost.vue";
 import SyncFailedBar from "@presentation/components/common/SyncFailedBar.vue";
 import CloudConflictModal from "@presentation/components/cloud/CloudConflictModal.vue";
@@ -36,5 +37,6 @@ onMounted(() => {
   <SyncFailedBar />
   <CloudConflictModal />
   <UpdatePrompt />
+  <WhatsNewDialog />
   <ToastHost />
 </template>
