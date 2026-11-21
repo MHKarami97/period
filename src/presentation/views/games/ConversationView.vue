@@ -31,7 +31,7 @@ function tryAdd(categoryValue: string, text: string): string | null {
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-    <GamePageHeader title="🗨 کارت‌های گفت‌وگوی عمیق" />
+    <GamePageHeader title="کارت‌های گفت‌وگوی عمیق" icon="conversation-cards" />
 
     <section class="flex flex-col gap-3 p-4 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">دسته‌ها</h2>

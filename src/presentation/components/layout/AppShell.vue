@@ -147,7 +147,7 @@ watch(() => hamdelStore.entries, syncReminders);
     </aside>
 
     <!-- Main Content Area -->
-    <main class="w-full p-4 pb-24 lg:pb-6">
+    <main class="w-full p-4 pb-28 lg:pb-6">
       <!-- Mobile Top Bar: App Title and Top Action Buttons (Guide & Settings) -->
       <header class="mb-4 flex items-center justify-between lg:hidden" aria-label="سربرگ بالا">
         <div class="flex items-center gap-2.5">
@@ -190,25 +190,31 @@ watch(() => hamdelStore.entries, syncReminders);
       <RouterView />
     </main>
 
-    <!-- Mobile Bottom Navigation Bar -->
+    <!-- Modern Floating Mobile Bottom Navigation Bar -->
     <nav
-      class="fixed inset-x-0 bottom-0 z-20 flex items-center justify-around gap-1 border-t border-slate-200/90 bg-white/95 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] backdrop-blur-md dark:border-slate-850 dark:bg-slate-950/95 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+      class="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-lg items-center justify-around gap-1 rounded-3xl bg-white/92 px-2.5 py-1.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-slate-900/10 backdrop-blur-xl dark:bg-slate-900/92 dark:shadow-[0_14px_40px_-6px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.4)] dark:ring-white/10 lg:hidden"
       aria-label="ناوبری موبایل"
     >
       <RouterLink
         v-for="item in visibleItems"
         :key="item.label"
         :to="item.to"
-        class="group flex flex-1 min-w-[48px] max-w-[78px] shrink-0 flex-col items-center gap-1 rounded-xl py-1 text-center transition-all duration-150"
-        :class="isRouteActive(item.to.name) ? 'text-teal-600 dark:text-teal-300 font-bold' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
+        class="group relative flex flex-1 min-w-[46px] max-w-[76px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl py-1 text-center transition-all duration-200 active:scale-90"
+        :class="isRouteActive(item.to.name)
+          ? 'text-teal-600 dark:text-teal-300 font-bold bg-teal-500/10 dark:bg-teal-400/15'
+          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/40'"
       >
         <span
-          class="flex h-7 w-7 items-center justify-center rounded-lg transition-transform duration-200 group-active:scale-90"
-          :class="isRouteActive(item.to.name) ? 'bg-teal-50 dark:bg-teal-950/70 scale-105 text-teal-600 dark:text-teal-300' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'"
+          class="flex h-6.5 w-6.5 items-center justify-center transition-transform duration-200"
+          :class="isRouteActive(item.to.name) ? 'scale-110 text-teal-600 dark:text-teal-300' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200'"
         >
           <NavIcon :name="item.iconName" :active="isRouteActive(item.to.name)" />
         </span>
-        <span class="text-[10.5px] leading-tight tracking-tight whitespace-nowrap">{{ item.label }}</span>
+        <span class="text-[10px] leading-tight tracking-tight whitespace-nowrap">{{ item.label }}</span>
+        <span
+          v-if="isRouteActive(item.to.name)"
+          class="h-1 w-1 rounded-full bg-teal-500 dark:bg-teal-400"
+        ></span>
       </RouterLink>
     </nav>
   </div>

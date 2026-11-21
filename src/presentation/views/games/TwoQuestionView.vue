@@ -9,7 +9,7 @@ const store = useTwoQuestionStore();
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-    <GamePageHeader title="💬 بازی دو سؤالی" />
+    <GamePageHeader title="بازی دو سؤالی" icon="two-questions" />
     <TwoQuestionPlayPanel v-if="store.isPlaying" />
     <TwoQuestionSetupPanel v-else />
   </div>

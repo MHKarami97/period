@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import type { HamyarStage, HamyarContentType } from "@domain/hamyar/HamyarGuide";
 import { useHamyarStore } from "@application/stores/hamyarStore";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 const props = defineProps<{
   guideId: string;
@@ -120,8 +121,11 @@ function getEvidenceBadgeClass(level: string): string {
     <!-- Expanded Body -->
     <div v-show="isExpanded" class="border-t border-slate-100 p-5 pt-4 flex flex-col gap-5 dark:border-slate-800">
       <!-- Goal callout -->
-      <div v-if="stage.goal" class="rounded-xl bg-teal-50/70 p-4 border-r-4 border-teal-500 dark:bg-teal-950/30 dark:border-teal-400">
-        <span class="text-xs font-bold text-teal-800 dark:text-teal-300 block mb-1">🎯 هدف این مرحله:</span>
+      <div v-if="stage.goal" class="rounded-2xl bg-teal-50/70 p-4 border-r-4 border-teal-500 dark:bg-teal-950/30 dark:border-teal-400">
+        <span class="text-xs font-bold text-teal-800 dark:text-teal-300 flex items-center gap-1.5 mb-1">
+          <AppIcon name="target" size="xs" />
+          <span>هدف این مرحله:</span>
+        </span>
         <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">
           {{ stage.goal }}
         </p>
@@ -130,7 +134,7 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 1. Knowledge & Evidence -->
       <div v-if="showKnowledge" class="flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-          <span>📚</span>
+          <AppIcon name="book" size="sm" />
           <span>دانستنی‌ها و شواهد علمی</span>
         </div>
 
@@ -168,7 +172,7 @@ function getEvidenceBadgeClass(level: string): string {
       <div v-if="showChecklist" class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-            <span>✅</span>
+            <AppIcon name="check-circle" size="sm" />
             <span>چک‌لیست و اقدامات عملی</span>
           </div>
           <span class="text-xs text-slate-400">برای ذخیره روی گزینه‌ها بزنید</span>
@@ -204,7 +208,7 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 3. Common Myths and Facts -->
       <div v-if="showMyths" class="flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-          <span>💡</span>
+          <AppIcon name="lightbulb" size="sm" />
           <span>باورهای اشتباه رایج و حقایق علمی</span>
         </div>
 
@@ -217,7 +221,7 @@ function getEvidenceBadgeClass(level: string): string {
             <!-- Myth -->
             <div class="flex items-start gap-2">
               <span class="shrink-0 rounded-md bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
-                باور نادرست ❌
+                باور نادرست
               </span>
               <p class="text-xs sm:text-sm font-semibold text-rose-900 dark:text-rose-200">
                 «{{ mythFact.myth }}»
@@ -227,7 +231,7 @@ function getEvidenceBadgeClass(level: string): string {
             <!-- Fact -->
             <div class="flex items-start gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-700/50">
               <span class="shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
-                واقعیت علمی ✔️
+                واقعیت علمی
               </span>
               <p class="text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-200">
                 {{ mythFact.fact }}
@@ -240,7 +244,7 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 4. Red Flags / Warnings -->
       <div v-if="showRedFlags" class="flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm font-bold text-rose-600 dark:text-rose-400">
-          <span>🚩</span>
+          <AppIcon name="flag" size="sm" />
           <span>علائم هشدار و پرچم‌های قرمز</span>
         </div>
 
@@ -261,7 +265,7 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 5. Questions for Professional / Doctor -->
       <div v-if="showQuestions" class="flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-          <span>🩺</span>
+          <AppIcon name="stethoscope" size="sm" />
           <span>پرسش‌هایی که خوب است از متخصص یا پزشک بپرسید</span>
         </div>
 
@@ -282,7 +286,7 @@ function getEvidenceBadgeClass(level: string): string {
       <!-- 6. Quiz / Self-Assessment -->
       <div v-if="showQuiz && stage.quiz" class="flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
-          <span>📝</span>
+          <AppIcon name="note" size="sm" />
           <span>خودآزمایی و کوییز یادگیری</span>
         </div>
 

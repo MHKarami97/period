@@ -70,7 +70,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
-    <GamePageHeader title="📖 پوزیشن‌ها" />
+    <GamePageHeader title="پوزیشن‌ها" icon="positions" />
 
     <AccessGate v-if="!accessStore.isUnlocked" message="برای دیدن پوزیشن‌ها، رمز را وارد کنید." />
 

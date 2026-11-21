@@ -9,6 +9,7 @@ import CircularCycleChart from "@presentation/components/dashboard/CircularCycle
 import QuickActions from "@presentation/components/dashboard/QuickActions.vue";
 import PhaseGuidanceCard from "@presentation/components/dashboard/PhaseGuidanceCard.vue";
 import ProfileSwitcher from "@presentation/components/shared/ProfileSwitcher.vue";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 const cycleStore = useCycleStore();
 const appModeStore = useAppModeStore();
@@ -65,9 +66,11 @@ watch(
 
       <section
         v-else
-        class="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-7"
+        class="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-7"
       >
-        <span class="text-3xl">{{ hasUsableScope ? "🩸" : "👥" }}</span>
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 ring-1 ring-rose-500/20 dark:bg-rose-500/20 dark:text-rose-400">
+          <AppIcon :name="hasUsableScope ? 'drop' : 'users'" size="xl" filled />
+        </div>
         <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
           {{
             !hasUsableScope

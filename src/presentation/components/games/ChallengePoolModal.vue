@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useDailyChallengesStore } from "@application/stores/dailyChallengesStore";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -8,10 +9,22 @@ const emit = defineEmits<{
 
 const store = useDailyChallengesStore();
 
+const searchQuery = ref("");
 const newTitle = ref("");
 const newDescription = ref("");
 const newCategory = ref("سرگرمی و دونفره");
 const addError = ref<string | null>(null);
+
+const filteredChallenges = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return store.allChallenges;
+  return store.allChallenges.filter(
+    (c) =>
+      c.title.toLowerCase().includes(q) ||
+      (c.description && c.description.toLowerCase().includes(q)) ||
+      (c.category && c.category.toLowerCase().includes(q)),
+  );
+});
 
 function handleAdd(): void {
   addError.value = null;
@@ -38,16 +51,16 @@ function handleRemove(id: string): void {
     <div class="flex max-h-[90vh] w-full max-w-xl flex-col rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
-        <div class="flex items-center gap-2.5">
-          <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-xl text-amber-600 dark:bg-amber-500/20 dark:text-amber-300">
-            🎯
+        <div class="flex items-center gap-3">
+          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300">
+            <AppIcon name="target" size="lg" filled />
           </span>
           <div>
             <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
               بانک ایده‌ها و چالش‌های دونفره
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">
-              افزودن چالش‌های دلخواه یا مدیریت موارد پیش‌فرض (مجموع: {{ store.allChallenges.length }} چالش)
+              مدیریت چالش‌های پیش‌فرض و افزودن ایده‌های دلخواه (مجموع: {{ store.allChallenges.length }})
             </p>
           </div>
         </div>
@@ -57,18 +70,16 @@ function handleRemove(id: string): void {
           class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800"
           @click="emit('close')"
         >
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-          </svg>
+          <AppIcon name="x" size="sm" />
         </button>
       </div>
 
       <!-- Content Area (Scrollable) -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-6 text-sm">
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 text-sm">
         <!-- Add New Challenge Box -->
-        <div class="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200/80 dark:bg-slate-800/50 dark:ring-slate-700/60">
-          <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-1.5">
-            <span>✨</span>
+        <div class="rounded-3xl bg-slate-50 p-4.5 ring-1 ring-slate-200/80 dark:bg-slate-800/50 dark:ring-slate-700/60 shadow-2xs">
+          <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+            <AppIcon name="sparkles" size="xs" filled />
             <span>افزودن چالش یا ایده دونفره جدید</span>
           </h4>
 
@@ -78,18 +89,18 @@ function handleRemove(id: string): void {
               <input
                 v-model="newTitle"
                 type="text"
-                placeholder="مثال: درست کردن ژله یا سالاد با هم، حل جدول کلمات..."
-                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                placeholder="مثال: حل پازل دونفره، درست کردن سالاد میوه..."
+                class="w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">توضیح کوتاه یا راهنما (اختیاری)</label>
+              <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">توضیح کوتاه یا ایده (اختیاری)</label>
               <input
                 v-model="newDescription"
                 type="text"
                 placeholder="توضیح جزئیات ایده..."
-                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                class="w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </div>
 
@@ -98,11 +109,11 @@ function handleRemove(id: string): void {
                 v-model="newCategory"
                 type="text"
                 placeholder="دسته‌بندی (مثلاً: آشپزی، بازی، خاطره...)"
-                class="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                class="flex-1 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
               <button
                 type="button"
-                class="shrink-0 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition dark:bg-amber-500 dark:hover:bg-amber-600"
+                class="shrink-0 rounded-2xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition dark:bg-amber-500 dark:hover:bg-amber-600 active:scale-95"
                 @click="handleAdd"
               >
                 + افزودن به لیست
@@ -115,32 +126,45 @@ function handleRemove(id: string): void {
           </div>
         </div>
 
+        <!-- Search bar within challenges -->
+        <div class="relative">
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="جستجو در چالش‌ها..."
+            class="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pe-4 ps-10 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          />
+          <span class="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <AppIcon name="search" size="xs" />
+          </span>
+        </div>
+
         <!-- Challenges List -->
         <div>
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">
-              لیست همه چالش‌ها ({{ store.allChallenges.length }})
-            </h4>
+          <div class="flex items-center justify-between mb-3 text-xs text-slate-500">
+            <span class="font-bold text-slate-700 dark:text-slate-300">
+              لیست چالش‌ها ({{ filteredChallenges.length }})
+            </span>
             <span class="text-[11px] text-slate-400">
-              چالش‌های اختصاصی شما قابل حذف هستند
+              موارد سفارشی قابل حذف هستند
             </span>
           </div>
 
-          <div class="space-y-2">
+          <div class="space-y-2 max-h-72 overflow-y-auto pe-1">
             <div
-              v-for="item in store.allChallenges"
+              v-for="item in filteredChallenges"
               :key="item.id"
-              class="flex items-start justify-between gap-3 rounded-2xl bg-white p-3.5 ring-1 ring-slate-100 shadow-sm transition hover:bg-slate-50 dark:bg-slate-800/40 dark:ring-slate-800 dark:hover:bg-slate-800/70"
+              class="flex items-start justify-between gap-3 rounded-2xl bg-white p-3.5 ring-1 ring-slate-100 shadow-2xs transition hover:bg-slate-50 dark:bg-slate-800/40 dark:ring-slate-800 dark:hover:bg-slate-800/70"
             >
               <div class="flex flex-col gap-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
                     {{ item.title }}
                   </span>
-                  <span v-if="item.category" class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                  <span v-if="item.category" class="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-700 dark:text-slate-300">
                     {{ item.category }}
                   </span>
-                  <span v-if="!item.isDefault" class="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  <span v-if="!item.isDefault" class="rounded-lg bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                     سفارشی شما
                   </span>
                 </div>
@@ -153,13 +177,11 @@ function handleRemove(id: string): void {
               <button
                 v-if="!item.isDefault"
                 type="button"
-                class="shrink-0 rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                class="shrink-0 rounded-xl p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition active:scale-95"
                 title="حذف این چالش"
                 @click="handleRemove(item.id)"
               >
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 001.5.06l.3-7.5z" clip-rule="evenodd" />
-                </svg>
+                <AppIcon name="x-circle" size="sm" />
               </button>
             </div>
           </div>
@@ -173,7 +195,7 @@ function handleRemove(id: string): void {
         </span>
         <button
           type="button"
-          class="rounded-xl bg-slate-900 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          class="rounded-2xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white active:scale-95 transition"
           @click="emit('close')"
         >
           بستن

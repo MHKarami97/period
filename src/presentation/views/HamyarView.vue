@@ -6,6 +6,7 @@ import { HAMYAR_CATEGORIES } from "@presentation/hamyar/hamyarCatalog";
 import type { HamyarGuideMeta, HamyarSearchResult } from "@domain/hamyar/HamyarGuide";
 import HamyarCard from "@presentation/components/hamyar/HamyarCard.vue";
 import CoupleCommunicationBanner from "@presentation/components/hamyar/CoupleCommunicationBanner.vue";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 const router = useRouter();
 const hamyarStore = useHamyarStore();
@@ -46,8 +47,8 @@ function clearSearch(): void {
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-3">
-          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-2xl text-teal-600 dark:bg-teal-500/20 dark:text-teal-300">
-            🌱
+          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-300 shadow-2xs">
+            <AppIcon name="sprout" size="lg" filled />
           </span>
           <div>
             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
@@ -188,7 +189,9 @@ function clearSearch(): void {
         v-if="hamyarStore.globalSearchResults.length === 0"
         class="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
       >
-        <span class="text-3xl">🔍</span>
+        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+          <AppIcon name="search" size="lg" />
+        </span>
         <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
           موردی با این عبارت در راهنماها پیدا نشد.
         </p>
@@ -256,9 +259,11 @@ function clearSearch(): void {
       </div>
 
       <!-- Info note -->
-      <div class="mt-4 rounded-2xl bg-slate-50 p-4 border border-slate-200/80 dark:bg-slate-900/50 dark:border-slate-800">
-        <div class="flex items-start gap-3">
-          <span class="text-xl">🛡️</span>
+      <div class="mt-4 rounded-3xl bg-slate-50 p-4.5 border border-slate-200/80 dark:bg-slate-900/50 dark:border-slate-800">
+        <div class="flex items-start gap-3.5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-300">
+            <AppIcon name="shield" size="md" filled />
+          </span>
           <div class="flex flex-col gap-1 text-xs leading-5 text-slate-600 dark:text-slate-400">
             <span class="font-bold text-slate-800 dark:text-slate-200">
               سیاست علمی و حفظ حریم خصوصی همیار

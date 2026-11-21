@@ -6,6 +6,7 @@ import { findHamyarGuideMeta } from "@presentation/hamyar/hamyarCatalog";
 import type { HamyarGuideData, HamyarContentType } from "@domain/hamyar/HamyarGuide";
 import { HamyarSearchEngine } from "@domain/hamyar/HamyarSearchEngine";
 import HamyarStageCard from "@presentation/components/hamyar/HamyarStageCard.vue";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -19,14 +20,14 @@ const localSearch = ref("");
 const selectedStageId = ref<number | "all">("all");
 const activeContentType = ref<HamyarContentType>("all");
 
-const contentTypeOptions: readonly { key: HamyarContentType; label: string; icon: string }[] = [
-  { key: "all", label: "همه بخش‌ها", icon: "📑" },
-  { key: "knowledge", label: "دانستنی‌ها", icon: "📚" },
-  { key: "checklist", label: "چک‌لیست عملی", icon: "✅" },
-  { key: "myths", label: "باورهای غلط", icon: "💡" },
-  { key: "red_flags", label: "علائم هشدار", icon: "🚩" },
-  { key: "questions", label: "پرسش از متخصص", icon: "🩺" },
-  { key: "quiz", label: "کوییز", icon: "📝" },
+const contentTypeOptions: readonly { key: HamyarContentType; label: string; iconName: string }[] = [
+  { key: "all", label: "همه بخش‌ها", iconName: "document" },
+  { key: "knowledge", label: "دانستنی‌ها", iconName: "book" },
+  { key: "checklist", label: "چک‌لیست عملی", iconName: "check-circle" },
+  { key: "myths", label: "باورهای غلط", iconName: "lightbulb" },
+  { key: "red_flags", label: "علائم هشدار", iconName: "flag" },
+  { key: "questions", label: "پرسش از متخصص", iconName: "stethoscope" },
+  { key: "quiz", label: "کوییز", iconName: "note" },
 ];
 
 async function loadData(): Promise<void> {
@@ -237,7 +238,7 @@ const filteredStages = computed(() => {
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'"
             @click="activeContentType = opt.key"
           >
-            <span>{{ opt.icon }}</span>
+            <AppIcon :name="opt.iconName" size="xs" />
             <span>{{ opt.label }}</span>
           </button>
         </div>
@@ -268,7 +269,9 @@ const filteredStages = computed(() => {
         v-if="filteredStages.length === 0"
         class="flex flex-col items-center gap-2 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
       >
-        <span class="text-2xl">🔎</span>
+        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+          <AppIcon name="search" size="lg" />
+        </span>
         <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
           موردی مطابق با فیلترها یا عبارت جستجو پیدا نشد.
         </p>

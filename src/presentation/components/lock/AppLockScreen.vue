@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { useLockStore } from "@application/stores/lockStore";
 import { FullWipeService } from "@infrastructure/backup/FullWipeService";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
 
 const lockStore = useLockStore();
@@ -37,8 +38,10 @@ onBeforeUnmount(() => {
 <template>
   <main class="flex min-h-screen items-center justify-center bg-slate-100 p-4 dark:bg-slate-950">
     <form class="flex w-full max-w-sm flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800" @submit.prevent="submit">
-      <div class="flex flex-col items-center gap-1 text-center">
-        <span class="text-4xl" aria-hidden="true">🔒</span>
+      <div class="flex flex-col items-center gap-2 text-center">
+        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-600 ring-1 ring-teal-500/20 dark:bg-teal-400/10 dark:text-teal-300 dark:ring-teal-400/20 shadow-sm">
+          <AppIcon name="lock" size="lg" filled />
+        </div>
         <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">ماهک قفل است</h1>
         <p class="text-xs text-slate-500 dark:text-slate-400">برای ادامه، رمز را وارد کنید.</p>
       </div>

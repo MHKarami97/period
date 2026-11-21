@@ -9,7 +9,7 @@ const store = useTruthOrDareStore();
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-    <GamePageHeader title="🔥 جرئت یا حقیقت" />
+    <GamePageHeader title="جرئت یا حقیقت" icon="truth-or-dare" />
     <TruthOrDarePlayPanel v-if="store.isPlaying" />
     <TruthOrDareSetupPanel v-else />
   </div>

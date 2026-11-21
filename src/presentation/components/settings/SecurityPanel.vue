@@ -7,6 +7,7 @@ import { vaultService } from "@infrastructure/security/VaultService";
 import PasswordPromptDialog from "@presentation/components/shared/PasswordPromptDialog.vue";
 import type { PasswordField } from "@presentation/components/shared/passwordFields";
 import { useToast } from "@presentation/composables/useToast";
+import AppIcon from "@presentation/components/common/AppIcon.vue";
 
 type DialogMode = "enable" | "disable" | "change" | "passkey";
 
@@ -128,7 +129,10 @@ onMounted(async () => {
     </template>
 
     <template v-else>
-      <button type="button" class="rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700" @click="lockStore.lock()">🔒 همین حالا قفل کن</button>
+      <button type="button" class="flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700" @click="lockStore.lock()">
+        <AppIcon name="lock" size="sm" filled />
+        <span>همین حالا قفل کن</span>
+      </button>
 
       <label class="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
         قفل خودکار

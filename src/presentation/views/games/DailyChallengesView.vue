@@ -5,7 +5,7 @@ import DailyChallengesSection from "@presentation/components/games/DailyChalleng
 
 <template>
   <div class="mx-auto flex w-full max-w-4xl flex-col gap-4">
-    <GamePageHeader title="🎯 پیشنهاد و چالش‌های روزانه و هفتگی" />
+    <GamePageHeader title="پیشنهاد و چالش‌های روزانه و هفتگی" icon="daily-challenges" />
     <DailyChallengesSection />
   </div>
 </template>

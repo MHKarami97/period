@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-    <GamePageHeader title="🎲 تاس دوتایی" />
+    <GamePageHeader title="تاس دوتایی" icon="dual-dice" />
 
     <section class="flex flex-col gap-4 p-4 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
       <div class="grid grid-cols-2 gap-3">
