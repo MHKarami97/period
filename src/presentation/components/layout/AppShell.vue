@@ -25,7 +25,7 @@ interface NavItem {
   readonly primary?: boolean;
 }
 
-const HOME_ITEM: NavItem = { to: { name: "home" }, label: "خانه", iconName: "home", primary: true };
+const HOME_ITEM: NavItem = { to: { name: "home" }, label: "", iconName: "home", primary: true };
 const COMPANION_ITEM: NavItem = { to: { name: "companion" }, label: "همراه", iconName: "companion" };
 const GAMES_ITEM: NavItem = { to: { name: "games" }, label: "هم‌راز", iconName: "games" };
 const HAMDEL_ITEM: NavItem = { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" };
