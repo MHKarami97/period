@@ -9,6 +9,10 @@ export class GameVisibilityPolicy {
   private static readonly OPEN_GAME_IDS: ReadonlySet<string> = new Set([
     "conversation-cards",
     "daily-challenges",
+    "dual-dice",
+    "truth-or-dare",
+    "two-questions",
+    "scratch-cards",
   ]);
 
   public static isOpen(gameId: string): boolean {
