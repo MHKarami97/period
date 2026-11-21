@@ -25,6 +25,11 @@ export interface SymptomRecord {
   painLevel: number;
   flowLevel: string;
   note: string | null;
+  /** Optional extras (not indexed, so no Dexie schema change): older records simply lack them. */
+  tags?: string[];
+  sleepHours?: number | null;
+  temperatureC?: number | null;
+  hadIntimacy?: boolean;
 }
 
 export interface HamdelEntryRecord {

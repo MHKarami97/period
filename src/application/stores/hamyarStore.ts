@@ -29,6 +29,27 @@ function persistChecklist(set: Set<string>): void {
   }
 }
 
+const STORAGE_KEY_READ = "mahak:hamyar:read-stages:v1";
+const STORAGE_KEY_BOOKMARKS = "mahak:hamyar:bookmarks:v1";
+const STORAGE_KEY_PATH = "mahak:hamyar:my-path:v1";
+
+function loadStringSet(key: string): Set<string> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "[]");
+    return new Set(Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function saveStringSet(key: string, values: ReadonlySet<string>): void {
+  try {
+    localStorage.setItem(key, JSON.stringify([...values]));
+  } catch {
+    // storage may be full or unavailable (private mode); progress is then session-only
+  }
+}
+
 export const useHamyarStore = defineStore("hamyar", () => {
   const guidesData = ref<Record<string, HamyarGuideData>>({});
   const loading = ref(false);
@@ -162,7 +183,37 @@ export const useHamyarStore = defineStore("hamyar", () => {
     return { completed, total, percentage };
   }
 
+  // Reading marks, bookmarks and "my path" (the guides the user follows) - all stored on this device.
+  const readStageKeys = ref<Set<string>>(loadStringSet(STORAGE_KEY_READ));
+  const bookmarkKeys = ref<Set<string>>(loadStringSet(STORAGE_KEY_BOOKMARKS));
+  const myPathGuideIds = ref<Set<string>>(loadStringSet(STORAGE_KEY_PATH));
+
+  const stageKey = (guideId: string, stageId: number): string => `${guideId}:${stageId}`;
+
+  function toggleIn(target: typeof readStageKeys, storageKey: string, value: string): void {
+    const next = new Set(target.value);
+    if (!next.delete(value)) next.add(value);
+    target.value = next;
+    saveStringSet(storageKey, next);
+  }
+
+  const isStageRead = (guideId: string, stageId: number): boolean => readStageKeys.value.has(stageKey(guideId, stageId));
+  const isBookmarked = (guideId: string, stageId: number): boolean => bookmarkKeys.value.has(stageKey(guideId, stageId));
+  const toggleStageRead = (guideId: string, stageId: number): void => toggleIn(readStageKeys, STORAGE_KEY_READ, stageKey(guideId, stageId));
+  const toggleBookmark = (guideId: string, stageId: number): void => toggleIn(bookmarkKeys, STORAGE_KEY_BOOKMARKS, stageKey(guideId, stageId));
+  const togglePathGuide = (guideId: string): void => toggleIn(myPathGuideIds, STORAGE_KEY_PATH, guideId);
+  const isInMyPath = (guideId: string): boolean => myPathGuideIds.value.has(guideId);
+
   return {
+    readStageKeys,
+    bookmarkKeys,
+    myPathGuideIds,
+    isStageRead,
+    isBookmarked,
+    toggleStageRead,
+    toggleBookmark,
+    togglePathGuide,
+    isInMyPath,
     guidesData,
     loading,
     loadingAll,

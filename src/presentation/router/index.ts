@@ -47,6 +47,8 @@ const router = createRouter({
         { path: "hamdel/dates", name: "hamdel-dates", component: () => import("@presentation/views/HamdelDatesView.vue") },
         { path: "hamdel/brief", name: "hamdel-brief", component: () => import("@presentation/views/HamdelBriefView.vue") },
         { path: "hamdel/occasionNotes", redirect: { name: "hamdel-brief" } },
+        { path: "hamdel/weekly-plan", name: "hamdel-weekly-plan", component: () => import("@presentation/views/HamdelWeeklyPlanView.vue") },
+        { path: "hamdel/gift-finder", name: "hamdel-gift-finder", component: () => import("@presentation/views/HamdelGiftFinderView.vue") },
         { path: "hamdel/stats", name: "hamdel-stats", component: () => import("@presentation/views/HamdelStatsView.vue") },
         { path: "hamdel/:section", name: "hamdel-section", component: () => import("@presentation/views/HamdelSectionView.vue") },
         // Positions now live in the games catalog (games/positions); keep the old URL working.

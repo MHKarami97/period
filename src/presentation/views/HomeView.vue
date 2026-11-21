@@ -2,7 +2,9 @@
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import { useAppModeStore } from "@application/stores/appModeStore";
+import { useDisplayPreferencesStore } from "@application/stores/displayPreferencesStore";
 import { useHomeDashboard } from "@presentation/composables/useHomeDashboard";
+import { useHomeExtras } from "@presentation/composables/useHomeExtras";
 import CareItemList from "@presentation/components/dashboard/CareItemList.vue";
 import HomeHeroCard from "@presentation/components/home/HomeHeroCard.vue";
 import HomeQuickLinks from "@presentation/components/home/HomeQuickLinks.vue";
@@ -13,6 +15,7 @@ import HomeTodayReminders from "@presentation/components/home/HomeTodayReminders
 import ProfileSwitcher from "@presentation/components/shared/ProfileSwitcher.vue";
 
 const appModeStore = useAppModeStore();
+const preferences = useDisplayPreferencesStore();
 const {
   greeting,
   careTarget,
@@ -38,6 +41,10 @@ const {
   lifeStageTip,
   reminders,
 } = useHomeDashboard();
+const { insights, statsAlert, score, seasonal, seasonalAdded, addSeasonalChallenge, extraReminders, lifeGuides, pathTip, bookmarks, isInMyPath, togglePathGuide } = useHomeExtras();
+
+const allReminders = computed(() => [...reminders.value, ...extraReminders.value]);
+const visibleLifeTip = computed(() => pathTip.value ?? lifeStageTip.value);
 
 const formatNumber = (value: number): string => value.toLocaleString("fa-IR");
 
@@ -72,19 +79,19 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
 
     <HomeHeroCard :greeting="greeting" :care-target="careTarget" :summary="cycleSummary" :tip-heading="careHeading" :tip="heroTip" :needs-symptom-log="needsSymptomLog" />
 
-    <HomeTodayReminders :reminders="reminders" />
-    <HomeQuickLinks :is-partner-mode="appModeStore.isPartnerMode" />
+    <HomeTodayReminders v-if="preferences.isWidgetVisible('reminders')" :reminders="allReminders" />
+    <HomeQuickLinks v-if="preferences.isWidgetVisible('quickLinks')" :is-partner-mode="appModeStore.isPartnerMode" />
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <HomeSectionCard
-        v-if="cycleFacts.length > 0"
+        v-if="cycleFacts.length > 0 && preferences.isWidgetVisible('companion')"
         class="md:col-span-2"
         title="همراه"
         :subtitle="appModeStore.isPartnerMode ? 'پیش‌بینی‌ها و راهنمای امروز برای حمایت' : 'پیش‌بینی‌ها و راهنمای امروز برای خودت'"
         icon="🩸"
         tone="rose"
-        :to="{ name: 'companion', query: { tab: 'calendar' } }"
-        cta-label="تقویم و جزئیات همراه"
+        :to="{ name: 'companion', query: { tab: 'stats' } }"
+        cta-label="آمار و تحلیل کامل"
       >
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <dl class="grid grid-cols-2 gap-2 self-start">
@@ -99,9 +106,18 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
             <CareItemList :items="careItems.slice(0, 4)" />
           </div>
         </div>
+        <ul v-if="insights.length > 0 || statsAlert" class="flex flex-col gap-1.5">
+          <li v-for="insight in insights" :key="insight.id" class="flex items-start gap-2 rounded-xl bg-violet-50 px-3 py-2 text-xs leading-5 text-violet-900 ring-1 ring-violet-200/70 dark:bg-violet-500/10 dark:text-violet-100 dark:ring-violet-500/25">
+            <span aria-hidden="true">{{ insight.icon }}</span>{{ insight.text }}
+          </li>
+          <li v-if="statsAlert" class="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900 ring-1 ring-amber-200/80 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-500/25">
+            <span aria-hidden="true">⚠️</span>{{ statsAlert.text }}
+          </li>
+        </ul>
       </HomeSectionCard>
 
       <HomeSectionCard
+        v-if="preferences.isWidgetVisible('challenge')"
         class="md:col-span-2"
         title="چالش امروز"
         subtitle="چالش‌های روزانه و هفتگی دونفره"
@@ -112,6 +128,11 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
         :progress="challengeWeek.total > 0 ? weekPercent : null"
         :progress-label="weekLabel"
       >
+        <div v-if="score.completedTotal > 0" class="flex flex-wrap gap-2 text-xs">
+          <span class="rounded-full bg-orange-100 px-2.5 py-1 font-bold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">🔥 {{ formatNumber(score.streak) }} روز پیاپی</span>
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">⭐ {{ formatNumber(score.points) }} امتیاز</span>
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">رکورد {{ formatNumber(score.bestStreak) }} روز</span>
+        </div>
         <p v-if="challenge.kind === 'no-plan'" class="text-sm leading-6 text-slate-600 dark:text-slate-300">برنامه‌ی این هفته هنوز ساخته نشده است. با یک لمس برای هر روز یک چالش دونفره بگیرید.</p>
         <p v-else-if="challenge.kind === 'no-today'" class="text-sm leading-6 text-slate-600 dark:text-slate-300">برای امروز چالشی در برنامه نیست.</p>
         <p v-else-if="challenge.kind === 'off'" class="text-sm leading-6 text-slate-600 dark:text-slate-300">🏖 امروز روز آف است: {{ challenge.reason }}</p>
@@ -135,9 +156,17 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
             <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ dot.label }}</span>
           </li>
         </ol>
+        <div class="flex flex-col gap-1.5 rounded-2xl bg-violet-50 p-3 ring-1 ring-violet-200/70 dark:bg-violet-500/10 dark:ring-violet-500/25">
+          <p class="text-[11px] font-bold text-violet-700 dark:text-violet-300">✨ چالش مناسبتی: {{ seasonal.occasion }}</p>
+          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ seasonal.title }}</p>
+          <p class="text-xs leading-5 text-slate-600 dark:text-slate-300">{{ seasonal.description }}</p>
+          <button type="button" class="self-start rounded-xl bg-violet-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-violet-700 active:scale-95 disabled:opacity-60" :disabled="seasonalAdded" @click="addSeasonalChallenge">
+            {{ seasonalAdded ? "به فهرست چالش‌ها اضافه شد ✓" : "افزودن به فهرست چالش‌ها" }}
+          </button>
+        </div>
       </HomeSectionCard>
 
-      <HomeSectionCard title="همدل" subtitle="دفترچه‌ی شناخت او" icon="💞" tone="rose" :to="{ name: 'hamdel' }" cta-label="رفتن به همدل">
+      <HomeSectionCard v-if="preferences.isWidgetVisible('hamdel')" title="همدل" subtitle="دفترچه‌ی شناخت او" icon="💞" tone="rose" :to="{ name: 'hamdel' }" cta-label="رفتن به همدل">
         <div class="flex flex-wrap gap-2 text-xs">
           <span class="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ formatNumber(hamdelStats.totalEntries) }} یادداشت</span>
           <span v-if="hamdelStats.openPromises > 0" class="rounded-full bg-amber-100 px-2.5 py-1 font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">{{ formatNumber(hamdelStats.openPromises) }} قول باز</span>
@@ -154,9 +183,13 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
 
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400">امروز با این کار خوشحالش کن</p>
         <HomeSuggestionList :suggestions="partnerSuggestions" />
+        <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+          <RouterLink :to="{ name: 'hamdel-weekly-plan' }" class="rounded-full bg-rose-50 px-2.5 py-1 text-rose-800 ring-1 ring-rose-200/70 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/25">🗓 برنامه‌ی هفتگی</RouterLink>
+          <RouterLink :to="{ name: 'hamdel-gift-finder' }" class="rounded-full bg-rose-50 px-2.5 py-1 text-rose-800 ring-1 ring-rose-200/70 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/25">🎁 ایده‌ی هدیه</RouterLink>
+        </div>
       </HomeSectionCard>
 
-      <HomeSectionCard title="همراز" subtitle="بازی و گفت‌وگوی دونفره" icon="🎲" tone="violet" :to="{ name: 'games' }" cta-label="رفتن به همراز">
+      <HomeSectionCard v-if="preferences.isWidgetVisible('play')" title="همراز" subtitle="بازی و گفت‌وگوی دونفره" icon="🎲" tone="violet" :to="{ name: 'games' }" cta-label="رفتن به همراز">
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400">پیشنهاد امروز برای شما دو نفر</p>
         <HomeSuggestionList :suggestions="playSuggestions" />
         <div v-if="visibleGames.length > 0" class="flex flex-wrap gap-1.5">
@@ -173,6 +206,7 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
       </HomeSectionCard>
 
       <HomeSectionCard
+        v-if="preferences.isWidgetVisible('hamyarLife')"
         title="همیار · مراحل زندگی"
         subtitle="راهنماهای علمی هر مرحله"
         icon="🌱"
@@ -194,10 +228,33 @@ const weekPercent = computed(() => (challengeWeek.value.total === 0 ? 0 : Math.r
           </span>
         </RouterLink>
         <p v-else-if="lifeStagesSummary.totalItems > 0" class="text-sm text-emerald-700 dark:text-emerald-300">همه‌ی راهنماها را کامل کرده‌اید 🎉</p>
-        <HomeTipCard :tip="lifeStageTip" />
+
+        <HomeTipCard :tip="visibleLifeTip" />
+
+        <ul v-if="bookmarks.length > 0" class="flex flex-col gap-1">
+          <li v-for="bookmark in bookmarks" :key="bookmark.key">
+            <RouterLink :to="{ name: 'hamyar-guide', params: { guideId: bookmark.guideId }, query: { stage: bookmark.stageId } }" class="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200/70 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-500/25">
+              <span aria-hidden="true">🔖</span>
+              <span class="min-w-0 flex-1 truncate font-bold">{{ bookmark.title }}</span>
+              <span class="shrink-0 opacity-70">{{ bookmark.guideTitle }}</span>
+            </RouterLink>
+          </li>
+        </ul>
+
+        <details class="rounded-2xl bg-slate-50 p-3 text-xs ring-1 ring-slate-200/70 dark:bg-slate-800/60 dark:ring-slate-700/60">
+          <summary class="cursor-pointer font-bold text-slate-700 dark:text-slate-200">🧭 مسیر من (راهنماهایی که دنبال می‌کنم)</summary>
+          <div class="mt-2 flex flex-col gap-1.5">
+            <label v-for="guide in lifeGuides" :key="guide.id" class="flex cursor-pointer items-center gap-2 text-slate-700 dark:text-slate-200">
+              <input type="checkbox" class="h-4 w-4 accent-teal-500" :checked="isInMyPath(guide.id)" @change="togglePathGuide(guide.id)" />
+              <span aria-hidden="true">{{ guide.icon }}</span>{{ guide.title }}
+            </label>
+            <p class="text-[11px] leading-5 text-slate-500 dark:text-slate-400">نکته‌ی روز فقط از راهنماهای انتخاب‌شده می‌آید؛ اگر چیزی انتخاب نکنید از همه‌ی راهنماها می‌آید.</p>
+          </div>
+        </details>
       </HomeSectionCard>
 
       <HomeSectionCard
+        v-if="preferences.isWidgetVisible('hamyarCouple')"
         title="همیار · ارتباط زوجین"
         subtitle="مهارت‌های گفت‌وگو و صمیمیت"
         icon="💑"

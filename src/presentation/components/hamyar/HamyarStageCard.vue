@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import type { HamyarStage, HamyarContentType } from "@domain/hamyar/HamyarGuide";
 import { useHamyarStore } from "@application/stores/hamyarStore";
 import AppIcon from "@presentation/components/common/AppIcon.vue";
+import HamyarStageActions from "@presentation/components/hamyar/HamyarStageActions.vue";
 
 const props = defineProps<{
   guideId: string;
@@ -120,6 +121,8 @@ function getEvidenceBadgeClass(level: string): string {
 
     <!-- Expanded Body -->
     <div v-show="isExpanded" class="border-t border-slate-100 p-3.5 sm:p-5 pt-3 sm:pt-4 flex flex-col gap-5 dark:border-slate-800">
+      <HamyarStageActions :guide-id="guideId" :stage-id="stage.id" />
+
       <!-- Goal callout -->
       <div v-if="stage.goal" class="rounded-2xl bg-teal-50/80 p-3.5 sm:p-4 border-r-4 border-teal-500 dark:bg-teal-950/40 dark:border-teal-400">
         <span class="text-xs font-bold text-teal-800 dark:text-teal-300 flex items-center gap-1.5 mb-1">

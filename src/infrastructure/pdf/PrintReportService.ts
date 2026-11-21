@@ -3,6 +3,8 @@ import type { Cycle } from "@domain/entities/Cycle";
 import type { Symptom } from "@domain/entities/Symptom";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { CyclePredictionService } from "@domain/services/CyclePredictionService";
+import { CycleStatisticsCalculator, REGULARITY_LABELS_FA } from "@domain/insights/CycleStatistics";
+import { tagLabel } from "@domain/insights/SymptomTags";
 
 const SIX_MONTHS_IN_DAYS = 182;
 
@@ -35,6 +37,7 @@ export class PrintReportService {
       .sort((a, b) => a.date.diffInDays(b.date));
 
     const predictionSection = recentCycles.length > 0 ? PrintReportService.buildPredictionSection(recentCycles) : "";
+    const statsSection = PrintReportService.buildStatsSection(recentCycles);
     const cyclesSection = PrintReportService.buildCyclesSection(recentCycles);
     const symptomsSection = PrintReportService.buildSymptomsSection(recentSymptoms);
 
@@ -81,6 +84,7 @@ export class PrintReportService {
   <h1>گزارش ۶ ماه اخیر - ردیاب عادت‌ماهیانه</h1>
   <p class="subtitle">${subtitle}</p>
   ${predictionSection}
+  ${statsSection}
   ${cyclesSection}
   ${symptomsSection}
   <script>
@@ -117,6 +121,29 @@ export class PrintReportService {
     </table>`;
   }
 
+  private static buildStatsSection(recentCycles: readonly Cycle[]): string {
+    if (recentCycles.length < 2) return "";
+    const stats = CycleStatisticsCalculator.calculate(recentCycles);
+    const fa = (value: number | null, unit: string): string => (value === null ? "-" : `${value.toLocaleString("fa-IR")} ${unit}`);
+    const alertRows = stats.alerts
+      .filter((alert) => alert.severity === "warning")
+      .map((alert) => `<li>${escapeHtml(alert.text)}</li>`)
+      .join("");
+    return `
+    <h2>آمار چرخه‌ها</h2>
+    <table>
+      <thead><tr><th>شاخص</th><th>مقدار</th></tr></thead>
+      <tbody>
+        <tr><td>میانگین طول چرخه</td><td>${fa(stats.averageLength, "روز")}</td></tr>
+        <tr><td>کوتاه‌ترین / بلندترین چرخه</td><td>${fa(stats.minLength, "روز")} / ${fa(stats.maxLength, "روز")}</td></tr>
+        <tr><td>انحراف معیار</td><td>${fa(stats.standardDeviation, "روز")}</td></tr>
+        <tr><td>میانگین طول پریود</td><td>${fa(stats.averagePeriodLength, "روز")}</td></tr>
+        <tr><td>نظم چرخه</td><td>${REGULARITY_LABELS_FA[stats.regularity]}</td></tr>
+      </tbody>
+    </table>
+    ${alertRows ? `<p>نکات قابل پیگیری (غربالگری ساده، نه تشخیص):</p><ul>${alertRows}</ul>` : ""}`;
+  }
+
   private static buildCyclesSection(cycles: readonly Cycle[]): string {
     const rows = cycles
       .map(
@@ -146,6 +173,9 @@ export class PrintReportService {
           <td>${symptom.mood ? escapeHtml(symptom.mood) : "-"}</td>
           <td>${symptom.painLevel}/۴</td>
           <td>${escapeHtml(symptom.flowLevel)}</td>
+          <td>${symptom.tags.length ? escapeHtml(symptom.tags.map(tagLabel).join("، ")) : "-"}</td>
+          <td>${symptom.sleepHours !== null ? symptom.sleepHours : "-"}</td>
+          <td>${symptom.temperatureC !== null ? symptom.temperatureC : "-"}</td>
         </tr>`,
       )
       .join("");
@@ -153,8 +183,8 @@ export class PrintReportService {
     return `
     <h2>علائم ثبت‌شده</h2>
     <table>
-      <thead><tr><th>تاریخ</th><th>خلق‌وخو</th><th>درد</th><th>خونریزی</th></tr></thead>
-      <tbody>${rows || `<tr><td colspan="4">علائمی در ۶ ماه اخیر ثبت نشده</td></tr>`}</tbody>
+      <thead><tr><th>تاریخ</th><th>خلق‌وخو</th><th>درد</th><th>خونریزی</th><th>علائم</th><th>خواب (ساعت)</th><th>دما (°C)</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="7">علائمی در ۶ ماه اخیر ثبت نشده</td></tr>`}</tbody>
     </table>`;
   }
 }

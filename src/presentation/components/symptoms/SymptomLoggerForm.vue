@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import { Mood } from "@domain/valueObjects/Mood";
 import { FlowLevel } from "@domain/valueObjects/FlowLevel";
+import { SYMPTOM_TAGS } from "@domain/insights/SymptomTags";
 import { useSymptomStore } from "@application/stores/symptomStore";
 import { useToast } from "@presentation/composables/useToast";
 import ConfirmDialog from "@presentation/components/shared/ConfirmDialog.vue";
@@ -31,6 +32,19 @@ const selectedMood = ref<Mood | null>(null);
 const painLevel = ref(0);
 const flowLevel = ref<FlowLevel>(FlowLevel.None);
 const note = ref("");
+const selectedTags = ref<string[]>([]);
+const sleepInput = ref("");
+const temperatureInput = ref("");
+const hadIntimacy = ref(false);
+
+function toNumberOrNull(text: string): number | null {
+  const trimmed = text.trim();
+  return trimmed === "" || Number.isNaN(Number(trimmed)) ? null : Number(trimmed);
+}
+
+function toggleTag(id: string): void {
+  selectedTags.value = selectedTags.value.includes(id) ? selectedTags.value.filter((tag) => tag !== id) : [...selectedTags.value, id];
+}
 
 const isSaving = ref(false);
 const saveError = ref<string | null>(null);
@@ -43,6 +57,10 @@ function loadExisting(): void {
   painLevel.value = existing?.painLevel ?? 0;
   flowLevel.value = existing?.flowLevel ?? FlowLevel.None;
   note.value = existing?.note ?? "";
+  selectedTags.value = [...(existing?.tags ?? [])];
+  sleepInput.value = existing?.sleepHours != null ? String(existing.sleepHours) : "";
+  temperatureInput.value = existing?.temperatureC != null ? String(existing.temperatureC) : "";
+  hadIntimacy.value = existing?.hadIntimacy ?? false;
 }
 
 watch(() => props.date, loadExisting, { immediate: true });
@@ -68,13 +86,19 @@ async function save(): Promise<void> {
       painLevel: painLevel.value,
       flowLevel: flowLevel.value,
       note: note.value || null,
+      tags: selectedTags.value,
+      sleepHours: toNumberOrNull(sleepInput.value),
+      temperatureC: toNumberOrNull(temperatureInput.value),
+      hadIntimacy: hadIntimacy.value,
     });
     showToast("علائم با موفقیت ذخیره شد ✅");
   } catch (error) {
     saveError.value =
       error instanceof Error && error.message === "No active profile selected."
         ? "قبل از ثبت علائم، ابتدا یک نفر را در بالای داشبورد انتخاب کنید."
-        : "ذخیره علائم با خطا مواجه شد. دوباره تلاش کنید.";
+        : error instanceof RangeError
+          ? "مقدار خواب یا دما معتبر نیست؛ خواب بین ۰ تا ۲۴ ساعت و دما بین ۳۴ تا ۴۲ درجه."
+          : "ذخیره علائم با خطا مواجه شد. دوباره تلاش کنید.";
   } finally {
     isSaving.value = false;
   }
@@ -111,6 +135,40 @@ async function save(): Promise<void> {
         <option v-for="option in FLOW_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
       </select>
     </div>
+
+    <div>
+      <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">علائم جسمی (چندتایی)</p>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="tag in SYMPTOM_TAGS"
+          :key="tag.id"
+          type="button"
+          :aria-pressed="selectedTags.includes(tag.id)"
+          class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs transition"
+          :class="selectedTags.includes(tag.id) ? 'bg-rose-500/10 text-rose-600 ring-1 ring-rose-400 dark:bg-rose-500/20 dark:text-rose-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+          @click="toggleTag(tag.id)"
+        >
+          <span aria-hidden="true">{{ tag.icon }}</span>
+          {{ tag.label }}
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <label class="flex flex-col gap-1 text-sm text-slate-500 dark:text-slate-400">
+        خواب دیشب (ساعت)
+        <input v-model="sleepInput" type="number" inputmode="decimal" min="0" max="24" step="0.5" dir="ltr" class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-slate-100" />
+      </label>
+      <label class="flex flex-col gap-1 text-sm text-slate-500 dark:text-slate-400">
+        دمای پایه‌ی بدن (°C)
+        <input v-model="temperatureInput" type="number" inputmode="decimal" min="34" max="42" step="0.01" dir="ltr" placeholder="مثلاً 36.45" class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 dark:bg-slate-800 dark:text-slate-100" />
+      </label>
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+      <input v-model="hadIntimacy" type="checkbox" class="h-4 w-4 accent-rose-500" />
+      رابطه‌ی زناشویی داشتم
+    </label>
 
     <div>
       <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">یادداشت (اختیاری)</p>

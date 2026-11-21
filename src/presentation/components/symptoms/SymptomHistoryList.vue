@@ -4,6 +4,7 @@ import { useSymptomStore } from "@application/stores/symptomStore";
 import { useJalali } from "@presentation/composables/useJalali";
 import { Mood } from "@domain/valueObjects/Mood";
 import { FlowLevel } from "@domain/valueObjects/FlowLevel";
+import { tagLabel } from "@domain/insights/SymptomTags";
 
 const symptomStore = useSymptomStore();
 const { toJalaliLabel } = useJalali();
@@ -48,6 +49,14 @@ const sortedSymptoms = computed(() =>
       <span class="text-xs text-slate-500 dark:text-slate-400">{{ FLOW_LABEL[symptom.flowLevel] }}</span>
     </span>
   </div>
+  <p v-if="symptom.tags.length > 0" class="flex flex-wrap gap-1">
+    <span v-for="tag in symptom.tags" :key="tag" class="rounded-full bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">{{ tagLabel(tag) }}</span>
+  </p>
+  <p v-if="symptom.sleepHours !== null || symptom.temperatureC !== null || symptom.hadIntimacy" class="text-[11px] text-slate-500 dark:text-slate-400">
+    <span v-if="symptom.sleepHours !== null">😴 {{ symptom.sleepHours.toLocaleString("fa-IR") }} ساعت خواب · </span>
+    <span v-if="symptom.temperatureC !== null">🌡 {{ symptom.temperatureC.toLocaleString("fa-IR") }}° · </span>
+    <span v-if="symptom.hadIntimacy">💞 رابطه</span>
+  </p>
   <p v-if="symptom.note" class="text-xs text-slate-500 dark:text-slate-400">{{ symptom.note }}</p>
 </li>
     </ul>

@@ -1,4 +1,4 @@
-export const HAMDEL_GROUP_IDS = ["profile", "feelings", "story", "interactions", "together"] as const;
+export const HAMDEL_GROUP_IDS = ["profile", "feelings", "story", "interactions", "together", "health"] as const;
 export type HamdelGroupId = (typeof HAMDEL_GROUP_IDS)[number];
 
 export const HAMDEL_GROUP_LABELS_FA: Readonly<Record<HamdelGroupId, string>> = {
@@ -7,6 +7,7 @@ export const HAMDEL_GROUP_LABELS_FA: Readonly<Record<HamdelGroupId, string>> = {
   story: "گذشته و آینده",
   interactions: "تعامل‌ها و تعهدها",
   together: "با هم",
+  health: "سلامت و درمان",
 };
 
 export type HamdelFieldKind = "text" | "textarea" | "select" | "date";

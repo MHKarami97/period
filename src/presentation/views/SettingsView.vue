@@ -6,6 +6,7 @@ import AccountActionsPanel from "@presentation/components/settings/AccountAction
 import CloudBackupCard from "@presentation/components/settings/CloudBackupCard.vue";
 import DataManagementPanel from "@presentation/components/settings/DataManagementPanel.vue";
 import DisplayNameForm from "@presentation/components/settings/DisplayNameForm.vue";
+import DisplayPreferencesPanel from "@presentation/components/settings/DisplayPreferencesPanel.vue";
 import GamesAccessPanel from "@presentation/components/settings/GamesAccessPanel.vue";
 import SecurityPanel from "@presentation/components/settings/SecurityPanel.vue";
 import TelegramReminderPanel from "@presentation/components/settings/TelegramReminderPanel.vue";
@@ -22,7 +23,7 @@ interface SettingsTab {
 
 /** Related panels share a tab; only the active tab is mounted, so heavy panels (cloud backup) load on demand. */
 const TABS: readonly SettingsTab[] = [
-  { id: "general", label: "عمومی", icon: "🎨", panels: [DisplayNameForm, ThemeSwitcher] },
+  { id: "general", label: "عمومی", icon: "🎨", panels: [DisplayNameForm, ThemeSwitcher, DisplayPreferencesPanel] },
   { id: "reminders", label: "یادآور", icon: "🔔", panels: [TelegramReminderPanel] },
   { id: "security", label: "امنیت و قفل", icon: "🔒", panels: [SecurityPanel, GamesAccessPanel] },
   { id: "data", label: "داده و پشتیبان", icon: "☁️", panels: [CloudBackupCard, DataManagementPanel] },

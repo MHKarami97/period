@@ -15,6 +15,10 @@ export interface LogSymptomInput {
   painLevel?: number;
   flowLevel?: FlowLevel;
   note?: string | null;
+  tags?: readonly string[];
+  sleepHours?: number | null;
+  temperatureC?: number | null;
+  hadIntimacy?: boolean;
 }
 
 export const useSymptomStore = defineStore("symptom", () => {
@@ -58,6 +62,10 @@ export const useSymptomStore = defineStore("symptom", () => {
       painLevel: input.painLevel,
       flowLevel: input.flowLevel,
       note: input.note,
+      tags: input.tags,
+      sleepHours: input.sleepHours,
+      temperatureC: input.temperatureC,
+      hadIntimacy: input.hadIntimacy,
     });
 
     await symptomRepository.save(symptom, profileStore.activeProfileId);

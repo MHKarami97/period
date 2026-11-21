@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
+import { useDisplayPreferencesStore } from "@application/stores/displayPreferencesStore";
 import { useProfileStore } from "@application/stores/profileStore";
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useSymptomStore } from "@application/stores/symptomStore";
 import { useHamdelStore } from "@application/stores/hamdelStore";
 import { useTelegramReminderStore } from "@application/stores/telegramReminderStore";
 import NavIcon from "@presentation/components/layout/NavIcon.vue";
+import { useMedicationNotifications } from "@presentation/composables/useMedicationReminders";
 
 const route = useRoute();
+const displayPreferences = useDisplayPreferencesStore();
 const profileStore = useProfileStore();
 const cycleStore = useCycleStore();
 const symptomStore = useSymptomStore();
@@ -22,7 +25,7 @@ interface NavItem {
   readonly primary?: boolean;
 }
 
-const HOME_ITEM: NavItem = { to: { name: "home" }, label: "", iconName: "home", primary: true };
+const HOME_ITEM: NavItem = { to: { name: "home" }, label: "خانه", iconName: "home", primary: true };
 const COMPANION_ITEM: NavItem = { to: { name: "companion" }, label: "همراه", iconName: "companion" };
 const GAMES_ITEM: NavItem = { to: { name: "games" }, label: "هم‌راز", iconName: "games" };
 const HAMDEL_ITEM: NavItem = { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" };
@@ -31,6 +34,11 @@ const HAMYAR_ITEM: NavItem = { to: { name: "hamyar" }, label: "همیار", icon
 /** RTL layout: the first item sits on the right edge. Home is the centre; Hamrah/Hamraz on the right, Hamdel/Hamyar on the left. */
 const MOBILE_ITEMS: readonly NavItem[] = [COMPANION_ITEM, GAMES_ITEM, HOME_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
 const DESKTOP_ITEMS: readonly NavItem[] = [HOME_ITEM, COMPANION_ITEM, GAMES_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
+
+const mobileItems = computed(() => MOBILE_ITEMS.filter((item) => displayPreferences.isNavVisible(item.to.name)));
+const desktopItems = computed(() => DESKTOP_ITEMS.filter((item) => displayPreferences.isNavVisible(item.to.name)));
+
+useMedicationNotifications();
 
 /** Top/Utility items (Guide and Settings) placed side-by-side in top bar on mobile and utility area on desktop */
 const GUIDE_ITEM: NavItem = { to: { name: "guide" }, label: "راهنما", iconName: "guide" };
@@ -93,7 +101,7 @@ watch(() => hamdelStore.entries, syncReminders);
 
         <nav class="flex flex-col gap-1.5" aria-label="ناوبری اصلی">
           <RouterLink
-            v-for="item in DESKTOP_ITEMS"
+            v-for="item in desktopItems"
             :key="item.label"
             :to="item.to"
             class="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all"
@@ -200,7 +208,7 @@ watch(() => hamdelStore.entries, syncReminders);
       class="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-lg items-end justify-around gap-1 rounded-3xl bg-white/92 px-2.5 py-1.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-slate-900/10 backdrop-blur-xl dark:bg-slate-900/92 dark:shadow-[0_14px_40px_-6px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.4)] dark:ring-white/10 lg:hidden"
       aria-label="ناوبری موبایل"
     >
-      <template v-for="item in MOBILE_ITEMS" :key="item.label">
+      <template v-for="item in mobileItems" :key="item.label">
         <RouterLink
           v-if="item.primary"
           :to="item.to"

@@ -48,6 +48,10 @@ export class DexieSymptomRepository implements ISymptomRepository {
       painLevel: record.painLevel,
       flowLevel: record.flowLevel as FlowLevel,
       note: record.note,
+      tags: record.tags ?? [],
+      sleepHours: record.sleepHours ?? null,
+      temperatureC: record.temperatureC ?? null,
+      hadIntimacy: record.hadIntimacy ?? false,
     });
   }
 
@@ -61,6 +65,10 @@ export class DexieSymptomRepository implements ISymptomRepository {
       painLevel: plain.painLevel,
       flowLevel: plain.flowLevel,
       note: plain.note,
+      tags: [...plain.tags],
+      sleepHours: plain.sleepHours,
+      temperatureC: plain.temperatureC,
+      hadIntimacy: plain.hadIntimacy,
     };
   }
 }
