@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { onMounted, watch } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
-import { useAppModeStore } from "@application/stores/appModeStore";
 import { useProfileStore } from "@application/stores/profileStore";
 import { useCycleStore } from "@application/stores/cycleStore";
 import { useSymptomStore } from "@application/stores/symptomStore";
@@ -10,7 +9,6 @@ import { useTelegramReminderStore } from "@application/stores/telegramReminderSt
 import NavIcon from "@presentation/components/layout/NavIcon.vue";
 
 const route = useRoute();
-const appModeStore = useAppModeStore();
 const profileStore = useProfileStore();
 const cycleStore = useCycleStore();
 const symptomStore = useSymptomStore();
@@ -21,24 +19,22 @@ interface NavItem {
   readonly to: { name: string };
   readonly label: string;
   readonly iconName: string;
-  readonly selfOnly?: boolean;
+  readonly primary?: boolean;
 }
 
-/** Primary navigation items in bottom bar (mobile) and main list (desktop sidebar) */
-const NAV_ITEMS: readonly NavItem[] = [
-  { to: { name: "dashboard" }, label: "داشبورد", iconName: "dashboard" },
-  { to: { name: "calendar" }, label: "تقویم", iconName: "calendar" },
-  { to: { name: "symptoms" }, label: "علائم", iconName: "symptoms", selfOnly: true },
-  { to: { name: "hamyar" }, label: "همیار", iconName: "hamyar" },
-  { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" },
-  { to: { name: "games" }, label: "هم‌راز", iconName: "games" },
-];
+const HOME_ITEM: NavItem = { to: { name: "home" }, label: "", iconName: "home", primary: true };
+const COMPANION_ITEM: NavItem = { to: { name: "companion" }, label: "همراه", iconName: "companion" };
+const GAMES_ITEM: NavItem = { to: { name: "games" }, label: "هم‌راز", iconName: "games" };
+const HAMDEL_ITEM: NavItem = { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" };
+const HAMYAR_ITEM: NavItem = { to: { name: "hamyar" }, label: "همیار", iconName: "hamyar" };
+
+/** The layout is RTL: the first item sits on the right edge. Home is the centre; Hamrah/Hamraz on the right, Hamdel/Hamyar on the left. */
+const MOBILE_ITEMS: readonly NavItem[] = [COMPANION_ITEM, GAMES_ITEM, HOME_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
+const DESKTOP_ITEMS: readonly NavItem[] = [HOME_ITEM, COMPANION_ITEM, GAMES_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
 
 /** Top/Utility items (Guide and Settings) placed side-by-side in top bar on mobile and utility area on desktop */
 const GUIDE_ITEM: NavItem = { to: { name: "guide" }, label: "راهنما", iconName: "guide" };
 const SETTINGS_ITEM: NavItem = { to: { name: "settings" }, label: "تنظیمات", iconName: "settings" };
-
-const visibleItems = computed(() => NAV_ITEMS.filter((item) => !item.selfOnly || !appModeStore.isPartnerMode));
 
 function isRouteActive(name: string): boolean {
   const current = String(route.name || "");
@@ -97,7 +93,7 @@ watch(() => hamdelStore.entries, syncReminders);
 
         <nav class="flex flex-col gap-1.5" aria-label="ناوبری اصلی">
           <RouterLink
-            v-for="item in visibleItems"
+            v-for="item in DESKTOP_ITEMS"
             :key="item.label"
             :to="item.to"
             class="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all"
@@ -199,33 +195,47 @@ watch(() => hamdelStore.entries, syncReminders);
       <RouterView />
     </main>
 
-    <!-- Modern Floating Mobile Bottom Navigation Bar -->
+    <!-- Floating mobile bottom bar: Home is the raised centre button -->
     <nav
-      class="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-lg items-center justify-around gap-1 rounded-3xl bg-white/92 px-2.5 py-1.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-slate-900/10 backdrop-blur-xl dark:bg-slate-900/92 dark:shadow-[0_14px_40px_-6px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.4)] dark:ring-white/10 lg:hidden"
+      class="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-lg items-end justify-around gap-1 rounded-3xl bg-white/92 px-2.5 py-1.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-slate-900/10 backdrop-blur-xl dark:bg-slate-900/92 dark:shadow-[0_14px_40px_-6px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.4)] dark:ring-white/10 lg:hidden"
       aria-label="ناوبری موبایل"
     >
-      <RouterLink
-        v-for="item in visibleItems"
-        :key="item.label"
-        :to="item.to"
-        class="group relative flex flex-1 min-w-[46px] max-w-[76px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl py-1 text-center transition-all duration-200 active:scale-90"
-        :class="isRouteActive(item.to.name)
-          ? 'text-teal-600 dark:text-teal-300 font-bold bg-teal-500/10 dark:bg-teal-400/15'
-          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/40'"
-        @click="handleNavClick(item.to.name)"
-      >
-        <span
-          class="flex h-6.5 w-6.5 items-center justify-center transition-transform duration-200"
-          :class="isRouteActive(item.to.name) ? 'scale-110 text-teal-600 dark:text-teal-300' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200'"
+      <template v-for="item in MOBILE_ITEMS" :key="item.label">
+        <RouterLink
+          v-if="item.primary"
+          :to="item.to"
+          :aria-label="item.label"
+          class="group relative -mt-7 flex min-w-[64px] max-w-[84px] flex-1 shrink-0 flex-col items-center gap-0.5 text-center"
+          @click="handleNavClick(item.to.name)"
         >
-          <NavIcon :name="item.iconName" :active="isRouteActive(item.to.name)" />
-        </span>
-        <span class="text-[10px] leading-tight tracking-tight whitespace-nowrap">{{ item.label }}</span>
-        <span
-          v-if="isRouteActive(item.to.name)"
-          class="h-1 w-1 rounded-full bg-teal-500 dark:bg-teal-400"
-        ></span>
-      </RouterLink>
+          <span
+            class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-rose-500 text-white shadow-lg shadow-teal-500/30 ring-4 ring-slate-100 transition-transform duration-200 group-active:scale-90 dark:ring-slate-950 [&>svg]:h-6 [&>svg]:w-6"
+            :class="isRouteActive(item.to.name) ? 'scale-110' : ''"
+          >
+            <NavIcon :name="item.iconName" :active="isRouteActive(item.to.name)" />
+          </span>
+          <span class="text-[10px] font-bold leading-tight" :class="isRouteActive(item.to.name) ? 'text-teal-600 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'">{{ item.label }}</span>
+        </RouterLink>
+
+        <RouterLink
+          v-else
+          :to="item.to"
+          class="group relative flex min-w-[46px] max-w-[76px] flex-1 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl py-1 text-center transition-all duration-200 active:scale-90"
+          :class="isRouteActive(item.to.name)
+            ? 'text-teal-600 dark:text-teal-300 font-bold bg-teal-500/10 dark:bg-teal-400/15'
+            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/40'"
+          @click="handleNavClick(item.to.name)"
+        >
+          <span
+            class="flex h-6.5 w-6.5 items-center justify-center transition-transform duration-200"
+            :class="isRouteActive(item.to.name) ? 'scale-110 text-teal-600 dark:text-teal-300' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200'"
+          >
+            <NavIcon :name="item.iconName" :active="isRouteActive(item.to.name)" />
+          </span>
+          <span class="text-[10px] leading-tight tracking-tight whitespace-nowrap">{{ item.label }}</span>
+          <span v-if="isRouteActive(item.to.name)" class="h-1 w-1 rounded-full bg-teal-500 dark:bg-teal-400"></span>
+        </RouterLink>
+      </template>
     </nav>
   </div>
 </template>

@@ -25,10 +25,13 @@ const router = createRouter({
       path: "/app",
       component: () => import("@presentation/components/layout/AppShell.vue"),
       children: [
-        { path: "", redirect: { name: "dashboard" } },
-        { path: "dashboard", name: "dashboard", component: () => import("@presentation/views/DashboardView.vue") },
-        { path: "calendar", name: "calendar", component: () => import("@presentation/views/CalendarView.vue") },
-        { path: "symptoms", name: "symptoms", component: () => import("@presentation/views/SymptomsView.vue") },
+        { path: "", redirect: { name: "home" } },
+        { path: "home", name: "home", component: () => import("@presentation/views/HomeView.vue") },
+        { path: "companion", name: "companion", component: () => import("@presentation/views/CompanionView.vue") },
+        // Legacy URLs and route names keep working; they now open the matching tab of "Hamrah".
+        { path: "dashboard", name: "dashboard", redirect: { name: "companion" } },
+        { path: "calendar", name: "calendar", redirect: { name: "companion", query: { tab: "calendar" } } },
+        { path: "symptoms", name: "symptoms", redirect: { name: "companion", query: { tab: "symptoms" } } },
         { path: "hamyar", name: "hamyar", component: () => import("@presentation/views/HamyarView.vue") },
         { path: "hamyar/:guideId", name: "hamyar-guide", component: () => import("@presentation/views/HamyarGuideView.vue") },
         { path: "games", name: "games", component: () => import("@presentation/views/GamesView.vue") },
@@ -59,13 +62,10 @@ router.beforeEach((to) => {
   const appModeStore = useAppModeStore();
 
   if (to.name === "onboarding" && appModeStore.hasSelectedRole) {
-    return { name: "dashboard" };
+    return { name: "home" };
   }
   if (to.name !== "onboarding" && !appModeStore.hasSelectedRole) {
     return { name: "onboarding" };
-  }
-  if (to.name === "symptoms" && appModeStore.isPartnerMode) {
-    return { name: "dashboard" };
   }
   if (to.meta.requiresGameAccess && !useAccessStore().isUnlocked) {
     return { name: "games" };

@@ -6,9 +6,39 @@ defineProps<{
 </script>
 
 <template>
+  <!-- Home + Companion icons -->
+  <svg
+    v-if="name === 'home'"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    :stroke-width="active ? 2.2 : 1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="h-5 w-5 shrink-0 transition-transform duration-200"
+    aria-hidden="true"
+  >
+    <path d="M3 10.25L12 3l9 7.25V20a2 2 0 01-2 2H5a2 2 0 01-2-2V10.25z" />
+    <path d="M12 17.5s-3-1.9-3-3.9a1.7 1.7 0 013-1.1 1.7 1.7 0 013 1.1c0 2-3 3.9-3 3.9z" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'companion'"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    :stroke-width="active ? 2.2 : 1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="h-5 w-5 shrink-0 transition-transform duration-200"
+    aria-hidden="true"
+  >
+    <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />
+  </svg>
+
   <!-- Dashboard Icon -->
   <svg
-    v-if="name === 'dashboard'"
+    v-else-if="name === 'dashboard'"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"

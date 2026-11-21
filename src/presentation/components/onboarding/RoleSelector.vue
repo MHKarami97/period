@@ -7,7 +7,7 @@ const router = useRouter();
 
 function selectRole(role: AppRole): void {
   appModeStore.setRole(role);
-  router.push({ name: "dashboard" });
+  router.push({ name: "home" });
 }
 </script>
 
