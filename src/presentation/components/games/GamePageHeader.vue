@@ -21,7 +21,7 @@ defineProps<{
       class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-slate-100/90 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-200/90 hover:text-slate-900 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
     >
       <span>بازگشت</span>
-      <svg class="h-3.5 w-3.5 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M15 19l-7-7 7-7" />
       </svg>
     </RouterLink>

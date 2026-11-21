@@ -13,7 +13,7 @@ describe("Couple Communication Guide JSON", () => {
 
     expect(data.schema_version).toBe("1.0");
     expect(data.guide_id).toBe("couple_communication");
-    expect(data.stages).toHaveLength(7);
+    expect(data.stages).toHaveLength(13);
   });
 
   it("covers all required stages and topics comprehensively", () => {

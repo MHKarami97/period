@@ -8,6 +8,10 @@ export default {
         vazir: ["Vazirmatn", "system-ui", "sans-serif"],
       },
       colors: {
+        slate: {
+          750: "#243042",
+          850: "#141c2b",
+        },
         phase: {
           menstrual: "#e7828c",
           follicular: "#7fb3a3",

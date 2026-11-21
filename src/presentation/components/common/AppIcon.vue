@@ -181,11 +181,22 @@ const sizeClasses = {
     </g>
 
     <!-- Beach / Off Day (Umbrella & Sun) -->
-    <g v-else-if="name === 'beach' || name === 'sun-beach'">
+    <g v-else-if="name === 'beach' || name === 'sun-beach' || name === 'holiday'">
       <circle cx="18" cy="6" r="3" />
       <path d="M4 14a8 8 0 0116 0H4z" :fill="filled ? 'currentColor' : 'none'" />
       <path d="M12 14v7M10 21h4" />
       <path d="M7 14l1.5-4M17 14l-1.5-4" />
+    </g>
+
+    <!-- Sun / Day -->
+    <g v-else-if="name === 'sun' || name === 'day'">
+      <circle cx="12" cy="12" r="4" :fill="filled ? 'currentColor' : 'none'" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </g>
+
+    <!-- Moon / Night -->
+    <g v-else-if="name === 'moon' || name === 'night'">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" :fill="filled ? 'currentColor' : 'none'" />
     </g>
 
     <!-- Check / Success -->

@@ -1,9 +1,10 @@
 import { format, getDay } from "date-fns-jalali";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
-import type {
-  ChallengeItem,
-  DailyChallengePlan,
-  WeeklyChallengeSchedule,
+import {
+  type ChallengeItem,
+  type DailyChallengePlan,
+  type WeeklyChallengeSchedule,
+  getChallengeTimeTags,
 } from "./DailyChallengeTypes";
 
 export const PERSIAN_WEEK_DAYS = [
@@ -81,7 +82,32 @@ export class WeeklyChallengeService {
   }
 
   /**
+   * Checks whether a challenge is suitable for a specific day of the Iranian week (0=Saturday to 6=Friday).
+   * For weekdays (0..4): working couples cannot do challenges that are strictly tagged for weekend or holiday.
+   * For weekends (5=Thursday, 6=Friday): weekend/holiday challenges are suitable and encouraged.
+   */
+  public static isChallengeSuitableForDayIndex(
+    challenge: ChallengeItem,
+    dayIndex: number,
+  ): boolean {
+    const tags = getChallengeTimeTags(challenge);
+    const isWeekendDay = dayIndex === 5 || dayIndex === 6;
+
+    if (isWeekendDay) {
+      return true;
+    }
+
+    // Weekdays (Saturday to Wednesday):
+    // If every tag on this challenge is weekend or holiday, do not put it on a working weekday.
+    const isStrictlyWeekendOrHoliday = tags.every(
+      (t) => t === "weekend" || t === "holiday",
+    );
+    return !isStrictlyWeekendOrHoliday;
+  }
+
+  /**
    * Generates a random 7-day schedule for the given week from the challenge pool.
+   * Intelligently aligns weekend/holiday challenges with Thursday and Friday, and weekday/night challenges with Saturday to Wednesday.
    * If existingSchedule is provided, preserves already completed or off days if desired.
    */
   public static generateWeeklyPlan(
@@ -100,7 +126,16 @@ export class WeeklyChallengeService {
     const weekTitle = this.formatWeekTitle(saturdayStart);
 
     // Shuffle pool to distribute challenges randomly across days
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
+    const usedChallengeIds = new Set<string>();
+
+    if (preserveCompleted && existingSchedule) {
+      for (const d of existingSchedule.days) {
+        if ((d.status === "completed" || d.isOff) && d.challengeId) {
+          usedChallengeIds.add(d.challengeId);
+        }
+      }
+    }
 
     const days: DailyChallengePlan[] = weekDays.map((day, idx) => {
       const dateIso = day.toIsoString();
@@ -116,8 +151,41 @@ export class WeeklyChallengeService {
         };
       }
 
-      // Pick a challenge from shuffled pool (looping if pool < 7)
-      const challenge = shuffled[idx % shuffled.length];
+      const isWeekendDay = idx === 5 || idx === 6;
+
+      // Filter candidates that are suitable for this day and not yet used
+      let candidates = shuffledPool.filter(
+        (c) =>
+          !usedChallengeIds.has(c.id) &&
+          this.isChallengeSuitableForDayIndex(c, idx),
+      );
+
+      // On weekend days (Thursday/Friday), prioritize challenges with weekend or holiday tags
+      if (isWeekendDay) {
+        const weekendSpecific = candidates.filter((c) => {
+          const tags = getChallengeTimeTags(c);
+          return tags.includes("weekend") || tags.includes("holiday");
+        });
+        if (weekendSpecific.length > 0) {
+          candidates = weekendSpecific;
+        }
+      }
+
+      // Pick challenge from candidates or fallback
+      let challenge: ChallengeItem;
+      if (candidates.length > 0) {
+        challenge = candidates[0];
+      } else {
+        const fallbackCandidates = shuffledPool.filter((c) =>
+          this.isChallengeSuitableForDayIndex(c, idx),
+        );
+        challenge =
+          fallbackCandidates.length > 0
+            ? fallbackCandidates[idx % fallbackCandidates.length]
+            : shuffledPool[idx % shuffledPool.length];
+      }
+
+      usedChallengeIds.add(challenge.id);
 
       return {
         date: dateIso,
@@ -127,6 +195,7 @@ export class WeeklyChallengeService {
         challengeId: challenge.id,
         challengeTitle: challenge.title,
         challengeDescription: challenge.description,
+        challengeTimeTags: getChallengeTimeTags(challenge),
         isOff: false,
         status: "pending",
       };
@@ -146,15 +215,25 @@ export class WeeklyChallengeService {
 
   /**
    * Selects a random challenge for a single day, avoiding currently used challenges in the week.
+   * If dayIndex is provided, respects suitability for weekdays vs weekends.
    */
   public static getRandomChallenge(
     pool: readonly ChallengeItem[],
     excludedIds: readonly string[] = [],
+    dayIndex?: number,
   ): ChallengeItem {
     if (!pool.length) {
       throw new Error("بانک چالش‌ها خالی است.");
     }
-    const candidates = pool.filter((item) => !excludedIds.includes(item.id));
+    let candidates = pool.filter((item) => !excludedIds.includes(item.id));
+    if (dayIndex !== undefined && candidates.length > 0) {
+      const suitable = candidates.filter((item) =>
+        this.isChallengeSuitableForDayIndex(item, dayIndex),
+      );
+      if (suitable.length > 0) {
+        candidates = suitable;
+      }
+    }
     const targetPool = candidates.length > 0 ? candidates : pool;
     const randomIndex = Math.floor(Math.random() * targetPool.length);
     return targetPool[randomIndex];

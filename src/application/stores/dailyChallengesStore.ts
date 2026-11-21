@@ -1,12 +1,14 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
-import type {
-  ChallengeItem,
-  ChallengeDayStatus,
-  DailyChallengePlan,
-  DailyChallengesSettings,
-  WeeklyChallengeSchedule,
+import {
+  type ChallengeItem,
+  type ChallengeDayStatus,
+  type DailyChallengePlan,
+  type DailyChallengesSettings,
+  type WeeklyChallengeSchedule,
+  type ChallengeTimeTag,
+  getChallengeTimeTags,
 } from "@domain/games/dailyChallenges/DailyChallengeTypes";
 import { DEFAULT_CHALLENGES } from "@domain/games/dailyChallenges/defaultChallenges";
 import { WeeklyChallengeService } from "@domain/games/dailyChallenges/WeeklyChallengeService";
@@ -168,7 +170,13 @@ export const useDailyChallengesStore = defineStore("dailyChallenges", () => {
 
     day.challengeTitle = title.trim();
     day.challengeDescription = description?.trim();
-    if (challengeId) day.challengeId = challengeId;
+    if (challengeId) {
+      day.challengeId = challengeId;
+      const matched = allChallenges.value.find((c) => c.id === challengeId);
+      if (matched) {
+        day.challengeTimeTags = getChallengeTimeTags(matched);
+      }
+    }
     schedule.updatedAt = new Date().toISOString();
     persist();
   }
@@ -187,10 +195,15 @@ export const useDailyChallengesStore = defineStore("dailyChallenges", () => {
       .map((d) => d.challengeId)
       .filter((id): id is string => Boolean(id));
 
-    const picked = WeeklyChallengeService.getRandomChallenge(allChallenges.value, usedIds);
+    const picked = WeeklyChallengeService.getRandomChallenge(
+      allChallenges.value,
+      usedIds,
+      day.dayOfWeekIndex,
+    );
     day.challengeId = picked.id;
     day.challengeTitle = picked.title;
     day.challengeDescription = picked.description;
+    day.challengeTimeTags = getChallengeTimeTags(picked);
     schedule.updatedAt = new Date().toISOString();
     persist();
   }
@@ -245,7 +258,12 @@ export const useDailyChallengesStore = defineStore("dailyChallenges", () => {
   /**
    * Adds a new custom challenge item to the pool.
    */
-  function addCustomChallenge(title: string, description?: string, category = "سفارشی"): ChallengeItem {
+  function addCustomChallenge(
+    title: string,
+    description?: string,
+    category = "سفارشی",
+    timeTags: ChallengeTimeTag[] = ["any"],
+  ): ChallengeItem {
     const cleanTitle = title.trim();
     if (!cleanTitle) {
       throw new Error("عنوان چالش نمی‌تواند خالی باشد.");
@@ -255,6 +273,7 @@ export const useDailyChallengesStore = defineStore("dailyChallenges", () => {
       title: cleanTitle,
       description: description?.trim(),
       category: category.trim() || "سفارشی",
+      timeTags: timeTags.length > 0 ? timeTags : ["any"],
       isDefault: false,
     };
     customPool.value.push(item);

@@ -121,12 +121,12 @@ function getEvidenceBadgeClass(level: string): string {
     <!-- Expanded Body -->
     <div v-show="isExpanded" class="border-t border-slate-100 p-3.5 sm:p-5 pt-3 sm:pt-4 flex flex-col gap-5 dark:border-slate-800">
       <!-- Goal callout -->
-      <div v-if="stage.goal" class="rounded-2xl bg-teal-50/80 p-3.5 sm:p-4 border-r-4 border-teal-500 dark:bg-teal-950/30 dark:border-teal-400">
+      <div v-if="stage.goal" class="rounded-2xl bg-teal-50/80 p-3.5 sm:p-4 border-r-4 border-teal-500 dark:bg-teal-950/40 dark:border-teal-400">
         <span class="text-xs font-bold text-teal-800 dark:text-teal-300 flex items-center gap-1.5 mb-1">
           <AppIcon name="target" size="xs" />
           <span>هدف این مرحله:</span>
         </span>
-        <p class="text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-200">
+        <p class="text-xs sm:text-sm leading-6 text-slate-800 dark:text-slate-100 font-medium">
           {{ stage.goal }}
         </p>
       </div>
@@ -142,7 +142,7 @@ function getEvidenceBadgeClass(level: string): string {
           <div
             v-for="topic in stage.knowledge"
             :key="topic.topic"
-            class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850/60 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs"
+            class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs"
           >
             <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
               {{ topic.topic }}
@@ -151,7 +151,7 @@ function getEvidenceBadgeClass(level: string): string {
               <div
                 v-for="(claim, cIdx) in topic.claims"
                 :key="cIdx"
-                class="flex flex-col gap-1.5 text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-300 border-r-2 border-teal-400/70 pr-3 dark:border-teal-500/70"
+                class="flex flex-col gap-1.5 text-xs sm:text-sm leading-6 text-slate-800 dark:text-slate-200 border-r-2 border-teal-400/70 pr-3 dark:border-teal-500/70"
               >
                 <div v-if="claim.evidence_level" class="flex items-center gap-2 flex-wrap">
                   <span
@@ -175,7 +175,7 @@ function getEvidenceBadgeClass(level: string): string {
             <AppIcon name="check-circle" size="sm" />
             <span>چک‌لیست و اقدامات عملی</span>
           </div>
-          <span class="text-[11px] text-slate-400 dark:text-slate-500">برای ثبت علامت بزنید</span>
+          <span class="text-[11px] text-slate-400 dark:text-slate-400">برای ثبت علامت بزنید</span>
         </div>
 
         <div class="space-y-2">
@@ -184,8 +184,8 @@ function getEvidenceBadgeClass(level: string): string {
             :key="idx"
             class="flex items-start gap-2.5 sm:gap-3 rounded-2xl p-2.5 sm:p-3 transition cursor-pointer ring-1 ring-transparent"
             :class="hamyarStore.isChecklistCompleted(getChecklistKey(idx))
-              ? 'bg-teal-50/60 ring-teal-200/60 dark:bg-teal-950/30 dark:ring-teal-900/60'
-              : 'bg-slate-50 hover:bg-slate-100/80 dark:bg-slate-850/50 dark:hover:bg-slate-800/80'"
+              ? 'bg-teal-50/60 ring-teal-200/60 dark:bg-teal-950/40 dark:ring-teal-900/60'
+              : 'bg-slate-50 hover:bg-slate-100/80 dark:bg-slate-850 dark:hover:bg-slate-800'"
           >
             <input
               type="checkbox"
@@ -216,11 +216,11 @@ function getEvidenceBadgeClass(level: string): string {
           <div
             v-for="(mythFact, mIdx) in stage.common_mistakes_and_myths"
             :key="mIdx"
-            class="flex flex-col gap-2 rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 border border-slate-200/80 dark:bg-slate-850/60 dark:border-slate-800 shadow-2xs"
+            class="flex flex-col gap-2 rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 border border-slate-200/80 dark:bg-slate-850 dark:border-slate-800 shadow-2xs"
           >
             <!-- Myth -->
             <div class="flex items-start gap-2">
-              <span class="shrink-0 rounded-md bg-rose-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-rose-700 dark:bg-rose-950/70 dark:text-rose-300">
+              <span class="shrink-0 rounded-md bg-rose-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
                 باور نادرست
               </span>
               <p class="text-xs sm:text-sm font-semibold text-rose-900 dark:text-rose-200 leading-6">
@@ -230,10 +230,10 @@ function getEvidenceBadgeClass(level: string): string {
 
             <!-- Fact -->
             <div class="flex items-start gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
-              <span class="shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
+              <span class="shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                 واقعیت علمی
               </span>
-              <p class="text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-200">
+              <p class="text-xs sm:text-sm leading-6 text-slate-800 dark:text-slate-200">
                 {{ mythFact.fact }}
               </p>
             </div>
@@ -248,7 +248,7 @@ function getEvidenceBadgeClass(level: string): string {
           <span>علائم هشدار و پرچم‌های قرمز</span>
         </div>
 
-        <div class="rounded-2xl bg-rose-50/80 p-3.5 sm:p-4 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/50 shadow-2xs">
+        <div class="rounded-2xl bg-rose-50/80 p-3.5 sm:p-4 border border-rose-200 dark:bg-rose-950/40 dark:border-rose-900/60 shadow-2xs">
           <ul class="space-y-2">
             <li
               v-for="(flag, fIdx) in stage.red_flags"
@@ -269,12 +269,12 @@ function getEvidenceBadgeClass(level: string): string {
           <span>پرسش‌هایی که خوب است از متخصص یا پزشک بپرسید</span>
         </div>
 
-        <div class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850/60 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs">
+        <div class="rounded-2xl bg-slate-50/90 p-3.5 sm:p-4 dark:bg-slate-850 ring-1 ring-slate-200/60 dark:ring-slate-800 shadow-2xs">
           <ul class="space-y-2">
             <li
               v-for="(q, qIdx) in [...(stage.questions_for_professional || []), ...(stage.questions_for_doctor || [])]"
               :key="qIdx"
-              class="flex items-start gap-2 text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-300"
+              class="flex items-start gap-2 text-xs sm:text-sm leading-6 text-slate-800 dark:text-slate-200"
             >
               <span class="text-teal-600 dark:text-teal-400 font-bold shrink-0">؟</span>
               <span>{{ q }}</span>
@@ -294,14 +294,14 @@ function getEvidenceBadgeClass(level: string): string {
           <div
             v-for="q in stage.quiz.questions"
             :key="q.n"
-            class="rounded-2xl border border-slate-200/80 bg-slate-50/90 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-850/60 shadow-2xs"
+            class="rounded-2xl border border-slate-200/80 bg-slate-50/90 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-850 shadow-2xs"
           >
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
               <div class="flex items-start gap-2 min-w-0">
                 <span class="shrink-0 rounded-lg bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
                   {{ q.n }}
                 </span>
-                <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-6">
+                <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 leading-6">
                   {{ q.q }}
                 </p>
               </div>
@@ -318,7 +318,7 @@ function getEvidenceBadgeClass(level: string): string {
             <!-- Answer revealed -->
             <div
               v-if="revealedAnswers[q.n]"
-              class="mt-3 rounded-xl bg-teal-50/90 p-3 text-xs sm:text-sm leading-6 text-teal-900 border border-teal-200/70 dark:bg-teal-950/40 dark:border-teal-800/60 dark:text-teal-200"
+              class="mt-3 rounded-xl bg-teal-50/90 p-3 text-xs sm:text-sm leading-6 text-teal-900 border border-teal-200/70 dark:bg-teal-950/50 dark:border-teal-800/60 dark:text-teal-200"
             >
               <span class="font-bold block mb-0.5">پاسخ علمی:</span>
               {{ stage.quiz.answers.find((a) => a.n === q.n)?.a || "پاسخ در متن شواهد آمده است." }}

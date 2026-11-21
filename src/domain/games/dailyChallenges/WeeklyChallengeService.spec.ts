@@ -85,4 +85,26 @@ describe("WeeklyChallengeService", () => {
     expect(picked.id).not.toBe("def-cooking");
     expect(picked.id).not.toBe("def-dance");
   });
+
+  it("checks day suitability: strictly weekend/holiday challenges are not placed on working weekdays", () => {
+    const weekendOnlyChallenge = {
+      id: "weekend-breakfast",
+      title: "صبحانه مفصل روز تعطیل",
+      timeTags: ["weekend", "holiday"] as const,
+    };
+    const nightChallenge = {
+      id: "night-tea",
+      title: "چای شبانه با شمع",
+      timeTags: ["night"] as const,
+    };
+
+    // Day 0 to 4 are weekdays (شنبه تا چهارشنبه)
+    expect(WeeklyChallengeService.isChallengeSuitableForDayIndex(weekendOnlyChallenge, 0)).toBe(false);
+    expect(WeeklyChallengeService.isChallengeSuitableForDayIndex(weekendOnlyChallenge, 2)).toBe(false);
+    expect(WeeklyChallengeService.isChallengeSuitableForDayIndex(nightChallenge, 0)).toBe(true);
+
+    // Day 5 and 6 are weekend (پنج‌شنبه و جمعه)
+    expect(WeeklyChallengeService.isChallengeSuitableForDayIndex(weekendOnlyChallenge, 5)).toBe(true);
+    expect(WeeklyChallengeService.isChallengeSuitableForDayIndex(weekendOnlyChallenge, 6)).toBe(true);
+  });
 });

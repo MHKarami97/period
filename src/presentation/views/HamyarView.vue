@@ -65,7 +65,7 @@ function switchTab(tab: "life_stages" | "couple_communication"): void {
 <template>
   <div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
     <!-- Top 2-Tab Navigation Switcher -->
-    <div class="flex items-center gap-1.5 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-850 ring-1 ring-slate-200/80 dark:ring-slate-800 shadow-2xs">
+    <div class="flex items-center gap-1.5 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-900 ring-1 ring-slate-200/80 dark:ring-slate-800 shadow-2xs">
       <button
         type="button"
         class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs sm:text-sm font-bold transition-all duration-200 active:scale-98"
@@ -124,7 +124,7 @@ function switchTab(tab: "life_stages" | "couple_communication"): void {
             v-model="hamyarStore.searchQuery"
             type="search"
             placeholder="جستجو در کل همیار (مباحث، چک‌لیست‌ها، باورهای غلط، هشدارها، کوییز...)"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pe-10 ps-11 text-sm text-slate-900 placeholder-slate-400 transition focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-teal-400 dark:focus:bg-slate-900"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pe-10 ps-11 text-sm text-slate-900 placeholder-slate-400 transition focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-slate-750 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:border-teal-400 dark:focus:bg-slate-800"
           />
           <svg
             class="absolute start-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500"

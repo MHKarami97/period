@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useDailyChallengesStore } from "@application/stores/dailyChallengesStore";
-import type { DailyChallengePlan } from "@domain/games/dailyChallenges/DailyChallengeTypes";
+import {
+  type DailyChallengePlan,
+  type ChallengeTimeTag,
+  getChallengeTimeTags,
+  getTimeTagOption,
+} from "@domain/games/dailyChallenges/DailyChallengeTypes";
 import AppIcon from "@presentation/components/common/AppIcon.vue";
 import ChallengePoolModal from "./ChallengePoolModal.vue";
 import DayResultModal from "./DayResultModal.vue";
@@ -81,6 +86,17 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
     iconName: "clock",
   };
 }
+
+function getDayChallengeTags(day: DailyChallengePlan): ChallengeTimeTag[] {
+  if (day.challengeTimeTags && day.challengeTimeTags.length > 0) {
+    return day.challengeTimeTags;
+  }
+  if (day.challengeId) {
+    const matched = store.allChallenges.find((c) => c.id === day.challengeId);
+    if (matched) return getChallengeTimeTags(matched);
+  }
+  return ["any"];
+}
 </script>
 
 <template>
@@ -114,7 +130,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
     <!-- 1. TODAY'S HIGHLIGHT CARD -->
     <div
       v-if="todayPlan"
-      class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-orange-500/15 p-4 sm:p-6 ring-1 ring-amber-500/30 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-slate-900 dark:ring-amber-500/30 shadow-xs"
+      class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-400/10 to-orange-500/10 p-4 sm:p-6 ring-1 ring-amber-500/30 dark:bg-slate-850 dark:from-slate-850 dark:via-slate-850 dark:to-slate-850 dark:ring-amber-400/40 dark:border dark:border-amber-400/30 shadow-xs"
     >
       <div class="flex flex-col gap-4">
         <!-- Header row of today's card -->
@@ -136,7 +152,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
           <div class="flex items-center gap-1.5 text-xs ms-auto sm:ms-0">
             <button
               type="button"
-              class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-white/80 dark:text-slate-300 dark:hover:bg-slate-800 transition active:scale-95"
+              class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-amber-100/60 dark:text-slate-300 dark:hover:bg-slate-800 transition active:scale-95"
               @click="store.reRollDay(store.currentWeekIso, todayPlan.date)"
             >
               <AppIcon name="rotate" size="xs" />
@@ -144,7 +160,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
             </button>
             <button
               type="button"
-              class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-white/80 dark:text-slate-300 dark:hover:bg-slate-800 transition active:scale-95"
+              class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-amber-100/60 dark:text-slate-300 dark:hover:bg-slate-800 transition active:scale-95"
               @click="openEditModal(todayPlan)"
             >
               <AppIcon name="pencil" size="xs" />
@@ -154,9 +170,20 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
         </div>
 
         <div>
-          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-            {{ todayPlan.challengeTitle }}
-          </h3>
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+              {{ todayPlan.challengeTitle }}
+            </h3>
+            <span
+              v-for="tg in getDayChallengeTags(todayPlan)"
+              :key="tg"
+              class="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-semibold border"
+              :class="getTimeTagOption(tg).badgeClass"
+            >
+              <AppIcon :name="getTimeTagOption(tg).iconName" size="xs" />
+              <span>{{ getTimeTagOption(tg).label }}</span>
+            </span>
+          </div>
           <p v-if="todayPlan.challengeDescription" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-6">
             {{ todayPlan.challengeDescription }}
           </p>
@@ -169,7 +196,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
         <!-- Result / Note if filled -->
         <div
           v-if="todayPlan.completionNote"
-          class="rounded-2xl bg-white/90 p-3.5 sm:p-4 ring-1 ring-slate-200/80 dark:bg-slate-850/90 dark:ring-slate-750/80 shadow-2xs"
+          class="rounded-2xl bg-white p-3.5 sm:p-4 ring-1 ring-slate-200/80 dark:bg-slate-800 dark:ring-slate-700 shadow-2xs"
         >
           <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">
             <AppIcon name="note" size="xs" />
@@ -265,7 +292,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
       </div>
 
       <!-- Week Header Info & Stats Bar -->
-      <div v-if="activePlan" class="flex flex-col gap-2 rounded-2xl bg-slate-50/80 p-3.5 dark:bg-slate-850/60 ring-1 ring-slate-200/60 dark:ring-slate-800">
+      <div v-if="activePlan" class="flex flex-col gap-2 rounded-2xl bg-slate-50/80 p-3.5 dark:bg-slate-850 ring-1 ring-slate-200/60 dark:ring-slate-800">
         <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
           <div class="flex items-center gap-2">
             <span class="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
@@ -312,12 +339,13 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
       <div
         v-for="day in activePlan.days"
         :key="day.date"
-        class="flex flex-col justify-between rounded-3xl bg-white p-4 sm:p-4.5 shadow-xs ring-1 transition-all duration-200 hover:shadow-md dark:bg-slate-900"
+        class="flex flex-col justify-between rounded-3xl p-4 sm:p-4.5 shadow-xs ring-1 transition-all duration-200 hover:shadow-md"
         :class="[
           day.date === store.today.toIsoString()
-            ? 'ring-2 ring-amber-500 dark:ring-amber-400 bg-amber-500/[0.04] dark:bg-amber-500/[0.06]'
-            : 'ring-slate-200/90 dark:ring-slate-800',
-          day.isOff ? 'ring-sky-200 dark:ring-sky-900/60 bg-sky-50/40 dark:bg-sky-950/25' : ''
+            ? 'bg-amber-50/70 ring-2 ring-amber-500 dark:bg-slate-800 dark:ring-amber-400 dark:border dark:border-amber-400/30'
+            : day.isOff
+              ? 'bg-sky-50/50 ring-sky-200 dark:bg-slate-850 dark:ring-sky-900/60'
+              : 'bg-white ring-slate-200/90 dark:bg-slate-900 dark:ring-slate-800'
         ]"
       >
         <div class="flex flex-col gap-2.5">
@@ -349,9 +377,20 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
 
           <!-- Challenge Title & Description -->
           <div class="pt-0.5">
-            <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
-              {{ day.challengeTitle }}
-            </h4>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
+                {{ day.challengeTitle }}
+              </h4>
+              <span
+                v-for="tg in getDayChallengeTags(day)"
+                :key="tg"
+                class="inline-flex items-center gap-0.5 rounded px-1.5 py-0.2 text-[9px] font-semibold border"
+                :class="getTimeTagOption(tg).badgeClass"
+              >
+                <AppIcon :name="getTimeTagOption(tg).iconName" size="xs" />
+                <span>{{ getTimeTagOption(tg).label }}</span>
+              </span>
+            </div>
             <p v-if="day.challengeDescription" class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-5">
               {{ day.challengeDescription }}
             </p>
@@ -364,7 +403,7 @@ function getStatusBadge(day: DailyChallengePlan): { label: string; class: string
           <!-- Completion Note Preview -->
           <div
             v-if="day.completionNote"
-            class="rounded-2xl bg-slate-50 p-2.5 text-[11px] text-slate-700 ring-1 ring-slate-200/60 dark:bg-slate-850/80 dark:text-slate-200 dark:ring-slate-750/70 shadow-2xs"
+            class="rounded-2xl bg-slate-50 p-2.5 text-[11px] text-slate-700 ring-1 ring-slate-200/60 dark:bg-slate-850 dark:text-slate-200 dark:ring-slate-700 shadow-2xs"
           >
             <div class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 mb-0.5">
               <AppIcon name="note" size="xs" />

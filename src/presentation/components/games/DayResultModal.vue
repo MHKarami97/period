@@ -116,7 +116,7 @@ function handleSave(): void {
             v-model="resultNote"
             rows="4"
             placeholder="مثلاً: چقدر خوش گذشت، از فیلم یا بازی لذت بردیم، یا چقدر با هم گفت‌وگو کردیم..."
-            class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-slate-750 dark:bg-slate-850 dark:text-slate-100 dark:placeholder-slate-500 leading-6"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-slate-750 dark:bg-slate-850 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:border-teal-400 dark:focus:bg-slate-850 leading-6"
           ></textarea>
         </div>
       </div>

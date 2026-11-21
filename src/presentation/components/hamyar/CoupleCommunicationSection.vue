@@ -14,7 +14,7 @@ const selectedStageId = ref<number | "all">("all");
 const activeContentType = ref<HamyarContentType>("all");
 
 const stageQuickFilters = [
-  { id: "all", label: "همه ۷ مرحله", iconName: "document", color: "text-slate-600 dark:text-slate-300" },
+  { id: "all", label: "همه ۱۳ بخش", iconName: "document", color: "text-slate-600 dark:text-slate-300" },
   { id: 1, label: "۱. تفاوت‌های زن و مرد", iconName: "brain", color: "text-purple-600 dark:text-purple-400" },
   { id: 2, label: "۲. ویژه آقایان", iconName: "male", color: "text-blue-600 dark:text-blue-400" },
   { id: 3, label: "۳. ویژه خانم‌ها", iconName: "female", color: "text-rose-600 dark:text-rose-400" },
@@ -22,6 +22,12 @@ const stageQuickFilters = [
   { id: 5, label: "۵. گفت‌وگو و حل تعارض", iconName: "chat", color: "text-teal-600 dark:text-teal-400" },
   { id: 6, label: "۶. بایدها و نبایدها", iconName: "balance", color: "text-indigo-600 dark:text-indigo-400" },
   { id: 7, label: "۷. ابراز محبت و زبان عشق", iconName: "heart", color: "text-emerald-600 dark:text-emerald-400" },
+  { id: 8, label: "۸. مدیریت مالی و بودجه", iconName: "target", color: "text-green-600 dark:text-green-400" },
+  { id: 9, label: "۹. مرزگذاری با خانواده‌ها", iconName: "shield", color: "text-orange-600 dark:text-orange-400" },
+  { id: 10, label: "۱۰. صمیمیت زناشویی و جنسی", iconName: "couple", color: "text-pink-600 dark:text-pink-400" },
+  { id: 11, label: "۱۱. تقسیم کار و بار ذهنی", iconName: "check-circle", color: "text-cyan-600 dark:text-cyan-400" },
+  { id: 12, label: "۱۲. ترمیم رابطه و عذرخواهی", iconName: "rotate", color: "text-violet-600 dark:text-violet-400" },
+  { id: 13, label: "۱۳. موبایل و حریم وفاداری", iconName: "phone", color: "text-blue-500 dark:text-blue-400" },
 ] as const;
 
 const contentTypeOptions: readonly { key: HamyarContentType; label: string; iconName: string }[] = [
@@ -113,7 +119,7 @@ function clearFilters(): void {
           v-model="localSearch"
           type="search"
           placeholder="جستجو در مباحث، راه‌حل‌های تعارض، غار تنهایی، زبان‌های عشق، باورها و کوییز..."
-          class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pe-9 ps-10 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 dark:border-slate-800 dark:bg-slate-850 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-rose-400"
+          class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pe-9 ps-10 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 dark:border-slate-750 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:border-rose-400 dark:focus:bg-slate-800"
         />
         <span class="absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
           <AppIcon name="search" size="xs" />
@@ -167,7 +173,7 @@ function clearFilters(): void {
     <!-- 3. Results Status / Clear filters -->
     <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
       <span>
-        نمایش <strong>{{ filteredStages.length }}</strong> بخش از <strong>۷</strong> بخش راهنمای ارتباط
+        نمایش <strong>{{ filteredStages.length }}</strong> بخش از <strong>{{ guideData?.stages?.length || 13 }}</strong> بخش راهنمای ارتباط
       </span>
 
       <button
