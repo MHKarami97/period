@@ -5,7 +5,6 @@ import { useDailyChallengesStore } from "@application/stores/dailyChallengesStor
 import { useHamdelStore } from "@application/stores/hamdelStore";
 import { useHamyarStore } from "@application/stores/hamyarStore";
 import { useSymptomStore } from "@application/stores/symptomStore";
-import { MedicationSchedule } from "@domain/health/MedicationSchedule";
 import { ChallengeScorer } from "@domain/home/ChallengeScore";
 import { HamyarTipPicker, type TipSource } from "@domain/home/HamyarTipPicker";
 import { SeasonalChallengeProvider } from "@domain/home/SeasonalChallenges";
