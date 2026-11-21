@@ -113,7 +113,7 @@ function handleRemove(id: string): void {
               بانک ایده‌ها و چالش‌های دونفره
             </h3>
             <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-              دسته‌بندی شده بر اساس زمان (روز، شب، آخر هفته، روز تعطیل) — مجموع: {{ store.allChallenges.length }}
+              دسته‌بندی شده بر اساس زمان (روز، شب، آخر هفته، روز تعطیل) - مجموع: {{ store.allChallenges.length }}
             </p>
           </div>
         </div>

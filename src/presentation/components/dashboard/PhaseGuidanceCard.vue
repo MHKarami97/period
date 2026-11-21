@@ -1,39 +1,30 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useAppModeStore } from "@application/stores/appModeStore";
 import { useCycleDashboard } from "@presentation/composables/useCycleDashboard";
-import { usePhaseGuidance } from "@presentation/composables/usePhaseGuidance";
+import { usePhaseCare } from "@presentation/composables/usePhaseCare";
+import CareItemList from "@presentation/components/dashboard/CareItemList.vue";
 
 /**
- * PhaseGuidanceCard - contextual "what to do today" tips on the dashboard,
- * driven entirely by the current CyclePhase. Shows self-care tips in
- * self-tracking mode and partner-support tips in partner mode, so the same
- * phase produces a different, audience-appropriate message.
+ * PhaseGuidanceCard - "what to do today" list driven by the cycle phase AND today's logged symptoms
+ * (pain, mood, flow). Wording differs for the tracked person and for a supporting partner.
  */
-const appModeStore = useAppModeStore();
 const { currentPhaseLabel } = useCycleDashboard();
-const { guidance } = usePhaseGuidance();
-
-const tips = computed(() => (appModeStore.isPartnerMode ? guidance.value.partnerTips : guidance.value.selfTips));
-const heading = computed(() => (appModeStore.isPartnerMode ? "امروز چطور کمک کنید" : "امروز چه کاری بکنید"));
+const { items, heading } = usePhaseCare();
 </script>
 
 <template>
   <div class="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
       <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">{{ heading }}</h2>
       <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ currentPhaseLabel }}</span>
     </div>
 
-    <ul class="flex flex-col gap-2">
-      <li v-for="tip in tips" :key="tip" class="flex gap-2 text-sm text-slate-700 dark:text-slate-200">
-        <span class="mt-0.5 text-teal-500">•</span>
-        <span>{{ tip }}</span>
-      </li>
-    </ul>
+    <CareItemList :items="items" />
 
-    <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
-      این موارد توصیه‌های عمومی سلامت هستند، نه تشخیص یا نسخه پزشکی؛ برای علائم شدید حتماً با پزشک مشورت کنید.
+    <p class="mt-1 text-xs leading-5 text-slate-400 dark:text-slate-500">
+      این موارد توصیه‌های عمومی سلامت‌اند، نه تشخیص یا نسخه‌ی پزشکی؛ برای علائم شدید حتماً با پزشک مشورت کنید. منابع عمومی:
+      <a class="underline" href="https://www.nhs.uk/symptoms/period-pain/" target="_blank" rel="noopener noreferrer">NHS (درد پریود)</a>،
+      <a class="underline" href="https://www.nhs.uk/conditions/pre-menstrual-syndrome/" target="_blank" rel="noopener noreferrer">NHS (PMS)</a>،
+      <a class="underline" href="https://www.mayoclinic.org/diseases-conditions/premenstrual-syndrome/diagnosis-treatment/drc-20376787" target="_blank" rel="noopener noreferrer">Mayo Clinic</a>.
     </p>
   </div>
 </template>

@@ -28,7 +28,7 @@ const GAMES_ITEM: NavItem = { to: { name: "games" }, label: "هم‌راز", ico
 const HAMDEL_ITEM: NavItem = { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" };
 const HAMYAR_ITEM: NavItem = { to: { name: "hamyar" }, label: "همیار", iconName: "hamyar" };
 
-/** The layout is RTL: the first item sits on the right edge. Home is the centre; Hamrah/Hamraz on the right, Hamdel/Hamyar on the left. */
+/** RTL layout: the first item sits on the right edge. Home is the centre; Hamrah/Hamraz on the right, Hamdel/Hamyar on the left. */
 const MOBILE_ITEMS: readonly NavItem[] = [COMPANION_ITEM, GAMES_ITEM, HOME_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
 const DESKTOP_ITEMS: readonly NavItem[] = [HOME_ITEM, COMPANION_ITEM, GAMES_ITEM, HAMDEL_ITEM, HAMYAR_ITEM];
 

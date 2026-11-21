@@ -1,7 +1,7 @@
 import type { DateOnly } from "../valueObjects/DateOnly";
 
 /**
- * DailyRotation - deterministic "random" choice that stays stable for a whole day and changes the next day.
+ * DailyRotation - deterministic "random" choice that is stable for a whole day and changes the next day.
  * No persistence needed and no flicker on re-render.
  */
 export class DailyRotation {
@@ -12,14 +12,17 @@ export class DailyRotation {
   }
 
   public pick<T>(items: readonly T[], offset = 0): T | null {
-    if (items.length === 0) {
-      return null;
-    }
-    return items[(this.seed + offset) % items.length];
+    return items.length === 0 ? null : items[(this.seed + offset) % items.length];
   }
 
   public startIndex(length: number): number {
     return length === 0 ? 0 : this.seed % length;
+  }
+
+  /** Same items, rotated so the starting element changes every day. */
+  public rotate<T>(items: readonly T[], offset = 0): T[] {
+    const start = this.startIndex(items.length) + offset;
+    return items.map((_, index) => items[(start + index) % items.length]);
   }
 
   /** FNV-1a 32-bit. */

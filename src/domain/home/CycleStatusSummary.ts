@@ -12,6 +12,8 @@ export interface CycleStatusSummary {
   readonly headline: string;
   readonly detail: string;
   readonly phaseLabel: string | null;
+  /** "day X of Y" for the progress bar; null when there is no history. */
+  readonly progress: { readonly day: number; readonly length: number } | null;
 }
 
 function toFa(value: number): string {
@@ -28,6 +30,7 @@ export class CycleStatusSummarizer {
         headline: "هنوز پریودی ثبت نشده",
         detail: "با ثبت اولین پریود، وضعیت و پیش‌بینی‌ها اینجا نمایش داده می‌شود.",
         phaseLabel: null,
+        progress: null,
       };
     }
 
@@ -35,17 +38,18 @@ export class CycleStatusSummarizer {
     const phase = CyclePredictionService.resolveCurrentPhase(sorted, today);
     const prediction = CyclePredictionService.predictNextCycle(sorted);
     const phaseLabel = CYCLE_PHASE_LABELS_FA[phase];
+    const cycleDay = CyclePredictionService.currentCycleDayNumber(sorted, today);
+    const progress = { day: cycleDay, length: prediction.predictedCycleLengthInDays };
 
     if (phase === CyclePhase.Menstrual) {
-      const periodDay = CyclePredictionService.currentCycleDayNumber(sorted, today);
-      const remaining = prediction.predictedPeriodLengthInDays - periodDay;
+      const remaining = prediction.predictedPeriodLengthInDays - cycleDay;
       let detail = "طبق میانگین، امروز آخرین روز پریود است.";
       if (remaining > 0) {
         detail = `طبق میانگین، حدود ${toFa(remaining)} روز دیگر ادامه دارد.`;
       } else if (remaining < 0) {
         detail = "از میانگین معمول طولانی‌تر شده؛ اگر تمام شده، پایان پریود را ثبت کنید.";
       }
-      return { kind: "bleeding", tone: "rose", headline: `امروز روز ${toFa(periodDay)} پریود است`, detail, phaseLabel };
+      return { kind: "bleeding", tone: "rose", headline: `امروز روز ${toFa(cycleDay)} پریود است`, detail, phaseLabel, progress };
     }
 
     if (phase === CyclePhase.Ovulation) {
@@ -56,18 +60,12 @@ export class CycleStatusSummarizer {
       } else if (toOvulation > 0) {
         detail = `${toFa(toOvulation)} روز تا تخمک‌گذاری برآوردی مانده است.`;
       }
-      return { kind: "fertile", tone: "violet", headline: "در بازه باروری است", detail, phaseLabel };
+      return { kind: "fertile", tone: "violet", headline: "در بازه باروری است", detail, phaseLabel, progress };
     }
 
     const daysUntilPeriod = prediction.nextPeriodStartDate.diffInDays(today);
     if (daysUntilPeriod === 0) {
-      return {
-        kind: "period-due",
-        tone: "rose",
-        headline: "پریود بعدی طبق پیش‌بینی امروز است",
-        detail: "اگر شروع شده، با یک لمس در «همراه» ثبتش کنید.",
-        phaseLabel,
-      };
+      return { kind: "period-due", tone: "rose", headline: "پریود بعدی طبق پیش‌بینی امروز است", detail: "اگر شروع شده، با یک لمس در «همراه» ثبتش کنید.", phaseLabel, progress };
     }
     if (daysUntilPeriod < 0) {
       return {
@@ -76,6 +74,7 @@ export class CycleStatusSummarizer {
         headline: `${toFa(Math.abs(daysUntilPeriod))} روز از زمان پیش‌بینی‌شده گذشته`,
         detail: "اگر پریود شروع شده آن را ثبت کنید تا پیش‌بینی‌ها دقیق‌تر شود.",
         phaseLabel,
+        progress,
       };
     }
 
@@ -86,6 +85,7 @@ export class CycleStatusSummarizer {
       headline: `${toFa(daysUntilPeriod)} روز تا پریود بعدی`,
       detail: toFertileWindow > 0 ? `بازه باروری ${toFa(toFertileWindow)} روز دیگر شروع می‌شود.` : `فاز فعلی: ${phaseLabel}`,
       phaseLabel,
+      progress,
     };
   }
 }

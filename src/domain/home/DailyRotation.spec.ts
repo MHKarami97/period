@@ -14,8 +14,8 @@ describe("DailyRotation", () => {
     expect(DailyRotation.forDay(DateOnly.today()).pick([])).toBeNull();
   });
 
-  it("moves through the list when the offset grows", () => {
-    const rotation = DailyRotation.forDay(DateOnly.fromIsoString("2026-03-20"));
-    expect(new Set(ITEMS.map((_, offset) => rotation.pick(ITEMS, offset))).size).toBe(ITEMS.length);
+  it("rotate keeps every item exactly once", () => {
+    const rotated = DailyRotation.forDay(DateOnly.fromIsoString("2026-03-20")).rotate(ITEMS);
+    expect([...rotated].sort()).toEqual([...ITEMS]);
   });
 });

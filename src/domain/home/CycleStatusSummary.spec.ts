@@ -7,7 +7,9 @@ const TODAY = DateOnly.fromIsoString("2026-03-20");
 
 describe("CycleStatusSummarizer", () => {
   it("reports no-data when nothing was logged", () => {
-    expect(CycleStatusSummarizer.summarize([], TODAY).kind).toBe("no-data");
+    const summary = CycleStatusSummarizer.summarize([], TODAY);
+    expect(summary.kind).toBe("no-data");
+    expect(summary.progress).toBeNull();
   });
 
   it("reports bleeding while a period is open", () => {

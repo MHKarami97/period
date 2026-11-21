@@ -25,11 +25,11 @@ interface ToneStyle {
 }
 
 const TONES: Readonly<Record<CardTone, ToneStyle>> = {
-  rose: { chip: "bg-rose-500/10 text-rose-600 ring-rose-500/20 dark:bg-rose-500/20 dark:text-rose-300", bar: "bg-rose-500 dark:bg-rose-400", cta: "bg-rose-500 text-white hover:bg-rose-600" },
-  teal: { chip: "bg-teal-500/10 text-teal-600 ring-teal-500/20 dark:bg-teal-500/20 dark:text-teal-300", bar: "bg-teal-500 dark:bg-teal-400", cta: "bg-teal-600 text-white hover:bg-teal-700" },
-  amber: { chip: "bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300", bar: "bg-amber-500 dark:bg-amber-400", cta: "bg-amber-500 text-white hover:bg-amber-600" },
-  violet: { chip: "bg-violet-500/10 text-violet-600 ring-violet-500/20 dark:bg-violet-500/20 dark:text-violet-300", bar: "bg-violet-500 dark:bg-violet-400", cta: "bg-violet-600 text-white hover:bg-violet-700" },
-  sky: { chip: "bg-sky-500/10 text-sky-600 ring-sky-500/20 dark:bg-sky-500/20 dark:text-sky-300", bar: "bg-sky-500 dark:bg-sky-400", cta: "bg-sky-600 text-white hover:bg-sky-700" },
+  rose: { chip: "bg-rose-500/10 text-rose-600 ring-rose-500/20 dark:bg-rose-500/20 dark:text-rose-300", bar: "bg-rose-500 dark:bg-rose-400", cta: "bg-rose-500 text-white hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-500" },
+  teal: { chip: "bg-teal-500/10 text-teal-600 ring-teal-500/20 dark:bg-teal-500/20 dark:text-teal-300", bar: "bg-teal-500 dark:bg-teal-400", cta: "bg-teal-600 text-white hover:bg-teal-700 dark:hover:bg-teal-500" },
+  amber: { chip: "bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300", bar: "bg-amber-500 dark:bg-amber-400", cta: "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500" },
+  violet: { chip: "bg-violet-500/10 text-violet-600 ring-violet-500/20 dark:bg-violet-500/20 dark:text-violet-300", bar: "bg-violet-500 dark:bg-violet-400", cta: "bg-violet-600 text-white hover:bg-violet-700 dark:hover:bg-violet-500" },
+  sky: { chip: "bg-sky-500/10 text-sky-600 ring-sky-500/20 dark:bg-sky-500/20 dark:text-sky-300", bar: "bg-sky-500 dark:bg-sky-400", cta: "bg-sky-600 text-white hover:bg-sky-700 dark:hover:bg-sky-500" },
 };
 
 const style = computed(() => TONES[props.tone]);
