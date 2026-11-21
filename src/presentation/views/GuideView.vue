@@ -10,7 +10,7 @@ const categories = [
   { id: "tracker", label: "ردیاب و تقویم", icon: "📱" },
   { id: "hamyar", label: "همیار مراحل زندگی", icon: "🌱" },
   { id: "hamdel", label: "همدل و روابط", icon: "💞" },
-  { id: "games", label: "بازی‌ها و پوزیشن‌ها", icon: "🎲" },
+  { id: "games", label: "هم‌راز", icon: "🎲" },
   { id: "security", label: "امنیت، داده و یادآور", icon: "🛡️" },
   { id: "health", label: "دانشنامه سلامت و شریک", icon: "🩺" },
 ];

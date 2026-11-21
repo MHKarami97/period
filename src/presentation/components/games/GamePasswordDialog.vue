@@ -36,7 +36,7 @@ function submit(): void {
         class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
         @submit.prevent="submit"
       >
-        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">ورود به بازی‌ها</h3>
+        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">ورود به هم‌راز</h3>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">برای ورود، رمز را وارد کنید.</p>
 
         <input

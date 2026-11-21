@@ -20,7 +20,7 @@ function openGame(game: GameDefinition): void {
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">بازی‌ها</h1>
+    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">هم‌راز</h1>
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <GameCard v-for="game in visibleGames" :key="game.id" :game="game" @open="openGame" />
     </div>

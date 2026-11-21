@@ -29,7 +29,7 @@ function clearPassword(): void {
 <template>
   <section class="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
     <div class="flex items-center justify-between gap-2">
-      <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">رمز بخش بازی‌ها</h2>
+      <h2 class="text-base font-medium text-slate-900 dark:text-slate-100">رمز بخش هم‌راز</h2>
       <span
         class="rounded-full px-2.5 py-1 text-xs"
         :class="
@@ -43,7 +43,7 @@ function clearPassword(): void {
     </div>
 
     <p class="text-xs leading-6 text-slate-500 dark:text-slate-400">
-      گفتگوی عمیق بدون رمز در دسترس است. بقیه بازی‌ها و بخش‌های اختصاصی فقط بعد از وارد کردن رمز نمایش داده می‌شوند.
+      گفتگوی عمیق بدون رمز در دسترس است. بقیه هم‌راز و بخش‌های اختصاصی فقط بعد از وارد کردن رمز نمایش داده می‌شوند.
     </p>
 
     <button

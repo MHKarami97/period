@@ -31,7 +31,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { to: { name: "symptoms" }, label: "علائم", iconName: "symptoms", selfOnly: true },
   { to: { name: "hamyar" }, label: "همیار", iconName: "hamyar" },
   { to: { name: "hamdel" }, label: "همدل", iconName: "hamdel" },
-  { to: { name: "games" }, label: "بازی‌ها", iconName: "games" },
+  { to: { name: "games" }, label: "هم‌راز", iconName: "games" },
 ];
 
 /** Top/Utility items (Guide and Settings) placed side-by-side in top bar on mobile and utility area on desktop */
