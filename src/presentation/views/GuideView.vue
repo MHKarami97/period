@@ -264,7 +264,7 @@ function isVisible(sectionCategory: string, textContent: string): boolean {
       <p>در تنظیمات، تب «داده و پشتیبان»، دو راه نگهداری از اطلاعات دارید:</p>
       <p class="pt-1"><strong>الف) مدیریت داده‌ها (دستی):</strong></p>
       <ul class="list-inside list-disc space-y-1 text-xs sm:text-sm">
-        <li><strong>بکاپ رمزنگاری‌شده</strong> از کل داده‌ها (PBKDF2 + AES-256-GCM) — روش پیشنهادی.</li>
+        <li><strong>بکاپ رمزنگاری‌شده</strong> از کل داده‌ها (PBKDF2 + AES-256-GCM) - روش پیشنهادی.</li>
         <li><strong>خروجی JSON ساده</strong> بدون رمز؛ فقط در جای امن نگه دارید.</li>
         <li><strong>بازیابی</strong> از فایل ساده یا رمزنگاری‌شده؛ بازیابی داده‌های فعلی را جایگزین می‌کند.</li>
         <li><strong>گزارش PDF پریود</strong> برای ۶ ماه اخیر، مناسب نشان دادن به پزشک.</li>

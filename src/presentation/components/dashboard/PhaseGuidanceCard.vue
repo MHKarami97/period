@@ -21,10 +21,7 @@ const { items, heading } = usePhaseCare();
     <CareItemList :items="items" />
 
     <p class="mt-1 text-xs leading-5 text-slate-400 dark:text-slate-500">
-      این موارد توصیه‌های عمومی سلامت‌اند، نه تشخیص یا نسخه‌ی پزشکی؛ برای علائم شدید حتماً با پزشک مشورت کنید. منابع عمومی:
-      <a class="underline" href="https://www.nhs.uk/symptoms/period-pain/" target="_blank" rel="noopener noreferrer">NHS (درد پریود)</a>،
-      <a class="underline" href="https://www.nhs.uk/conditions/pre-menstrual-syndrome/" target="_blank" rel="noopener noreferrer">NHS (PMS)</a>،
-      <a class="underline" href="https://www.mayoclinic.org/diseases-conditions/premenstrual-syndrome/diagnosis-treatment/drc-20376787" target="_blank" rel="noopener noreferrer">Mayo Clinic</a>.
+      این موارد توصیه‌های عمومی سلامت‌اند، نه تشخیص یا نسخه‌ی پزشکی؛ برای علائم شدید حتماً با پزشک مشورت کنید.
     </p>
   </div>
 </template>
