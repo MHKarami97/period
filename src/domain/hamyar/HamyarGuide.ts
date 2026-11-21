@@ -1,6 +1,6 @@
 export interface HamyarClaim {
   readonly text: string;
-  readonly evidence_level: string;
+  readonly evidence_level?: string;
   readonly sources?: readonly string[];
   readonly caveat?: string;
 }

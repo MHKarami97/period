@@ -149,7 +149,7 @@ function getEvidenceBadgeClass(level: string): string {
                 :key="cIdx"
                 class="flex flex-col gap-1.5 text-xs sm:text-sm leading-6 text-slate-700 dark:text-slate-300 border-r-2 border-slate-300 pr-3 dark:border-slate-700"
               >
-                <div class="flex items-center gap-2 flex-wrap">
+                <div v-if="claim.evidence_level" class="flex items-center gap-2 flex-wrap">
                   <span
                     class="rounded-full px-2.5 py-0.5 text-[11px] font-medium border"
                     :class="getEvidenceBadgeClass(claim.evidence_level)"

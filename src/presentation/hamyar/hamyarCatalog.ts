@@ -15,6 +15,24 @@ export const HAMYAR_CATEGORIES: readonly HamyarCategoryFilter[] = [
 
 export const HAMYAR_CATALOG: readonly HamyarGuideMeta[] = [
   {
+    id: "couple_communication",
+    title: "راهنمای جامع ارتباط، شناخت تفاوت‌ها و تعامل عاطفی زوجین",
+    shortTitle: "ارتباط و تعامل زوجین",
+    tag: "ارتباط و صمیمیت",
+    category: "marriage",
+    categoryLabel: "پیش از ازدواج و ازدواج",
+    icon: "💑",
+    jsonFile: "mahak_couple_communication_guide.json",
+    summary: "شناخت تفاوت‌های روانی زن و مرد، راهنمای ویژه آقایان و خانم‌ها، راهنمای افراد با تجربه ارتباطی کم با جنس مخالف، مهارت‌های گفت‌وگو، بایدها و نبایدها و زبان‌های ابراز محبت.",
+    colorClass: {
+      bg: "bg-rose-500/10 dark:bg-rose-500/20",
+      text: "text-rose-700 dark:text-rose-300",
+      border: "hover:ring-rose-400/60 dark:hover:ring-rose-500/50",
+      badge: "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-200",
+      glow: "group-hover:text-rose-600 dark:group-hover:text-rose-400",
+    },
+  },
+  {
     id: "premarital_acquaintance",
     title: "راهنمای آموزشی مراحل آشنایی پیش از ازدواج",
     shortTitle: "آشنایی پیش از ازدواج",

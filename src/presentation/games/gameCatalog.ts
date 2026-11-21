@@ -16,6 +16,14 @@ export interface GameDefinition {
  */
 export const GAME_CATALOG: readonly GameDefinition[] = [
   {
+    id: "daily-challenges",
+    title: "پیشنهاد و چالش‌های روزانه و هفتگی",
+    description: "ایده چالش دونفره برای هر روز، برنامه‌ریزی هفتگی از شنبه، ثبت روزهای آف و ثبت خلاصه و نتیجه خاطرات.",
+    icon: "🎯",
+    routeName: "game-daily-challenges",
+    loadView: () => import("@presentation/views/games/DailyChallengesView.vue"),
+  },
+  {
     id: "snake-ladder",
     title: "مار و پله زناشویی",
     description: "تخته‌ی مار و پله با چالش‌های عاشقانه؛ نام‌ها و محتوای خانه‌ها را خودتان تنظیم می‌کنید.",

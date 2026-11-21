@@ -6,7 +6,10 @@
  * (not just disabled) until the password is accepted in Settings.
  */
 export class GameVisibilityPolicy {
-  private static readonly OPEN_GAME_IDS: ReadonlySet<string> = new Set(["conversation-cards"]);
+  private static readonly OPEN_GAME_IDS: ReadonlySet<string> = new Set([
+    "conversation-cards",
+    "daily-challenges",
+  ]);
 
   public static isOpen(gameId: string): boolean {
     return GameVisibilityPolicy.OPEN_GAME_IDS.has(gameId);

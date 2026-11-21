@@ -5,6 +5,7 @@ import { useHamyarStore } from "@application/stores/hamyarStore";
 import { HAMYAR_CATEGORIES } from "@presentation/hamyar/hamyarCatalog";
 import type { HamyarGuideMeta, HamyarSearchResult } from "@domain/hamyar/HamyarGuide";
 import HamyarCard from "@presentation/components/hamyar/HamyarCard.vue";
+import CoupleCommunicationBanner from "@presentation/components/hamyar/CoupleCommunicationBanner.vue";
 
 const router = useRouter();
 const hamyarStore = useHamyarStore();
@@ -59,6 +60,9 @@ function clearSearch(): void {
         </div>
       </div>
     </div>
+
+    <!-- Featured Section: Couple Communication Guide -->
+    <CoupleCommunicationBanner v-if="!hamyarStore.searchQuery" />
 
     <!-- Search bar & filters -->
     <div class="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
