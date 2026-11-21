@@ -334,26 +334,26 @@ watch(() => profileStore.activeProfileId, () => void store.ensureLoaded());
       <!-- 1. STATS & ANALYTICS PART ON TOP OF THE BOX -->
       <RouterLink
         to="/app/hamdel/stats"
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-white/90 p-4 shadow-xs ring-1 ring-slate-200/80 transition hover:bg-white hover:ring-teal-400 active:scale-[0.99] dark:bg-slate-850 dark:ring-slate-750 dark:hover:bg-slate-800"
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-white/95 p-3.5 sm:p-4 shadow-xs ring-1 ring-slate-200/80 transition hover:bg-white hover:ring-teal-400 active:scale-[0.99] dark:bg-slate-850 dark:ring-slate-750 dark:hover:bg-slate-800"
       >
-        <div class="flex items-center gap-3">
-          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-500/15 text-xl text-teal-600 dark:bg-teal-500/25 dark:text-teal-300">
+        <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+          <span class="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-teal-500/15 text-lg sm:text-xl text-teal-600 dark:bg-teal-500/25 dark:text-teal-300">
             📊
           </span>
-          <div class="min-w-0">
-            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <span>آمار و تحلیل‌های تفصیلی همدل</span>
-              <span class="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+          <div class="min-w-0 flex-1">
+            <h3 class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+              <span class="leading-snug">آمار و تحلیل‌های تفصیلی همدل</span>
+              <span class="inline-flex shrink-0 whitespace-nowrap items-center rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 ring-1 ring-teal-600/20 dark:bg-teal-950/70 dark:text-teal-300 dark:ring-teal-500/30">
                 نمودارها و ارزیابی
               </span>
             </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
+            <p class="mt-1 text-[11px] sm:text-xs leading-5 text-slate-500 dark:text-slate-400">
               نمودار روند خوشحالی و ناراحتی، آمار هدیه‌ها، قول‌ها و توزیع تمام یادداشت‌ها
             </p>
           </div>
         </div>
 
-        <span class="inline-flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400 shrink-0 self-start sm:self-center">
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400 shrink-0 self-end sm:self-center">
           <span>مشاهده آمار و نمودارها</span>
           <span>←</span>
         </span>

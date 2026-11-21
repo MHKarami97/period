@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { DateOnly } from "@domain/valueObjects/DateOnly";
 import type { HamdelFieldDefinition, HamdelSectionDefinition } from "@domain/hamdel/HamdelSectionDefinition";
 import { buildDefaultValues } from "@domain/hamdel/hamdelDefaults";
 import { addCustomCategory } from "@domain/hamdel/customCategories";
 import JalaliDatePicker from "@presentation/components/shared/JalaliDatePicker.vue";
+import AppSelect from "@presentation/components/common/AppSelect.vue";
 import { useJalali } from "@presentation/composables/useJalali";
 
 const props = defineProps<{
@@ -32,6 +33,20 @@ const values = reactive<Record<string, string>>({
 });
 
 const customCategoryInputs = reactive<Record<string, string>>({});
+const optionsVersion = ref(0);
+
+function getFieldOptions(field: HamdelFieldDefinition) {
+  void optionsVersion.value;
+  return field.options ?? [];
+}
+
+function handleAddCustomCategory(field: HamdelFieldDefinition, label: string): void {
+  const text = label.trim();
+  if (!text) return;
+  const newOpt = addCustomCategory(props.definition.id, field.key, text);
+  values[field.key] = newOpt.value;
+  optionsVersion.value++;
+}
 
 function openNewCategoryInput(field: HamdelFieldDefinition): void {
   customCategoryInputs[field.key] = "";
@@ -44,17 +59,10 @@ function cancelNewCategory(field: HamdelFieldDefinition): void {
   }
 }
 
-function handleSelectChange(field: HamdelFieldDefinition): void {
-  if (values[field.key] === "__custom_new__") {
-    openNewCategoryInput(field);
-  }
-}
-
 function saveNewCategory(field: HamdelFieldDefinition): void {
   const text = (customCategoryInputs[field.key] ?? "").trim();
   if (!text) return;
-  const newOpt = addCustomCategory(props.definition.id, field.key, text);
-  values[field.key] = newOpt.value;
+  handleAddCustomCategory(field, text);
   delete customCategoryInputs[field.key];
 }
 
@@ -88,6 +96,18 @@ function submit(): void {
         <datalist v-if="field.suggestions" :id="`${definition.id}-${field.key}-hints`">
           <option v-for="hint in field.suggestions" :key="hint" :value="hint" />
         </datalist>
+        <div v-if="field.suggestions && field.suggestions.length > 0" class="flex flex-wrap items-center gap-1.5 pt-1">
+          <span class="text-[10px] text-slate-400 dark:text-slate-500">پیشنهادات سریع:</span>
+          <button
+            v-for="hint in field.suggestions"
+            :key="hint"
+            type="button"
+            class="rounded-lg bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition hover:bg-teal-50 hover:text-teal-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-teal-950/60 dark:hover:text-teal-300"
+            @click="values[field.key] = hint"
+          >
+            + {{ hint }}
+          </button>
+        </div>
       </template>
 
       <textarea
@@ -101,20 +121,22 @@ function submit(): void {
 
       <div v-else-if="field.kind === 'select'" class="flex flex-col gap-1.5">
         <div class="flex items-center gap-2">
-          <select
-            v-model="values[field.key]"
-            :class="INPUT_CLASS"
-            @change="handleSelectChange(field)"
-          >
-            <option v-if="!field.required" value="">—</option>
-            <option v-else value="" disabled>انتخاب کنید</option>
-            <option v-for="option in field.options" :key="option.value" :value="option.value">{{ option.label }}</option>
-            <option v-if="field.allowCustom" value="__custom_new__">➕ دسته جدید...</option>
-          </select>
+          <div class="min-w-0 flex-1">
+            <AppSelect
+              v-model="values[field.key]"
+              :options="getFieldOptions(field)"
+              :placeholder="field.placeholder || 'انتخاب کنید...'"
+              :required="field.required"
+              :allow-custom="field.allowCustom"
+              :custom-label="field.label"
+              @add-custom="handleAddCustomCategory(field, $event)"
+            />
+          </div>
           <button
             v-if="field.allowCustom && customCategoryInputs[field.key] === undefined"
             type="button"
-            class="shrink-0 rounded-lg bg-teal-50 px-2.5 py-2 text-xs font-medium text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900/60"
+            class="shrink-0 rounded-xl bg-teal-50 px-2.5 py-2 text-xs font-semibold text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900/60 transition"
+            title="افزودن دسته سفارشی"
             @click="openNewCategoryInput(field)"
           >
             + دسته جدید
