@@ -10,16 +10,7 @@ export interface HamdelFeature {
 }
 
 /**
- * HAMDEL_FEATURES - Extra non-generic sections in the Hamdel hub.
- * Brief and occasionNotes are now merged into one unified experience.
+ * HAMDEL_FEATURES - Extra non-generic features.
+ * Stats and PDF export are housed together in the dedicated bottom section of the hub.
  */
-export const HAMDEL_FEATURES: readonly HamdelFeature[] = [
-  {
-    id: "stats",
-    title: "آمار و تحلیل‌های تفصیلی",
-    icon: "📊",
-    description: "نمودار روند خوشحالی و ناراحتی، آمار هدیه‌ها، قول‌ها و توزیع یادداشت‌ها.",
-    group: "together",
-    path: "/app/hamdel/stats",
-  },
-];
+export const HAMDEL_FEATURES: readonly HamdelFeature[] = [];

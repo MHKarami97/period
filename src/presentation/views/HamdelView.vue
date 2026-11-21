@@ -329,46 +329,68 @@ watch(() => profileStore.activeProfileId, () => void store.ensureLoaded());
       </section>
     </template>
 
-    <!-- DEDICATED PDF EXPORT PART (MOVED TO BOTTOM AT THE END) -->
-    <section class="mt-2 rounded-3xl bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-teal-500/10 p-4 sm:p-6 ring-1 ring-rose-500/25 dark:bg-slate-900 dark:ring-rose-500/35 shadow-xs flex flex-col gap-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <!-- DEDICATED STATS & PDF EXPORT BOX AT THE END -->
+    <section class="mt-2 flex flex-col gap-4 rounded-3xl bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-teal-500/10 p-5 sm:p-6 ring-1 ring-rose-500/25 dark:bg-slate-900 dark:ring-rose-500/35 shadow-xs">
+      <!-- 1. STATS & ANALYTICS PART ON TOP OF THE BOX -->
+      <RouterLink
+        to="/app/hamdel/stats"
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-white/90 p-4 shadow-xs ring-1 ring-slate-200/80 transition hover:bg-white hover:ring-teal-400 active:scale-[0.99] dark:bg-slate-850 dark:ring-slate-750 dark:hover:bg-slate-800"
+      >
         <div class="flex items-center gap-3">
-          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15 text-2xl text-rose-600 dark:bg-rose-500/25 dark:text-rose-300">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-500/15 text-xl text-teal-600 dark:bg-teal-500/25 dark:text-teal-300">
+            📊
+          </span>
+          <div class="min-w-0">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <span>آمار و تحلیل‌های تفصیلی همدل</span>
+              <span class="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+                نمودارها و ارزیابی
+              </span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
+              نمودار روند خوشحالی و ناراحتی، آمار هدیه‌ها، قول‌ها و توزیع تمام یادداشت‌ها
+            </p>
+          </div>
+        </div>
+
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400 shrink-0 self-start sm:self-center">
+          <span>مشاهده آمار و نمودارها</span>
+          <span>←</span>
+        </span>
+      </RouterLink>
+
+      <!-- 2. PDF EXPORT PART -->
+      <div class="flex flex-col gap-3 pt-1">
+        <div class="flex items-center gap-3">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-xl text-rose-600 dark:bg-rose-500/25 dark:text-rose-300">
             📄
           </span>
           <div class="min-w-0">
-            <h2 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">
               خروجی PDF و سند رسمی همدل
-            </h2>
+            </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-5">
               خلاصه‌ی کامل علایق، اندازه‌ها، قول‌ها، هدیه‌ها، خاطرات و آمار در یک سند شکیل چاپی
             </p>
           </div>
         </div>
 
-        <RouterLink
-          to="/app/hamdel/stats"
-          class="shrink-0 self-start sm:self-center rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 transition active:scale-95"
-        >
-          📊 آمار و نمودارها
-        </RouterLink>
-      </div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-rose-500/15 dark:border-slate-800">
+          <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+            <input v-model="includePhotos" type="checkbox" />
+            <span>عکس‌های دفترچه‌ی خاطرات هم در فایل گزارش باشد</span>
+          </label>
 
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-rose-500/10 dark:border-slate-800">
-        <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-          <input v-model="includePhotos" type="checkbox" />
-          <span>عکس‌های دفترچه‌ی خاطرات هم در فایل گزارش باشد</span>
-        </label>
-
-        <button
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-600 transition active:scale-95 disabled:opacity-50"
-          :disabled="isExporting || totalCount === 0"
-          @click="exportPdf"
-        >
-          <AppIcon name="print" size="xs" />
-          <span>{{ isExporting ? "در حال آماده‌سازی..." : "دریافت فایل PDF همدل" }}</span>
-        </button>
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-600 transition active:scale-95 disabled:opacity-50"
+            :disabled="isExporting || totalCount === 0"
+            @click="exportPdf"
+          >
+            <AppIcon name="print" size="xs" />
+            <span>{{ isExporting ? "در حال آماده‌سازی..." : "دریافت فایل PDF همدل" }}</span>
+          </button>
+        </div>
       </div>
     </section>
   </div>
