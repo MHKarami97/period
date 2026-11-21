@@ -162,8 +162,8 @@ watch(() => profileStore.activeProfileId, () => void store.ensureLoaded());
       <p class="text-xs leading-6 text-slate-500 dark:text-slate-400">
         خلاصه‌ی آمار و همه‌ی بخش‌ها در یک سند. در پنجره‌ی چاپ سیستم «Save as PDF» را انتخاب کن. فایل شامل اطلاعات خصوصی است.
       </p>
-      <label class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-        <input v-model="includePhotos" type="checkbox" class="h-4 w-4 accent-teal-500" />
+      <label class="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+        <input v-model="includePhotos" type="checkbox" />
         عکس‌های دفترچه هم در گزارش باشد (حجم بیشتر)
       </label>
       <button

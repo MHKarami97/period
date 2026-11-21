@@ -10,23 +10,15 @@ export interface HamdelFeature {
 }
 
 /**
- * HAMDEL_FEATURES - Hamdel screens that are not a plain list of notes. Each batch of the
- * feature appends here; the hub renders them next to the generic sections of the same group.
+ * HAMDEL_FEATURES - Extra non-generic sections in the Hamdel hub.
+ * Brief and occasionNotes are now merged into one unified experience.
  */
 export const HAMDEL_FEATURES: readonly HamdelFeature[] = [
   {
-    id: "brief",
-    title: "نکته قبل از ملاقات",
-    icon: "🧭",
-    description: "قبل از مهمانی، سفر یا قرار خاص، خلاصه‌ی آنچه باید درباره‌اش به یاد داشته باشی.",
-    group: "together",
-    path: "/app/hamdel/brief",
-  },
-  {
     id: "stats",
-    title: "آمار و گزارش PDF",
+    title: "آمار و تحلیل‌های تفصیلی",
     icon: "📊",
-    description: "نمودار روند خوشحالی و ناراحتی، آمار هدیه‌ها و قول‌ها، و خروجی PDF از همه‌ی همدل.",
+    description: "نمودار روند خوشحالی و ناراحتی، آمار هدیه‌ها، قول‌ها و توزیع یادداشت‌ها.",
     group: "together",
     path: "/app/hamdel/stats",
   },

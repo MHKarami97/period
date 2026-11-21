@@ -249,7 +249,7 @@ async function handleRollback(): Promise<void> {
       <label class="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
         <input
           type="checkbox"
-          class="mt-0.5 rounded accent-teal-500"
+          class="mt-0.5"
           :checked="snapshot.notifyFailures"
           @change="store.setNotifyFailures(($event.target as HTMLInputElement).checked)"
         />

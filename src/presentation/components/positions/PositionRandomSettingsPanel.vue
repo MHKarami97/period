@@ -22,7 +22,6 @@ const store = usePositionsStore();
         <input
           type="checkbox"
           role="switch"
-          class="h-5 w-5 accent-rose-500"
           :checked="store.autoAdvance.enabled"
           @change="store.setAutoAdvanceEnabled(($event.target as HTMLInputElement).checked)"
         />

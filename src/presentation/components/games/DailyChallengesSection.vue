@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useDailyChallengesStore } from "@application/stores/dailyChallengesStore";
+import { useProfileStore } from "@application/stores/profileStore";
+import { WeeklyChallengesReportService } from "@infrastructure/pdf/WeeklyChallengesReportService";
 import {
   type DailyChallengePlan,
   type ChallengeTimeTag,
@@ -13,6 +15,7 @@ import DayResultModal from "./DayResultModal.vue";
 import DayEditModal from "./DayEditModal.vue";
 
 const store = useDailyChallengesStore();
+const profileStore = useProfileStore();
 
 const showPoolModal = ref(false);
 const activeResultDay = ref<DailyChallengePlan | null>(null);
@@ -56,6 +59,15 @@ function selectNextWeek(): void {
     store.generatePlanForWeek(store.nextWeekIso, false);
   }
   store.selectWeek(store.nextWeekIso);
+}
+
+function exportWeekPdf(): void {
+  const plan = activePlan.value;
+  if (!plan) return;
+  WeeklyChallengesReportService.openWeeklyReport({
+    schedule: plan,
+    profileName: profileStore.activeProfile?.name,
+  });
 }
 
 function getStatusBadge(day: DailyChallengePlan): { label: string; class: string; iconName: string } {
@@ -279,16 +291,29 @@ function getDayChallengeTags(day: DailyChallengePlan): ChallengeTimeTag[] {
           </div>
         </div>
 
-        <!-- Weekly Plan Action / Generate -->
-        <button
-          v-if="store.canEditSelectedWeek"
-          type="button"
-          class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline dark:text-amber-400 self-start sm:self-center transition active:scale-95"
-          @click="generateNewPlanForSelectedWeek"
-        >
-          <AppIcon name="rotate" size="xs" />
-          <span>تولید برنامه تصادفی برای کل این هفته</span>
-        </button>
+        <!-- Weekly Plan Actions: PDF and Regenerate -->
+        <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+          <button
+            v-if="activePlan"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-2xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-750 transition active:scale-95"
+            title="خروجی PDF برنامه این هفته"
+            @click="exportWeekPdf"
+          >
+            <AppIcon name="print" size="xs" />
+            <span>خروجی PDF هفته</span>
+          </button>
+
+          <button
+            v-if="store.canEditSelectedWeek"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline dark:text-amber-400 transition active:scale-95"
+            @click="generateNewPlanForSelectedWeek"
+          >
+            <AppIcon name="rotate" size="xs" />
+            <span>تولید برنامه تصادفی</span>
+          </button>
+        </div>
       </div>
 
       <!-- Week Header Info & Stats Bar -->

@@ -30,6 +30,8 @@ export interface HamdelFieldDefinition {
   readonly suggestions?: readonly string[];
   /** Stored and validated like any field, but never rendered by the generic form/card (managed by a custom view). */
   readonly hidden?: boolean;
+  /** When true for select/category fields, user can define and save custom category values. */
+  readonly allowCustom?: boolean;
 }
 
 /** One-tap status switch shown on the card (e.g. promise: open <-> done). */
@@ -48,7 +50,7 @@ export interface HamdelFlowDefinition {
 }
 
 /** Sections that have a dedicated screen instead of the generic list page. */
-export type HamdelCustomView = "challenges" | "diary" | "dates";
+export type HamdelCustomView = "challenges" | "diary" | "dates" | "brief";
 
 export interface HamdelSectionDefinition {
   readonly id: string;

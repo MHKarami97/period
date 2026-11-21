@@ -6,6 +6,15 @@ import { GameVisibilityPolicy } from "@domain/games/GameVisibilityPolicy";
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(to, _from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    }
+    if (to.hash) {
+      return { el: to.hash, behavior: "smooth" };
+    }
+    return { top: 0, left: 0 };
+  },
   routes: [
     {
       path: "/",
@@ -34,6 +43,7 @@ const router = createRouter({
         { path: "hamdel/diary", name: "hamdel-diary", component: () => import("@presentation/views/HamdelDiaryView.vue") },
         { path: "hamdel/dates", name: "hamdel-dates", component: () => import("@presentation/views/HamdelDatesView.vue") },
         { path: "hamdel/brief", name: "hamdel-brief", component: () => import("@presentation/views/HamdelBriefView.vue") },
+        { path: "hamdel/occasionNotes", redirect: { name: "hamdel-brief" } },
         { path: "hamdel/stats", name: "hamdel-stats", component: () => import("@presentation/views/HamdelStatsView.vue") },
         { path: "hamdel/:section", name: "hamdel-section", component: () => import("@presentation/views/HamdelSectionView.vue") },
         // Positions now live in the games catalog (games/positions); keep the old URL working.
@@ -61,6 +71,16 @@ router.beforeEach((to) => {
     return { name: "games" };
   }
   return true;
+});
+
+router.afterEach((to, from) => {
+  if (to.path !== from.path) {
+    window.scrollTo({ top: 0, left: 0 });
+    if (typeof document !== "undefined") {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  }
 });
 
 export default router;

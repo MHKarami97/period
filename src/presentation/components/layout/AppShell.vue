@@ -49,6 +49,12 @@ function isRouteActive(name: string): boolean {
   return false;
 }
 
+function handleNavClick(name: string): void {
+  if (isRouteActive(name)) {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }
+}
+
 /** One schedule per Telegram link: period reminders and Hamdel reminders are always sent together. */
 function syncReminders(): Promise<void> {
   return telegramReminderStore.syncReminders(cycleStore.sortedCycles, hamdelStore.entries);
@@ -98,6 +104,7 @@ watch(() => hamdelStore.entries, syncReminders);
             :class="isRouteActive(item.to.name)
               ? 'bg-slate-200 text-teal-700 shadow-xs dark:bg-slate-900 dark:text-teal-300'
               : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/60 dark:hover:text-slate-100'"
+            @click="handleNavClick(item.to.name)"
           >
             <span
               class="flex h-6 w-6 items-center justify-center transition-transform group-hover:scale-110"
@@ -118,6 +125,7 @@ watch(() => hamdelStore.entries, syncReminders);
           :class="isRouteActive(GUIDE_ITEM.to.name)
             ? 'bg-slate-200 text-teal-700 shadow-xs dark:bg-slate-900 dark:text-teal-300'
             : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/60 dark:hover:text-slate-100'"
+          @click="handleNavClick(GUIDE_ITEM.to.name)"
         >
           <span
             class="flex h-6 w-6 items-center justify-center transition-transform group-hover:scale-110"
@@ -134,6 +142,7 @@ watch(() => hamdelStore.entries, syncReminders);
           :class="isRouteActive(SETTINGS_ITEM.to.name)
             ? 'bg-slate-200 text-teal-700 shadow-xs dark:bg-slate-900 dark:text-teal-300'
             : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/60 dark:hover:text-slate-100'"
+          @click="handleNavClick(SETTINGS_ITEM.to.name)"
         >
           <span
             class="flex h-6 w-6 items-center justify-center transition-transform group-hover:scale-110"
@@ -203,6 +212,7 @@ watch(() => hamdelStore.entries, syncReminders);
         :class="isRouteActive(item.to.name)
           ? 'text-teal-600 dark:text-teal-300 font-bold bg-teal-500/10 dark:bg-teal-400/15'
           : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/40'"
+        @click="handleNavClick(item.to.name)"
       >
         <span
           class="flex h-6.5 w-6.5 items-center justify-center transition-transform duration-200"

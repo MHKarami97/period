@@ -190,7 +190,7 @@ function getEvidenceBadgeClass(level: string): string {
             <input
               type="checkbox"
               :checked="hamyarStore.isChecklistCompleted(getChecklistKey(idx))"
-              class="mt-1 h-4 w-4 shrink-0 rounded-md border-slate-300 text-teal-600 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800"
+              class="mt-0.5"
               @change="hamyarStore.toggleChecklist(getChecklistKey(idx))"
             />
             <span

@@ -82,7 +82,7 @@ const MAX_NOTE_LENGTH = 120;
 
 function describe(entry: HamdelEntry): string {
   const definition = getHamdelSection(entry.section);
-  const filter = definition.fields.find((field) => field.key === definition.filterField);
+  const filter = definition.fields.find((field) => field.key === definition.filterField && field.key !== "status");
   const prefix = filter?.options?.find((option) => option.value === entry.valueOf(filter.key))?.label;
   const title = entry.valueOf(definition.titleField);
   const noteField = definition.fields.find((field) => field.kind === "textarea" && field.key !== definition.titleField);

@@ -49,7 +49,7 @@ describe("SnakeLadderBoardGenerator", () => {
       const board = new SnakeLadderBoardGenerator(new SeededRandom(seed)).generate();
       expect(board.ladderCount).toBe(8);
       expect(board.snakeCount).toBe(8);
-      expect(board.challengeCount).toBe(22);
+      expect(board.challengeCount).toBe(30);
     }
   });
 });

@@ -303,7 +303,6 @@ function handleReRoll(): void {
             <input
               v-model="isOff"
               type="checkbox"
-              class="h-4.5 w-4.5 rounded-lg text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-800"
             />
             <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
               این روز به عنوان روز آف (استراحت) علامت بخورد
