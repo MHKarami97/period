@@ -187,10 +187,6 @@ watch(() => profileStore.activeProfileId, () => void store.ensureLoaded());
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
     <header class="flex flex-col gap-1">
       <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">💞 همدل</h1>
-      <p class="text-sm leading-6 text-slate-500 dark:text-slate-400">
-        دفترچه‌ی شناخت همسر<template v-if="profileStore.activeProfile"> - {{ profileStore.activeProfile.name }}</template>.
-        {{ formatNumber(totalCount) }} یادداشت ثبت شده؛ همه‌چیز کاملاً محلی و امن روی همین دستگاه است.
-      </p>
     </header>
 
     <!-- 1. GLOBAL SEARCH & FILTER SECTION (IN TOP PART) -->
